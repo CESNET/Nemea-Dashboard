@@ -1,0 +1,56 @@
+/* VARIABLES */
+$login-height : 410px;
+
+body {
+    font-size: 16px;
+}
+
+
+/* CODE */
+.login-bg-container {
+    padding: 0!important;
+    height: 100%;
+    width: 100%;
+
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#3981a2+0,47b8c1+100 */
+    background: #3981a2; /* Old browsers */
+    background: -moz-linear-gradient(-45deg, #3981a2 0%, #47b8c1 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#3981a2), color-stop(100%,#47b8c1)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(-45deg, #3981a2 0%,#47b8c1 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(-45deg, #3981a2 0%,#47b8c1 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(-45deg, #3981a2 0%,#47b8c1 100%); /* IE10+ */
+    background: linear-gradient(135deg, #3981a2 0%,#47b8c1 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3981a2', endColorstr='#47b8c1',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+    .login-vert-container {
+        position: relative;
+        min-width:320px;
+        margin: 0 auto;
+        max-width: 350px;
+    }
+}
+
+.login-container {
+    background: #fff;
+    padding: 0 0 2em 0!important;
+    height: $login-height;
+    position: absolute!important;
+    top: 50%;
+    margin-top: -$login-height/2;
+    width: 100%;
+    
+
+    .header-logo {
+        background: url(../img/logo.png) no-repeat right bottom;
+        background-size: cover;
+        display: block;
+        width: 100%;
+        height: 150px;
+        @include center-block;
+    }
+
+    .login-form, h1 {
+        margin-left: 25px;
+        margin-right: 25px;
+    }
+}

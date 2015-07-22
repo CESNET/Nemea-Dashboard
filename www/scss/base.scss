@@ -1,0 +1,184 @@
+/*!
+ * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
+ * Code licensed under the Apache License v2.0.
+ * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+$blue: #1ab4f0;
+$white: darken(#ffffff, 1%);
+
+@import     "bootstrap/_mixins.scss";
+@import     "bootstrap/_variables.scss";
+@import     "mixins/_alignment.scss";
+@import     "login.scss";
+@import     "home.scss";
+
+/* Toggle Styles */
+
+.navbar-header {
+    #menu-toggle {
+        margin-top: 0.55em;
+        float: left;
+    }
+
+    .navbar-brand {
+        font-size: 14px;
+    }
+}
+
+// .events {
+//     ul.menu {
+
+//         list-style-type: none;
+//         text-decoration: none;
+//         float: right;
+//         margin: 0;
+
+//         .btn-group.open .dropdown-toggle {
+//             background: $gray-lighter;
+//         }
+
+//         & > div {
+
+//             float: left;
+
+//             & > li {
+
+//                 margin: 0;
+
+//                 a {
+//                     height: 50px;
+//                     width: 45px;
+//                     float: left;
+//                     padding-top: 1.25em;
+//                     border-left: 1px solid $gray-light-2;
+//                     position: relative;
+//                     background: auto;
+
+
+//                     span {
+//                         font-size: 65%;
+//                         @include center-block;
+//                         text-align: center;
+//                         display: none;
+//                         color: $gray-dark;
+
+//                         &.glyphicon {
+//                             font-size: 125%;
+//                             margin: 0 auto;
+//                             text-align: center;
+//                             display: block;
+//                         }
+
+//                         &.num {
+//                             background: $brand-danger;
+//                             @include border-radius(10px);
+//                             color: $white;
+//                             display: inline;
+//                             position: absolute;
+//                             top: 5px;
+//                             right: 5px;
+//                             padding: 0.5em;
+//                             font-size: 60%;
+//                         }
+//                     }
+
+//                     &:hover, &:focus {
+//                         background: $gray-lighter;
+//                         text-decoration: none;
+//                     }
+//                 }
+//             }
+//         }
+
+//         .dropdown-menu {
+//             right: 0;
+//             left: auto;
+//         }
+//     }
+// }
+
+// li.open + ul.dropdown-menu {
+//     display: block;
+
+//     li {
+
+//         a {
+//             white-space: normal;
+//         }
+//     }
+// }
+
+// .notifications {
+//     width: 20em;
+    
+//     li {
+
+//         &:first-child {
+//             border-top: 1px solid $gray-light-2;
+//         }
+
+//         border-bottom: 1px solid $gray-light-2;
+
+//         h4 small{
+//             color: $black;
+//         }
+
+//         p {
+//             font-size: 80%;
+//         }
+
+//         &.error {
+//             background: $brand-danger;
+//         }
+//     }
+// }
+
+.content {
+    margin-top: 64px;
+}
+
+/* Sidebar Styles */
+
+@media(min-width:768px) {
+
+    .navbar-header a#menu-toggle {
+        display: none;
+    }
+
+    .events ul.menu > div > li > a{
+            
+        padding-top: 0.75em;
+
+        span {
+            display: block;
+        }
+    }
+
+    sidebar-menu {
+    position: fixed;
+    z-index: 59; //60 is sidebar
+    bottom: 0;
+    top: 0;
+}
+}
+
+.sidebar-logo {
+    height: 152px;
+    width: 100%;
+    display: block;
+    background: url(../img/menu-bg.png) no-repeat right bottom;
+    background-size: cover;
+
+    a {
+        color: #fff;
+        font-weight: 900;
+        font-size: 1.75em;
+        padding-left: 0.75em;
+
+        &:hover {
+            text-decoration: none;
+            color: #fff;
+        }
+    }
+}

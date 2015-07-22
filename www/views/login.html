@@ -1,0 +1,42 @@
+<div class="container-fluid login-bg-container" layout="row" flex layout-fill>
+	<div class="col-md-4 col-md-offset-4 login-vert-container">
+	<md-whiteframe class="md-whiteframe-z2 login-container col-md-10 col-md-offset-1 animated zoomIn" layout-align="center center">
+
+		<md-whiteframe class="md-whiteframe-z1 header-logo" layout-align="center center">
+			<!-- <img src="img/logo.png" class="md-whiteframe-z1"> -->
+		</md-whiteframe>
+
+		<h1 ng-controller="loginController" layout-align="center">{{title}}</h1>
+
+		<form name="userForm" class="login-form" ng-submit="hitSubmit(user)">
+	      <div layout layout-sm="column">
+	        <md-input-container flex style="padding-bottom: 0px;">
+	          <label>Email</label>
+	          <input ng-model="user.email" ng-required="true" type="email" name="email" required>
+	          <div ng-messages="userForm.email.$error">
+	          		<!-- <div ng-message="required">I don't who you are without an email.</div> -->
+          		</div>
+	        </md-input-container>
+	      </div>
+
+	      <div layout-sm="column">
+	        <md-input-container flex>
+		        <label>Password</label>
+		        <input ng-model="user.password" type="password" ng-required="true" name="pwd" required>
+				<div ng-messages="userForm.pwd.$error">
+	          		<!-- <div ng-message="required">You cannot log in without a password.</div> -->
+          		</div>
+	        </md-input-container>
+
+	        <div flex layout-gt-sm="column"> {{error_mes}} </div>
+	      </div>
+
+	      <div layout="row" layout-align="end">
+	  	      <md-button class="md-raised md-primary" style="background: #47b8c1; padding: 7px 15px">{{loginBtn}}</md-button>
+  	      </div>
+
+	    </form>
+	</md-whiteframe>
+
+</div>
+</div>

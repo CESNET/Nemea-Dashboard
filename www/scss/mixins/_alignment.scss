@@ -1,0 +1,6 @@
+@mixin vert-align {
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	//align-items: center;
+}

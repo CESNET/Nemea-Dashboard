@@ -1,0 +1,30 @@
+<section class="topbar md-whiteframe-z1" ng-controller="topBar as ctrl" layout="row" hide-gt-md layout-align="space-between center">
+	<div>
+		<md-button ng-click="ctrl.toggleLeft()" hide-gt-md id="menu-toggle">
+		                        <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
+		</md-button>
+	</div>
+
+	<div>
+		<md-menu>
+          <md-button aria-label="Open demo menu" ng-click="$mdOpenMenu()">
+            <md-icon md-menu-origin md-svg-src="img/icons/person.svg"></md-icon>
+            {{ctrl.user}}
+          </md-button>
+          <md-menu-content width="4" >
+            <md-menu-item>
+              <md-button>
+                <p><md-icon md-svg-src="img/icons/settings.svg"></md-icon> Settings</p>
+              </md-button>
+            </md-menu-item>
+
+            <md-menu-item>
+              <md-button ng-click="ctrl.logout()">
+                <p><md-icon md-svg-src="img/icons/logout.svg"></md-icon> Log Out</p>
+              </md-button>
+            </md-menu-item>
+
+          </md-menu-content>
+        </md-menu>
+	</div>
+</section>

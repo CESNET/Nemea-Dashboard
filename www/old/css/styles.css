@@ -1,0 +1,294 @@
+@font-face {
+    font-family: 'PTSansNarrowBold';
+    src: url('../fonts/PTN77F-webfont.eot');
+    src: url('../fonts/PTN77F-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/PTN77F-webfont.woff') format('woff'),
+         url('../fonts/PTN77F-webfont.ttf') format('truetype'),
+         url('../fonts/PTN77F-webfont.svg#PTSansNarrowBold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'PTSansRegular';
+    src: url('../fonts/PTS55F-webfont.eot');
+    src: url('../fonts/PTS55F-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/PTS55F-webfont.woff') format('woff'),
+         url('../fonts/PTS55F-webfont.ttf') format('truetype'),
+         url('../fonts/PTS55F-webfont.svg#PTSansRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+/* ============================== */
+/* ! Layout for desktop version   */
+/* ============================== */
+
+body {
+	font-family: "HelveticaNeue-Light", PTSansRegular, Arial, sans-serif;
+	margin: 0 auto;
+	text-align: center;
+	color: #343434;
+}
+p {
+	font-size: 1.1em;
+	text-align: left;
+	padding-bottom: 1em;
+	line-height: 1.5em;
+}
+h2 {
+	font-size: 2.2em;
+	text-transform: uppercase;
+	color: #14233b;
+	font-family: "HelveticaNeue-CondensedBold", 'PTSansNarrowBold', sans-serif;
+	margin-bottom: 0.2em;
+}
+
+.header {
+	background: url(../img/header_bg.jpg) no-repeat fixed center center;
+	background-size: cover;
+	max-width: 1920px;
+	height: 500px;
+	-webkit-box-shadow: inset 0px -1px 3px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow: inset 0px -1px 3px rgba(50, 50, 50, 0.75);
+	box-shadow: inset 0px -1px 3px rgba(50, 50, 50, 0.75);
+}
+
+nav {
+	display: block;
+	padding-top: 1em;
+	background: rgba(0, 0, 0, 0.2);
+	width: 100%;
+	height: 2.7em;
+	position: fixed;
+}
+nav ul {
+	margin: 0 auto;
+	text-align: center;
+	display: block;
+	width: 1000px;
+	height: 0.7em;
+}
+nav ul li {
+	list-style-type: none;
+	float: left;
+	padding: 1em 1em;
+	margin: 0 3em;
+	position: relative;
+	top: -1em;
+}
+
+nav ul li a {
+	text-decoration: none;
+	font-size: 1.4em;
+	color: #FFF;
+	text-align: left;
+	font-weight: 100;
+}
+nav ul li:hover {
+	background: rgba(0, 0, 0, 0.2);
+}
+
+
+.logo {
+	padding-top: 9em;
+}
+h1 {
+	font-weight: 100;
+	color: #FFF;
+	font-size: 2em;
+	margin-top: 1em;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+	min-height: 26px;
+}
+
+.elevator_pitch {
+	font-size: 2.0em;
+	font-style: italic;
+	font-weight: 100;
+	padding: 5% 0;
+}
+.elevator_pitch p {text-align: center;}
+
+.fotka {
+	margin-bottom: 5%;
+}
+.fotka > p {
+	font-size: 1.5em;
+	font-weight: 100;
+	padding: 3% 0;
+}
+
+.sluzby {
+	margin-top: 10%;
+}
+
+.sluzby p {
+	font-size: 1.2em;
+	padding: 10% 0;
+}
+
+.reference {
+	background: url(../img/trdelnik.jpg) no-repeat center center;
+	max-width: 1920px;
+	height: 406px;
+	background-size: cover;
+	overflow: visible;
+	margin-top: 10%;
+}
+.info {
+	background: url(../img/hexagon.png) no-repeat center center;
+	background-position-y: -2px;
+	width: 616px;
+	height: 408px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.info > h2 {
+	padding-top: 1em;
+}
+.info > a {
+	color: #831929;
+	text-decoration: none;
+	padding-left: 1.5em;
+	background: url(../img/icon_link.png) no-repeat left center;
+}
+.info >a:hover {
+	text-decoration: underline;
+}
+.popis {
+	padding: 2em 0 1.5em 0;
+	max-width: 400px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+
+.cil {
+	padding: 10% 0;
+	clear: both;
+}
+
+.kontakt {
+	background: url(../img/map_bg.png) no-repeat center center;
+	max-width: 1920px;
+	height: 406px;
+	background-size: cover;
+	margin-top: 10%; 
+}
+.bg {
+	background: url(../img/kontakt_blur.png) no-repeat center;
+	width: auto;
+	height: 406px;
+}
+.kontakt > div > h2 {	
+	padding-top: 3.8em;
+	color: #FFF;
+	font-size: 3em;
+}
+
+
+.odkazy {
+	margin-top: 5%;
+}
+.odkazy li {
+	list-style-type: none;
+	text-align: left;
+	margin-bottom: 50px;
+	font-size: 1.2em;
+}
+.odkazy li img {
+	margin-right: 1em;
+	position: relative;
+	top: 5px;
+}
+.odkazy li a {
+	color: #831929;
+	text-decoration: none;
+}
+.odkazy li a:hover {
+	text-decoration: underline;
+}
+
+.email img {
+	top: 2px!important;
+}
+
+form {
+	margin-top: 5%;
+}
+input, textarea {
+	border: 1px solid #e5e5e5;
+	background: #fafafa;
+	font-size: 0.8em;
+	margin: 0 0 1.6em 0;
+	text-align: left;
+	float: left;
+	font-family: "HelveticaNeue-Light", PT Sans, Arial, sans-serif;
+	outline-color: #fafafa;
+}
+input {
+	width: 80%;
+	height: 36px;
+	padding-left: 1em;
+}
+textarea {
+	width: 97%;
+	height: 150px;
+	padding: 1em 0 0 1em;
+}
+
+input[type="submit"] {
+	background: #14233b;
+	font-family: "HelveticaNeue-CondensedBold", PT Sans Narrow, sans-serif;
+	color: #fff;
+	text-transform: uppercase;
+	font-size: 1em;
+	width: 100px;
+	height: 35px;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	float: right;
+}
+input[type="submit"]:active {
+	color: #8a919d;
+}
+
+footer {
+ padding: 3% 0 1.5% 0;
+}
+footer span {
+	font-size: 0.7em;
+	text-align: left;
+}
+
+/* ============================= */
+/* ! Layout for mobile version   */
+/* ============================= */
+
+@media handheld, only screen and (max-width: 767px) {
+
+	body {
+		
+	}
+
+}
+
+
+/* ========================================== */
+/* ! Provide higher res assets for iPhone 4   */
+/* ========================================== */
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2) { 
+
+/*	.logo {
+		background: url(logo2x.jpg) no-repeat;
+		background-size: 212px 303px;
+	}*/
+
+}

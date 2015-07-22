@@ -1,0 +1,53 @@
+<div layout="row">
+	<sidebar-menu></sidebar-menu>
+
+	<topbar-menu></topbar-menu>
+	
+</div>
+
+
+
+<section class="content">
+	<h1>{{title}}</h1>
+
+	
+	<div layout="column" layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row">
+		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
+			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
+			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
+
+			<div ng-init="showTitle = true">
+				<h2 ng-show="showTitle" ng-click="editTitle(); showTitle=!showTitle">{{box.title}}</h2>
+				<md-input-container ng-hide="showTitle">
+					<input type="text" value="{{box.title}}" ng-blur="editTitle(box.title); showTitle=!showTitle" ng-model="box.title" class="focusTitle" aria-label="Edit Title">
+				</md-input-container>
+			</div>
+
+			<div click-to-edit="box.title"></div>
+
+			
+
+			<br />
+
+			<div ng-if="box.type == 'incident'">BLblablabla</div>
+
+			<div ng-if="box.type == 'graph'">
+				<nvd3 options="options" api="api" showXAxis="true"
+	            showYAxis="true"
+	            tooltips="true"
+	            interactive="true" 
+	            data="data"
+	            autorefresh="true"></nvd3>
+           	</div>
+
+		</div>
+		<div flex="10" class="add-elem " ng-click="addElem($index)" ng-class="{'inactive' : $scope.full}" ng-controller="box">
+			+
+		</div>
+	</div>
+
+	<md-button ng-click="addRow()"> + Add Row</md-button>
+	
+</section>
+
+
