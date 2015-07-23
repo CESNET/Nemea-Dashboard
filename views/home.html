@@ -16,12 +16,12 @@
 			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
 			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
 
-			<div ng-init="showTitle = true">
+			<!-- <div ng-init="showTitle = true">
 				<h2 ng-show="showTitle" ng-click="editTitle(); showTitle=!showTitle">{{box.title}}</h2>
 				<md-input-container ng-hide="showTitle">
 					<input type="text" value="{{box.title}}" ng-blur="editTitle(box.title); showTitle=!showTitle" ng-model="box.title" class="focusTitle" aria-label="Edit Title">
 				</md-input-container>
-			</div>
+			</div> -->
 
 			<div click-to-edit="box.title"></div>
 

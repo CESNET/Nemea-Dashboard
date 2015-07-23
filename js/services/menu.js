@@ -7,7 +7,7 @@ app.factory('menu', ['$http', function($http) {
 }]);
 
 app.factory('jsondata', ['$http', function($http) {
-	return $http.get('/json/testfile_100.json')
+	return $http.get('json/testfile_100.json')
 		.success(function(data) {
 			return data;
 		});
@@ -87,12 +87,12 @@ app.directive('clickEdit', function() {
 app.directive("clickToEdit", function() {
     var editorTemplate = '<div class="click-to-edit">' +
         '<div ng-hide="view.editorEnabled" ng-click="enableEditor()">' +
-            '<a ng-click="enableEditor()"><md-icon md-svg-src="img/edit.svg"></md-icon></a>' +
+            '<a ng-click="enableEditor()"><md-icon md-svg-src="img/icons/edit.svg"></md-icon></a>' +
             '{{value}} ' +
         '</div>' +
         '<md-input-container ng-show="view.editorEnabled">' +
 	        '<div>' +
-	            '<input ng-model="view.editableValue" class="focusTitle">' +
+	            '<input ng-model="view.editableValue" class="focusTitle" aria-label="Title">' +
 	            '<span ng-click="save()">Save</span>' +
 	            ' or ' +
 	            '<a ng-click="disableEditor()">cancel</a>.' +

@@ -15,7 +15,7 @@
 
 .content {
 	padding: 0 0.5em;
-	width: 100%;
+    margin-top: 64px;
 }
 
 .menu_item {
@@ -58,11 +58,14 @@
 }
 md-sidenav {
 	background-color: $white;
-//	position: fixed!important;
-	//#59c9f4;
+
+	md-content {
+		position: absolute;
+		width: 100%;
+	}
 }
 
-md-toolbar {
+.sidebar-logo {
 	background-color: $blue;
 
 	#menu-toggle {
@@ -107,6 +110,30 @@ section.topbar {
 		h2 {
 			margin: 0;
 		}
+
+		.click-to-edit {
+			cursor: pointer;
+			font-size: 1.5em;
+			font-weight: bold;
+
+			md-icon {
+				opacity: 0.5;
+				width: 16px;
+				height: 16px;
+				margin-right: 5px;
+
+				&:hover {
+					opacity: 1;
+
+				}
+			}
+
+			input {
+				max-width: 100%;
+			}
+		}
+
+
 
 		.close-btn {
 			position: absolute;
@@ -157,6 +184,7 @@ section.topbar {
 @media (min-width: 959px) {
 	section.content {
 		margin-left: 304px;
+		margin-top: 0;
 		padding: 0 3em 0 0.5em;
 	}
 

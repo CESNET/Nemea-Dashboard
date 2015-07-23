@@ -126,7 +126,7 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, jsonda
 
 });
 
-app.controller('sidebar', ['$scope', '$mdSidenav', 'menu', function($scope, $mdSidenav, menu) {
+app.controller('sidebar', function($scope, $mdSidenav, menu, $window) {
 
 	menu.success(function(data) {
 		$scope.menu = data;
@@ -137,7 +137,15 @@ app.controller('sidebar', ['$scope', '$mdSidenav', 'menu', function($scope, $mdS
     $scope.toggleBtn = "toggled";
   };
 
-  $scope.windowHeight = $scope.height();
+
+  var w = angular.element($window);
+  $scope.windowHeight = w.height();
+
+  w.bind('resize', function () {
+    $scope.windowHeight = w.height();
+    $scope.$apply();
+  })
+  //$scope.windowHeight = $scope.height();
 
 
   $scope.closeLeft = function() {
@@ -145,7 +153,7 @@ app.controller('sidebar', ['$scope', '$mdSidenav', 'menu', function($scope, $mdS
 
     };
     
-}]);
+});
 
 app.factory('confirmLogout', function(){
 	return function (){
