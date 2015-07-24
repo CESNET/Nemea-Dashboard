@@ -10,74 +10,10 @@ app.value('boxes_arr', [
       },
       {
         "title"   : "two",
-        "type"    : "incident",
+        "type"    : "graph",
         "data"    : "",
         "timestamp": "",
-        "options" : ""
-      },
-      {
-        "title": "three",
-        "type"    : "incident"
-      },
-      {
-        "title": "four",
-        "type"    : "incident"
-      }
-    ]
-  },
-  { 
-    "row"   : 1,
-    "items" : [
-      {
-        "title" : "1",
-        "type"  : "graph",
-        "data"  : [
-          { 'key' : 'PORTSCAN_H',
-            'y': 687
-          },
-          { 'key' : 'DNSAMP',
-            'y': 2
-          },
-          { 'key' : 'VOIP_PREFIX_GUESS',
-            'y': 189
-          },
-          { 'key' : 'BRUTEFORCE',
-            'y': 122
-          }],
-        "config": {
-            chart: {
-                type: 'pieChart',
-                height: 500,
-                x: function(d){return d.key;},
-                y: function(d){return d.y;},
-                showLabels: true,
-                transitionDuration: 500,
-                labelThreshold: 0.1,
-                legend: {
-                    margin: {
-                        top: 0,
-                        right: 100,
-                        bottom: 5,
-                        left: 0
-                    }
-                }
-            }
-        }
-      },
-      {
-        "title": "2",
-        "type"    : "incident"
-      },
-    ]
-  },
-  ]);
-
-app.controller('homeController', function($scope, $mdSidenav, $log, $sce, jsondata, $mdDialog, $timeout, boxes_arr) {
-	$scope.boxes_arr = boxes_arr;
-
-  $scope.title = "Home sweet home";
-
-  $scope.options = { chart: {
+        "options" : { chart: {
                 type: 'lineChart',
                 height: 300,
                 margin : {
@@ -124,10 +60,72 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, jsonda
                     'margin': '10px 13px 0px 7px'
                 }
             }*/
-        };
+        }
+      },
+      {
+        "title": "three",
+        "type"    : "incident"
+      },
+      {
+        "title": "four",
+        "type"    : "incident"
+      }
+    ]
+  },
+  { 
+    "row"   : 1,
+    "items" : [
+      {
+        "title" : "1",
+        "type"  : "graph",
+        "data"  : [
+          { 'key' : 'PORTSCAN_H',
+            'y': 687
+          },
+          { 'key' : 'DNSAMP',
+            'y': 2
+          },
+          { 'key' : 'VOIP_PREFIX_GUESS',
+            'y': 189
+          },
+          { 'key' : 'BRUTEFORCE',
+            'y': 122
+          }],
+        "options": {
+            chart: {
+                type: 'pieChart',
+                height: 500,
+                x: function(d){return d.key;},
+                y: function(d){return d.y;},
+                showLabels: true,
+                transitionDuration: 500,
+                labelThreshold: 0.1,
+                legend: {
+                    margin: {
+                        top: 0,
+                        right: 100,
+                        bottom: 5,
+                        left: 0
+                    }
+                }
+            }
+        }
+      },
+      {
+        "title": "2",
+        "type"    : "incident"
+      },
+    ]
+  },
+  ]);
+
+app.controller('homeController', function($scope, $mdSidenav, $log, $sce, jsondata, $mdDialog, $timeout, boxes_arr) {
+	$scope.boxes_arr = boxes_arr;
+
+  $scope.title = "Home sweet home";
 
         jsondata.success(function(data) {
-          $scope.data = data;
+          boxes_arr[0].items[1].data = data;
         });
 
   $scope.editTitle = function(inputText) {
