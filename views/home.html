@@ -32,11 +32,11 @@
 			<div ng-if="box.type == 'incident'">BLblablabla</div>
 
 			<div ng-if="box.type == 'graph'">
-				<nvd3 options="options" api="api" showXAxis="true"
+				<nvd3 options="box.config" api="api" showXAxis="true"
 	            showYAxis="true"
 	            tooltips="true"
 	            interactive="true" 
-	            data="data"
+	            data="box.data"
 	            autorefresh="true"></nvd3>
            	</div>
 

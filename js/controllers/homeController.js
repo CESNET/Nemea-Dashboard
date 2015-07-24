@@ -10,7 +10,7 @@ app.value('boxes_arr', [
       },
       {
         "title"   : "two",
-        "type"    : "graph",
+        "type"    : "incident",
         "data"    : "",
         "timestamp": "",
         "options" : ""
@@ -29,8 +29,40 @@ app.value('boxes_arr', [
     "row"   : 1,
     "items" : [
       {
-        "title": "1",
-        "type"    : "incident"
+        "title" : "1",
+        "type"  : "graph",
+        "data"  : [
+          { 'key' : 'PORTSCAN_H',
+            'y': 687
+          },
+          { 'key' : 'DNSAMP',
+            'y': 2
+          },
+          { 'key' : 'VOIP_PREFIX_GUESS',
+            'y': 189
+          },
+          { 'key' : 'BRUTEFORCE',
+            'y': 122
+          }],
+        "config": {
+            chart: {
+                type: 'pieChart',
+                height: 500,
+                x: function(d){return d.key;},
+                y: function(d){return d.y;},
+                showLabels: true,
+                transitionDuration: 500,
+                labelThreshold: 0.1,
+                legend: {
+                    margin: {
+                        top: 0,
+                        right: 100,
+                        bottom: 5,
+                        left: 0
+                    }
+                }
+            }
+        }
       },
       {
         "title": "2",
