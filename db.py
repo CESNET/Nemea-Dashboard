@@ -9,8 +9,8 @@ from time import mktime
 try:
     conn=pymongo.MongoClient()
     print ("Connected successfully!!!")
-except pymongo.errors.ConnectionFailure:
-   print ("Could not connect to MongoDB: %s" % e) 
+except pymongo.errors.ConnectionFailure, e:
+        print "Could not connect to server: %s" % e
 
 db = conn.test_corr_db
 print(conn.database_names())
