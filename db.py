@@ -6,11 +6,28 @@ import sys
 from datetime import date
 from time import mktime
 
-from eve import Eve
-app = Eve()
+# """from eve import Eve
 
-if __name__ == '__main__':
-    app.run()
+# my_settings = {
+#     'MONGO_HOST': 'localhost',
+#     'MONGO_PORT': 27017,
+#     'MONGO_DBNAME': 'test_corr_db',
+#     'DOMAIN': {'events': {
+#     		'schema' : {
+#     			'type': {
+#     					'type' : 'string'
+#     			}
+#     		}
+    
+#     }}
+# }
+
+# app = Eve(settings = my_settings)
+
+# if __name__ == '__main__':
+#     app.run()
+
+# """
 
 class db(object):
 
