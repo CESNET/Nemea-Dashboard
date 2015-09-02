@@ -13,7 +13,7 @@
 	
 	<div layout="column" layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row">
 		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
-			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false">
+			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
 			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
 
 			<!-- <div ng-init="showTitle = true">
@@ -23,7 +23,8 @@
 				</md-input-container>
 			</div> -->
 
-			<div click-to-edit="box.title"></div>
+			<div click-to-edit="box.title" ng-if="editMode"></div>
+			<div class="click-to-edit disabled" ng-if="!editMode">{{box.title}}</div>
 
 			
 
@@ -31,7 +32,7 @@
 
 			<div ng-if="box.type == 'incident'">BLblablabla</div>
 
-			<div ng-if="box.type == 'graph'">
+			<div ng-if="box.type == 'graph'" class="graph">
 				<nvd3 options="box.options" api="api" showXAxis="true"
 	            showYAxis="true"
 	            tooltips="true"

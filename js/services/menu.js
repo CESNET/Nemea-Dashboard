@@ -14,6 +14,34 @@ app.factory('jsondata', ['$http', function($http) {
 	//	.error(console.log('Cannot retrieve data'));
 }]);
 
+app.factory('api', ['$http', function($http) {
+	return function(url) {
+		/*$http.get('http://localhost:5000/events/' + url)
+			.success(function(data) {
+				console.log(data);
+				response = data;
+				return response;
+			})
+			.error(function() {
+				console.log('Cannot fetch data');
+			});
+		return response;*/
+
+		var addr = "http://localhost:5000/events/" + url
+
+		return $http.get(addr)
+			.success(function(data) {
+				//console.log(JSON.stringify(data));
+				return data;
+			});
+
+		//return $resource(addr, { query: { method: 'GET', isArray : false } } );
+	}
+
+
+//	.error(console.log('Cannot retrieve data'));
+}]);
+
 app.directive("sidebarMenu", function() {
 	return {
 		scope: {

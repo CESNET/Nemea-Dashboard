@@ -14,7 +14,7 @@ app.value('boxes_arr', [
         "data"    : "",
         "timestamp": "",
         "options" : { chart: {
-                type: 'lineChart',
+                type: 'multiBarChart',
                 height: 300,
                 margin : {
                     top: 0,
@@ -22,8 +22,8 @@ app.value('boxes_arr', [
                     bottom: 0,
                     left: 0
                 },
-                x: function(d){ return d[0]; },
-                y: function(d){ return d[1]; },
+                x: function(d){ return d.x; },
+                y: function(d){ return d.y; },
                 useInteractiveGuideline: true,
                 dispatch: {
                     stateChange: function(e){ console.log("stateChange"); },
@@ -32,34 +32,23 @@ app.value('boxes_arr', [
                     //tooltipHide: function(e){ console.log("tooltipHide"); }
                 },
                 xAxis: {
-                    axisLabel: 'Time (ms)'
+                    axisLabel: 'Time (ms)',
+                    tickFormat: function(d) {
+                        return d3.time.format('%x/%X')(new Date(d))
+                    }
                 },
                 yAxis: {
                     axisLabel: 'Voltage (v)',
                     tickFormat: function(d){
                         return d3.format('.02f')(d);
                     },
-                    axisLabelDistance: 30
+                    axisLabelDistance: 0
                 },
             },
             title: {
                 enable: true,
-                text: 'Title for Line Chart'
+                text: 'Title for Line Chart 2'
             },
-            /*subtitle: {
-                enable: true,
-                css: {
-                    'text-align': 'center',
-                    'margin': '10px 13px 0px 7px'
-                }
-            },
-            caption: {
-                enable: true,
-                css: {
-                    'text-align': 'justify',
-                    'margin': '10px 13px 0px 7px'
-                }
-            }*/
         }
       },
       {
@@ -78,19 +67,19 @@ app.value('boxes_arr', [
       {
         "title" : "1",
         "type"  : "graph",
-        "data"  : [
-          { 'key' : 'PORTSCAN_H',
-            'y': 687
-          },
-          { 'key' : 'DNSAMP',
-            'y': 2
-          },
-          { 'key' : 'VOIP_PREFIX_GUESS',
-            'y': 189
-          },
-          { 'key' : 'BRUTEFORCE',
-            'y': 122
-          }],
+        // "data"  : [
+        //   { 'key' : 'PORTSCAN_H',
+        //     'y': 687
+        //   },
+        //   { 'key' : 'DNSAMP',
+        //     'y': 2
+        //   },
+        //   { 'key' : 'VOIP_PREFIX_GUESS',
+        //     'y': 189
+        //   },
+        //   { 'key' : 'BRUTEFORCE',
+        //     'y': 122
+        //   }],
         "options": {
             chart: {
                 type: 'pieChart',
@@ -119,14 +108,82 @@ app.value('boxes_arr', [
   },
   ]);
 
-app.controller('homeController', function($scope, $mdSidenav, $log, $sce, jsondata, $mdDialog, $timeout, boxes_arr) {
+//app.value('editMode', true);
+
+function processData(data) {
+  var dataArr = [];
+  angular.forEach(data, function(value, key) {
+    //console.log(data[key]["scale"]);
+    dataArr.push({ x : data[key]["time_first"]*1000, y : data[key]["scale"]});
+  });
+
+  return [{values: dataArr}];
+};
+
+function pieChart(data) {
+  var counter = new Object();
+  angular.forEach(data, function(value, key) {
+      var doctype = data[key]['type'];
+
+      if (counter[doctype] != undefined ) {
+        counter[doctype] += 1;
+      } else {
+        counter[doctype] = 1;
+      }
+  });
+
+  var dataArr = [];
+  angular.forEach(counter, function(value, key) {
+    dataArr.push({key : key, y : value});
+  });
+
+  return dataArr;
+}
+
+app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http) {
 	$scope.boxes_arr = boxes_arr;
-
   $scope.title = "Home sweet home";
+  $scope.editMode = true;
 
-        jsondata.success(function(data) {
-          boxes_arr[0].items[1].data = data;
+  /*var data = api("type/portscan/last/10").query(function(data){
+    console.log(data);
+  });
+  console.log(data);*/
+
+  /*var resp = $http.get('http://localhost:5000/events/type/portscan/last/100')
+        .success(function(response) {
+          $scope.data = response;
+          return processData(response)
+        })
+        .error(function(response) {
+          console.log(response);
         });
+
+        console.log($scope.data);
+*/
+  api('type/portscan/top/100').success(function(data) {
+    var proccessed = processData(data);
+    //console.log(proccessed);
+    boxes_arr[0].items[1].data = proccessed;
+    //console.log(JSON.stringify(boxes_arr[0].items[1].data));
+  })
+
+  api('type/portscan/top/1').success(function(data) {
+    //var proccessed = processData(data);
+    //console.log(proccessed);
+    //boxes_arr[0].items[1].data = proccessed;
+    //console.log(JSON.stringify(data));
+  })
+
+  api('last/1000').success(function(data) {
+    boxes_arr[1].items[0].data = pieChart(data);
+    //console.log(pieChart(data));
+  })
+
+  
+
+        //console.log(data);
+        //boxes_arr[0].items[1].data = data;
 
   $scope.editTitle = function(inputText) {
 

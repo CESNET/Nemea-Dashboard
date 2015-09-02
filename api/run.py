@@ -7,6 +7,7 @@ from time import mktime
 
 from bson import Binary, Code
 from bson.json_util import dumps
+from bson.son import SON
 
 class db(object):
 
@@ -36,6 +37,30 @@ class db(object):
 		except Exception:
 			print("Cannot establish connection to database")
 			sys.exit()
+	def get_event(self, event_type, limit):
+		if limit == 0:
+			return("You cannot dump the whole DB")
+		else:
+			return(self.collection.find( {"type" : event_type.upper() } ).sort( [( "$natural", -1)] ).limit(limit))
+	def parse_doc(self, docs):
+		tmp = []
+		return(dumps(docs, sort_keys=True, indent=4))
+
+	def get_event_time(self, event_type, from_time, to_time):
+		return(self.collection.find( {"type" : event_type.upper(), "time_first" : {"$gt" : from_time},	"time_first" : {"$lt" : to_time} } ).sort( [( "$natural", -1)] )).limit(10000)
+
+	def get_event_type(self, event_type):
+		if event_type == "portscan":
+			return "PORTSCAN_H"
+		elif event_type == "voipguess":
+			return "VOIP_PREFIX_GUESS"
+		elif event_type == "voipcall":
+			return "VOIP_CALL_DIFFERENT_COUNTRY"
+		elif event_type == "dnstunnel":
+			return "DNS_TUNNEL"
+		else:
+			return event_type
+#END db
 
 
 
@@ -44,31 +69,12 @@ app.debug = True
 
 mongo = db()
 
-def parse_doc(docs):
-	tmp = []
-
-	for doc in docs:
-		tmp.append(doc)
-	
-	return(dumps(tmp, sort_keys=True, indent=4))
-
-def get_event(event_type, limit):
-	if limit == 0:
-		return("You cannot dump the whole DB")
-	else:
-		return(mongo.collection.find( {"type" : event_type.upper() } ).sort( [( "$natural", 1)] ).limit(limit))
-
-def get_event_type(event_type):
-	if event_type == "portscan":
-		return "PORTSCAN_H"
-	elif event_type == "voipguess":
-		return "VOIP_PREFIX_GUESS"
-	elif event_type == "voipcall":
-		return "VOIP_CALL_DIFFERENT_COUNTRY"
-	elif event_type == "dnstunnel":
-		return "DNS_TUNNEL"
-	else:
-		return event_type
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
 
 @app.route('/')
 def hello_world():
@@ -78,11 +84,12 @@ def hello_world():
 def create_index():
 	indexes = mongo.collection.index_information()
 	for item in indexes.keys():
-		if item == "scale_1" or item == "type_1":
-			print('index scale is here')
+		if item == "scale_1" and item == "type_1" and item == "time_first":
+			print('indexes are here')
 		else:
 			mongo.collection.create_index([( "scale", 1)])
 			mongo.collection.create_index([( "type", 1)])
+			mongo.collection.create_index([( "time_first", 1), ("type", 1)])
 
 	return(json.dumps(indexes))
 
@@ -90,24 +97,26 @@ def create_index():
 def connect_db():
 	doctype = {}
 
-	print('lets rock')
-	print(mongo.collection.find().limit(10).sort([('scale', -1 )]))
+	"""print('lets rock')
+	#print(mongo.collection.find().limit(10).sort([('scale', -1 )]))
 	foo = []
 	#tmp = mongo.collection.find( { "time_first": {"$gt" : '1238214400' }, "type": "PORTSCAN_H" }).sort( [( "scale", 1)] ).limit(10)
-	tmp = mongo.collection.find({"type": "PORTSCAN_H"}).sort( [( "scale", 1)] ).limit(10)
+	#tmp = mongo.collection.find({"type": "PORTSCAN_H"}).sort( [( "scale", 1)] ).limit(10)
 
 	for doc in tmp:
 		print('tmp', doc)
 		foo.append(doc)
 
-	temp = mongo.collection.find( { "time_first": {"$gt" : '1238214400' }, "type": "PORTSCAN_H" }).sort( [( "scale", 1)] ).limit(10)
+	#temp = mongo.collection.find( { "time_first": {"$gt" : '1238214400' }, "type": "PORTSCAN_H" }).sort( [( "scale", 1)] ).limit(10)
+	"""
+	temp = mongo.collection.find().limit(100).sort([("$natural", -1)])
 
-
+	counter = {}
 
 	for doc in temp:
 	#for doc in collection.find().sort([( "$natural", -1)]).limit(10):
 		print(doc)
-		print('running')
+		#print('running')
 		
 		doctype = doc['type']
 		#tmp = counter[doctype]
@@ -116,7 +125,7 @@ def connect_db():
 		else: 
 			counter[doctype] = 1 
 
-	return str(foo)
+	return str(counter)
 
 #############################
 #Get the last event
@@ -135,10 +144,29 @@ def get_last(items):
 	else:
 		return("You cannot dump the whole DB!")
 		
-	temp = parse_doc(docs)
+	temp = mongo.parse_doc(docs)
 
-	print(temp)
 	return (temp)
+
+@app.route('/events/last/<int:items>/agg')
+def get_last_agg(items):
+	if items != 0:
+		pipeline = [
+			{"$sort" : {"time_first" : -1} },
+			{ "$limit" : items},
+			{"$group": {"_id": "$type", "count": {"$sum": 1}}}
+		]
+		#docs = mongo.collection.aggregate(pipeline, {"explain": "true"})
+
+		temp = mongo.command('aggregate', 'collection', pipeline=pipeline, explain=True)
+	else:
+		return("You cannot dump the whole DB!")
+		
+	#temp = parse_doc(docs)
+
+	#print(temp)
+
+	return (str(temp))
 
 #############################
 #Get the first event
@@ -157,7 +185,7 @@ def get_first(items):
 	else:
 		return("You cannot dump the whole DB!")
 	
-	temp = parse_doc(docs)
+	temp = mongo.parse_doc(docs)
 
 	#debug purposes
 	#print(temp)
@@ -167,21 +195,27 @@ def get_first(items):
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
 
-	docs = get_event(get_event_type(event_type), 1)
+	docs = mongo.get_event(mongo.get_event_type(event_type), 1)
 
-	return(parse_doc(docs))
+	return(mongo.parse_doc(docs))
 
 @app.route('/events/type/<event_type>/last/<int:limit>')
 def get_type(event_type, limit):
-	docs = get_event(get_event_type(event_type), limit)
+	docs = mongo.get_event(mongo.get_event_type(event_type), limit)
 
-	return(parse_doc(docs))
+	return(mongo.parse_doc(docs))
+
+@app.route('/events/type/<event_type>/from/<int:from_time>/to/<int:to_time>')
+def get_type_time(event_type, from_time, to_time):
+	docs = mongo.get_event_time(mongo.get_event_type(event_type), from_time, to_time)
+
+	return(mongo.parse_doc(docs))
 
 @app.route('/events/type/<event_type>/top/<int:limit>')
 def get_top_events(event_type, limit):
-	docs = mongo.collection.find( {"type" : get_event_type(event_type).upper() } ).sort( [( "scale", -1)] ).limit(limit)
+	docs = mongo.collection.find( {"type" : mongo.get_event_type(event_type).upper() } ).sort( [( "scale", -1)] ).limit(limit)
 
-	return(parse_doc(docs))
+	return(mongo.parse_doc(docs))
 
 if __name__ == '__main__':
     app.run()
