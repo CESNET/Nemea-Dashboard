@@ -1,4 +1,4 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, session, escape
 import pymongo
 import json
 import sys
@@ -30,11 +30,12 @@ class db(object):
 				self.collectionName = collection
 
 		try:
-			self.socket = pymongo.MongoClient(self.host, self.port)
+			self.socket = pymongo.MongoClient(self.host, self.port, serverSelectionTimeoutMS=0)
 			self.db = self.socket[self.dbName]
 			self.collection = self.db[self.collectionName]
 
-		except Exception:
+		except pymongo.errors.PyMongoError as err:
+			print("\n\n\n\n\n\n")
 			print("Cannot establish connection to database")
 			sys.exit()
 	def get_event(self, event_type, limit):
@@ -68,6 +69,13 @@ app = Flask(__name__)
 app.debug = True
 
 mongo = db()
+print(mongo)
+
+@app.errorhandler(db)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return "\n\n\n\n" + response
 
 @app.after_request
 def after_request(response):
@@ -90,7 +98,6 @@ def create_index():
 			mongo.collection.create_index([( "scale", 1)])
 			mongo.collection.create_index([( "type", 1)])
 			mongo.collection.create_index([( "time_first", 1), ("type", 1)])
-
 	return(json.dumps(indexes))
 
 @app.route('/events')
@@ -216,6 +223,30 @@ def get_top_events(event_type, limit):
 	docs = mongo.collection.find( {"type" : mongo.get_event_type(event_type).upper() } ).sort( [( "scale", -1)] ).limit(limit)
 
 	return(mongo.parse_doc(docs))
+
+@app.route('/events/ip/<ip>')
+def get_by_ip(ip):
+
+	ip =ip.replace('-', '.')
+
+	print(ip)
+
+	docs = mongo.collection.find( {"attacker" : ip } )
+
+	return(mongo.parse_doc(docs))
+
+@app.route('/login')
+def login():
+	if 'username' in session:
+		username = session['username']
+		print(username)
+		return("Logged In As:" + username)
+	session['username'] = "john"
+	#return("DONE!")
+	return("No logo ino")
+	
+
+app.secret_key = 'Ugd\d&\y12~\x9d-\x1e0A\xd2)\xbbp\x1d\xfa-\xfc=\xbf\xd9/'
 
 if __name__ == '__main__':
     app.run()

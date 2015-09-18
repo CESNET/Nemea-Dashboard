@@ -3,7 +3,8 @@
 		"title" : "Dashboard",
 		"items" : [
 			{
-				"title" : "Users"
+				"title" : "Users",
+				"link"	: "user"
 			},
 			{
 				"title" : "My profile"

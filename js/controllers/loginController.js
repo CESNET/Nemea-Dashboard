@@ -1,6 +1,7 @@
-app.controller('loginController', ['$scope', '$location', '$log', 'loginAuth', function($scope, $location, $log, loginAuth) {
+app.controller('loginController', function($scope, $location, $log, loginAuth, $rootScope, localStorageService) {
 	$scope.title = "Login!";
 	$scope.loginBtn = "Login";
+
 
 	$scope.hitSubmit = function(user){
 
@@ -10,15 +11,19 @@ app.controller('loginController', ['$scope', '$location', '$log', 'loginAuth', f
 		.success(function(data) {
 
 			if (data["success"] == true) {
-				$log.info(data);	
+				//$log.info(data);	
 				$scope.loginBtn = "Success";
-				$location.path("/");			
+				$location.path("/");
+				localStorageService.set('loggedIn', true);
+				localStorageService.set('loggedIn.pw', sha256_digest(data.password));	
 			}
 			else {
 				$log.error("error - bad password");
 				$scope.error_mes = "Bad password";
 				$scope.loginBtn = "Login";
+				loginCorrect = false;
+				localStorageService.set('loggedIn', false);	
 			}
 		});
 	};
-}]);
+});

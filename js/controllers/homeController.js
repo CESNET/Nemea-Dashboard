@@ -9,11 +9,12 @@ app.value('boxes_arr', [
         "content" : ""
       },
       {
-        "title"   : "two",
+        "title"   : "10 TOP SCANPORTS",
         "type"    : "graph",
         "data"    : "",
         "timestamp": "",
-        "options" : { chart: {
+        "options" : { 
+            chart: {
                 type: 'multiBarChart',
                 height: 300,
                 margin : {
@@ -49,12 +50,12 @@ app.value('boxes_arr', [
                 enable: true,
                 text: 'Title for Line Chart 2'
             },
-        }
+          }
       },
-      {
-        "title": "three",
-        "type"    : "incident"
-      },
+      // {
+      //   "title": "three",
+      //   "type"    : "incident"
+      // },
       {
         "title": "four",
         "type"    : "incident"
@@ -65,7 +66,7 @@ app.value('boxes_arr', [
     "row"   : 1,
     "items" : [
       {
-        "title" : "1",
+        "title" : "Last 1000 events",
         "type"  : "graph",
         // "data"  : [
         //   { 'key' : 'PORTSCAN_H',
@@ -87,8 +88,12 @@ app.value('boxes_arr', [
                 x: function(d){return d.key;},
                 y: function(d){return d.y;},
                 showLabels: true,
+                donut : true,
+                padAngle : 0.02,
+                cornerRadius : 3,
                 transitionDuration: 500,
                 labelThreshold: 0.1,
+                color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
                 legend: {
                     margin: {
                         top: 0,
@@ -140,7 +145,11 @@ function pieChart(data) {
   return dataArr;
 }
 
-app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http) {
+app.controller('userController', function($scope){
+  console.log("hello!");
+});
+
+app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http, $rootScope) {
 	$scope.boxes_arr = boxes_arr;
   $scope.title = "Home sweet home";
   $scope.editMode = true;
@@ -161,7 +170,7 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $
 
         console.log($scope.data);
 */
-  api('type/portscan/top/100').success(function(data) {
+  api('type/portscan/top/10').success(function(data) {
     var proccessed = processData(data);
     //console.log(proccessed);
     boxes_arr[0].items[1].data = proccessed;
