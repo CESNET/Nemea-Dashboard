@@ -76,7 +76,7 @@ loginService.factory('loginAuth', ['$http', function($http){
 	var loginAuth = {};
 
 	loginAuth.fetchUser = function (user) {
-		return $http.post('test.php', user);
+		return $http.post('http://localhost:5000/login', user);
 	};
 
 	return loginAuth;

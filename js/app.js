@@ -2,11 +2,11 @@ var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'loginSer
 
 app.config(config);
 
-var db = new PouchDB('http://localhost:5984/users');
+//var db = new PouchDB('http://localhost:5984/users');
 
-db.info().then(function (info) {
-  console.log(info);
-})
+// db.info().then(function (info) {
+//   console.log(info);
+// })
 
 function config($routeProvider, $locationProvider, localStorageServiceProvider) {
 	$routeProvider
@@ -35,13 +35,13 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 			redirectTo: '/login'
 		});
 
-	localStorageServiceProvider
-		.setPrefix('nemea-dashboard')
-		//PRODUCTION
-		//.setStorageCookieDomain(window.location)
-		//DEV
-		.setStorageCookieDomain('')
-		;
+	// localStorageServiceProvider
+	// 	.setPrefix('nemea-dashboard')
+	// 	//PRODUCTION
+	// 	//.setStorageCookieDomain(window.location)
+	// 	//DEV
+	// 	.setStorageCookieDomain('')
+	// 	;
 
 	//$locationProvider.html5Mode(true);
 };
@@ -59,22 +59,30 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 var loginCorrect = null;
 
 checkLogin = function($rootScope, $location, localStorageService) {
-	console.log("login: " + loginCorrect);
-	console.log(localStorageService.keys());
-	if (localStorageService.keys() == '') {
-		localStorageService.set('loggedIn', null);
-	}
+	// console.log("login: " + loginCorrect);
+	// console.log(localStorageService.keys());
+	// if (localStorageService.keys() == '') {
+	// 	localStorageService.set('loggedIn', null);
+	// }
 
 	//$rootScope.$on("$locationChangeStart", function(event){
 
-    	if (localStorageService.get("loggedIn")) {
+    	// if (localStorageService.get("loggedIn")) {
+    	// 	//$location.path("/");
+    	// 	console.log("correct")	
+    	// }
+    	// else {
+    	// 	$location.path("/login");
+    	// }
+	//})
+
+		if (localStorageService.get("loggedIn")) {
     		//$location.path("/");
     		console.log("correct")	
     	}
     	else {
     		$location.path("/login");
     	}
-	//})
 
 	return false;
 }

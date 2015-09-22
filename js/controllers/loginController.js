@@ -10,6 +10,8 @@ app.controller('loginController', function($scope, $location, $log, loginAuth, $
 		loginAuth.fetchUser(user)
 		.success(function(data) {
 
+			$log.info(data);
+
 			if (data["success"] == true) {
 				//$log.info(data);	
 				$scope.loginBtn = "Success";

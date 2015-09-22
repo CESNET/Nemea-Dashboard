@@ -1,4 +1,5 @@
-from flask import Flask, redirect, session, escape
+from flask import Flask, redirect, session, escape, request
+from flask.ext.cors import CORS
 import pymongo
 import json
 import sys
@@ -67,6 +68,8 @@ class db(object):
 
 app = Flask(__name__)
 app.debug = True
+
+CORS(app)
 
 mongo = db()
 print(mongo)
@@ -235,15 +238,24 @@ def get_by_ip(ip):
 
 	return(mongo.parse_doc(docs))
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+	#data = json.loads(request.data.decode())
+	#print(data)
+
+	if request.method == 'POST':
+		print("email: " + request.form["email"])
+		tmp = json.loads(str(request.data))
+		if tmp.email == "a@a.cz":
+			tmp["success"] = True
+		return(json.dumps(tmp))
 	if 'username' in session:
 		username = session['username']
 		print(username)
 		return("Logged In As:" + username)
 	session['username'] = "john"
 	#return("DONE!")
-	return("No logo ino")
+	return("aa")
 	
 
 app.secret_key = 'Ugd\d&\y12~\x9d-\x1e0A\xd2)\xbbp\x1d\xfa-\xfc=\xbf\xd9/'
