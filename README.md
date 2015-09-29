@@ -66,6 +66,7 @@ Get top n events by type
 
 Get all events by attacker IP
 >IPv4 address in format: `192-0-0-1`
+
 ```
 /events/ip/<ip>
 
