@@ -1,4 +1,4 @@
-echo "source api/bin/activate";
+echo "[EXEC] source api/bin/activate";
 source api/bin/activate
-python3 api/run.py
+python3 run.py
 

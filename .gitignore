@@ -39,3 +39,6 @@ Thumbs.db
 #Bower and SASS
 bower_components
 .sass-cache
+
+#virtualenv
+api
