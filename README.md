@@ -1,5 +1,22 @@
 # Nemea Dashboard
 
+##Installing Nemea-Dashboard
+###Prequisites
+You'll need `python3`, `pip`, `bower`, `mongoDB` and any HTTP server (tested and run on `httpd`)
+
+###Installing
+1. Clone this repository
+2. (Optional) create python virtual environment (`virtualenv <name>`) and activate it
+3. Run pip install
+4. Run bower install
+5. Start mongoDB (demo DB TBD)
+6. Start web server
+7. Start Python API (`python api.py`)
+8. Navigate to the server
+
+User login (if needed) : `a@a.cz`
+Password: `aa`
+
 ##API endpoints
 
 ###User control
