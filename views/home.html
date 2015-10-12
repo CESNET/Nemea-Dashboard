@@ -9,7 +9,6 @@
 
 <section class="content">
 	<h1>{{title}}</h1>
-
 	
 	<div layout="column" layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row">
 		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">

@@ -17,9 +17,9 @@
 					{{menu_item.title}} <span ng-if="menu_item.items && enable" class="toggle">+</span> <span ng-if="!enable" class="toggle">-</span>
 				</md-button>
 				<md-button class="md-button-toggle submenu_item" ng-href="#/{{submenu_item.link}}" ng-repeat="submenu_item in menu_item.items" ng-hide="enable" ng-class="{'animate fadeIn' : !enable}" >{{submenu_item.title}}</md-button>
-			</div>
-
-			
+			</div>			
+			<md-button ng-click="changeMode()">Change Mode</md-button>
 		</md-content>
+
 	</md-sidenav>
 </div>

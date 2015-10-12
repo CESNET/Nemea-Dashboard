@@ -113,7 +113,7 @@ app.value('boxes_arr', [
   },
   ]);
 
-//app.value('editMode', true);
+app.value('editMode', false);
 
 function processData(data) {
   var dataArr = [];
@@ -152,12 +152,16 @@ app.controller('userController', function($scope){
 app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http, $rootScope) {
 	$scope.boxes_arr = boxes_arr;
   $scope.title = "Home sweet home";
-  $scope.editMode = true;
-
-  /*var data = api("type/portscan/last/10").query(function(data){
-    console.log(data);
+  
+  //Show/hide edit buttons on button click
+  //@default: hidden/false
+  $scope.$on('reqChangeMode', function(e) {
+    if ($scope.editMode == undefined) {
+      $scope.editMode = true;
+    } else {
+      $scope.editMode = !($scope.editMode);
+    }
   });
-  console.log(data);*/
 
   /*var resp = $http.get('http://localhost:5000/events/type/portscan/last/100')
         .success(function(response) {
@@ -227,6 +231,10 @@ app.controller('sidebar', function($scope, $mdSidenav, menu, $window) {
 	menu.success(function(data) {
 		$scope.menu = data;
 	})
+
+  $scope.changeMode = function() {
+    $scope.$emit('reqChangeMode');
+  }
 
   $scope.enable = true;
   $scope.toggleItem = function() {

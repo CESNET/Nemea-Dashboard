@@ -43,7 +43,7 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 	// 	.setStorageCookieDomain('')
 	// 	;
 
-	//$locationProvider.html5Mode(true);
+	$locationProvider.html5Mode(true);
 };
 
 // $rootScope.$on('$routeChangeStart', function (event, next) {
