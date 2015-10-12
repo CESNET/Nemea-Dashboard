@@ -7,7 +7,7 @@ You'll need `python3`, `pip`, `bower`, `mongoDB` and any HTTP server (tested and
 ###Installing
 1. Clone this repository
 2. (Optional) create python virtual environment (`virtualenv <name>`) and activate it
-3. Run pip install
+3. Run `pip install -r requirements.txt`
 4. Run bower install
 5. Start mongoDB (demo DB TBD)
 6. Start web server
