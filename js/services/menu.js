@@ -27,7 +27,7 @@ app.factory('api', ['$http', function($http) {
 			});
 		return response;*/
 
-		var addr = "http://localhost:5000/events/" + url
+		var addr = "http://pcstehlik.fit.vutbr.cz:5555/events/" + url
 
 		return $http.get(addr)
 			.success(function(data) {
@@ -76,7 +76,7 @@ loginService.factory('loginAuth', ['$http', function($http){
 	var loginAuth = {};
 
 	loginAuth.fetchUser = function (user) {
-		return $http.post('http://localhost:5000/login', user);
+		return $http.post('http://pcstehlik.fit.vutbr.cz:5555/login', user);
 	};
 
 	return loginAuth;
