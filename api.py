@@ -80,12 +80,12 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return "\n\n\n\n" + response
 
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
-    return response
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Origin', '*')
+#     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+#     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+#     return response
 
 @app.route('/')
 def hello_world():
@@ -244,10 +244,12 @@ def login():
 	#print(data)
 
 	if request.method == 'POST':
-		print("email: " + request.form["email"])
-		tmp = json.loads(str(request.data))
-		if tmp.email == "a@a.cz":
+		tmp = request.get_json()
+		if tmp["email"] == "a@a.cz":
 			tmp["success"] = True
+		else:
+			tmp["success"] = False
+		print(tmp)
 		return(json.dumps(tmp))
 	if 'username' in session:
 		username = session['username']
@@ -261,4 +263,4 @@ def login():
 app.secret_key = 'Ugd\d&\y12~\x9d-\x1e0A\xd2)\xbbp\x1d\xfa-\xfc=\xbf\xd9/'
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5555)
