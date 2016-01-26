@@ -14,23 +14,27 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 			controller: 'loginController',
 			templateUrl: 'views/login.html',
 			resolve: {
-				isLogin: checkLogin
+				//isLogin: checkLogin
 			}
 		})
 		.when('/', {
 			controller: 'homeController',
 			templateUrl: 'views/home.html',
 			resolve: {
-				isLogin: checkLogin
+				//isLogin: checkLogin
 			}
 		})
 		.when('/user', {
 			controller: 'userController',
 			templateUrl: 'views/login.html',
 			resolve: {
-				isLogin: checkLogin
+				//isLogin: checkLogin
 			}
 		})
+        .when('/events', {
+            controller : 'eventsController',
+            templateUrl : 'views/events.html'
+        })
 		.otherwise({
 			redirectTo: '/login'
 		});
