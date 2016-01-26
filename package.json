@@ -1,0 +1,20 @@
+{
+  "name": "nemea-dashboard",
+  "version": "0.1.0",
+  "description": "##Installing Nemea-Dashboard ###Prequisites You'll need `python3`, `pip`, `bower`, `mongoDB` and any HTTP server (tested and run on `httpd`)",
+  "main": "index.html",
+  "scripts": {
+    "test": "test",
+    "sass" : "sass ./scss:./css --style compressed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CESNET/Nemea-Dashboard.git"
+  },
+  "author": "Petr Stehlik <stehlik@cesnet.cz>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CESNET/Nemea-Dashboard/issues"
+  },
+  "homepage": "https://github.com/CESNET/Nemea-Dashboard#readme"
+}
