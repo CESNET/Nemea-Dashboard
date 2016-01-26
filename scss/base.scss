@@ -6,6 +6,7 @@
 
 $blue: #1ab4f0;
 $white: darken(#ffffff, 1%);
+$grey : #eee;
 
 @import     "bootstrap/_mixins.scss";
 @import     "bootstrap/_variables.scss";
@@ -134,8 +135,12 @@ $white: darken(#ffffff, 1%);
 //     }
 // }
 
+md-content {
+    overflow-y: hidden;
+}
+
 .content {
-    margin-top: 64px;
+    //margin-top: 64px;
 }
 
 /* Sidebar Styles */
@@ -156,11 +161,11 @@ $white: darken(#ffffff, 1%);
     }
 
     sidebar-menu {
-    position: fixed;
-    z-index: 59; //60 is sidebar
-    bottom: 0;
-    top: 0;
-}
+        position: fixed;
+        z-index: 59; //60 is sidebar
+        bottom: 0;
+        top: 0;
+    }
 }
 
 .sidebar-logo {
@@ -182,3 +187,17 @@ $white: darken(#ffffff, 1%);
         }
     }
 }
+.row {
+    border-top: 1px solid $grey;
+    padding: 0.5em 0;
+}
+
+.item_info {
+    display: block;
+    margin: 0 0 2em 0;
+
+    &.toggled-item {
+        height: 200px;
+    }
+}
+
