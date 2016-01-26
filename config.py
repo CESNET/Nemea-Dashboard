@@ -12,5 +12,8 @@ CONFIG = {
 	},
 	#'unix_socket' : '/Applications/MAMP/tmp/mysql/mysql.sock'
 	'debug' : True,
-	'version' : '/v2'
+	'version' : 'v2',
+    'base' : 'events'
 }
+
+CONFIG['url'] = '/' + CONFIG['version'] + '/' + CONFIG['base'] + '/'
