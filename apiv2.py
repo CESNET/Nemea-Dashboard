@@ -6,6 +6,7 @@ import pymongo
 import json
 import sys
 from datetime import date
+from bson import json_util
 from time import mktime
 
 class jsonReturn(object):
@@ -13,6 +14,7 @@ class jsonReturn(object):
         'error' : False,
         'error_msg' : None,
         'success' : True,
+        'data' : None
     }
 
     def error(self, message):
@@ -21,10 +23,13 @@ class jsonReturn(object):
         self.base['success'] = False
         return(json.dumps(self.base))
 
+    def success(self, data):
+        self.base['data'] = data
+        return(json.dumps(self.base))
+
 ret = jsonReturn()
 
 class dbConnector(object):
-
     host = C["db"]["host"]
     port = C["db"]["port"]
     dbName = C["db"]["database"]
@@ -74,7 +79,7 @@ class dbConnector(object):
         return(res)
     def parse_doc(self, docs):
         tmp = []
-        return(dumps(docs, sort_keys=True, indent=4))
+        return(json.dumps(docs, sort_keys=True, indent=4))
 
     def get_event_time(self, event_type, from_time, to_time):
         return(self.collection.find( {"type" : event_type.upper(), "time_first" : {"$gt" : from_time},  "time_first" : {"$lt" : to_time} } ).sort( [( "$natural", -1)] )).limit(10000)
@@ -99,10 +104,48 @@ app.debug = C['debug']
 
 CORS(app)
 
-@app.route('/<int:limit>')
+#@app.route(C['base'] + '/<int:limit>')
 def home(limit):
     res = db.get_event("portscan_h", limit)
     return(str(res))
+
+@app.route(C['url'] + '<int:items>', methods=['GET'])
+def get_last(items):
+    if request.method == 'GET':
+        if items != 0:
+            docs = list(db.collection.find().sort( [( "$natural", -1)] ).limit(items))
+        else:
+            return("You cannot dump the whole DB!")
+        
+#temp = db.parse_doc(docs)
+
+        return (json.dumps(docs, default=json_util.default))
+
+@app.route('/events/type/<event_type>/')
+def get_event_item(event_type):
+
+    docs = db.get_event(mongo.get_event_type(event_type), 1)
+
+    return(db.parse_doc(docs))
+
+@app.route('/events/type/<event_type>/last/<int:limit>')
+def get_type(event_type, limit):
+    docs = db.get_event(db.get_event_type(event_type), limit)
+
+    return(db.parse_doc(docs))
+
+@app.route('/events/type/<event_type>/from/<int:from_time>/to/<int:to_time>')
+def get_type_time(event_type, from_time, to_time):
+    docs = db.get_event_time(db.get_event_type(event_type), from_time, to_time)
+
+    return(db.parse_doc(docs))
+
+@app.route('/events/type/<event_type>/top/<int:limit>')
+def get_top_events(event_type, limit):
+    docs = db.collection.find( {"type" : db.get_event_type(event_type).upper() } ).sort( [( "scale", -1)] ).limit(limit)
+
+    return(db.parse_doc(docs))
+
 
 
 if __name__ == '__main__':

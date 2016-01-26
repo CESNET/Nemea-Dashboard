@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3
 from flask import Flask, redirect, session, escape, request
 from flask.ext.cors import CORS
 import pymongo
