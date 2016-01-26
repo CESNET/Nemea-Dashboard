@@ -1,16 +1,15 @@
-<div layout="row">
-	<sidebar-menu></sidebar-menu>
-
-	<topbar-menu></topbar-menu>
-	
+<section layout="row" flex>
+<div flex="20">	
+<sidebar-menu flex></sidebar-menu>
 </div>
-
-
-
-<section class="content">
-	<h1>{{title}}</h1>
+	<!--topbar-menu></topbar-menu-->
 	
-	<div layout="column" layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row">
+
+
+<md-content flex="80" layout-padding>
+<section class="content">
+	
+	<div layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row" flex>
 		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
 			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
 			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
@@ -49,5 +48,7 @@
 	<md-button ng-click="addRow()"> + Add Row</md-button>
 	
 </section>
+</md-content>
 
 
+</section>

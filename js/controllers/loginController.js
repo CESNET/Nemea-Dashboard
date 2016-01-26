@@ -1,9 +1,13 @@
 app.controller('loginController', function($scope, $location, $log, loginAuth, $rootScope, localStorageService) {
 	$scope.title = "Login!";
 	$scope.loginBtn = "Login";
-
+    
+    $scope.submit = function(user) {
+        console.log(user);
+    }
 
 	$scope.hitSubmit = function(user){
+        console.log("test");
 
 		$scope.loginBtn = "Please wait...";
 		
