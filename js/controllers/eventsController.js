@@ -9,6 +9,12 @@ app.controller('eventsController', function($scope, $http) {
         "items" : 100,
         "btn" : "Load"
     };
+    $scope.query = {
+        "from" : "",
+        "to" : "",
+        "date" : "",
+        "limit" : 25
+    }
     
     $scope.data = [];
 
@@ -17,14 +23,29 @@ app.controller('eventsController', function($scope, $http) {
 				$scope.data = data;
 	});
 
-    
+   $scope.parseDate = function(date) {
+        var date_tmp = date;
+        date_tmp.setHours(date_tmp.getHours() + 1);
+        $scope.foodate = date_tmp.toJSON();
 
-    $scope.loadItems = function(num) {
+   }
+
+    $scope.loadItems = function(query) {
         $scope.filter.btn = "Loading..."
     
-        console.log(num);
-        $http.get('http://pcstehlik.fit.vutbr.cz:5555/v2/events/' + num).success(function(data) {
-		    //console.log(JSON.stringify(data));
+        var date = JSON.stringify(query.date).split("T");
+        var from_time = JSON.stringify(query.from).split("T");
+        var to_time = JSON.stringify(query.to).split("T");
+
+        var send = {
+            "from" : JSON.parse(date[0] + "T" + from_time[1]),
+            "to" : JSON.parse(date[0] + "T" + to_time[1]),
+            "limit" : query.limit
+        }
+        console.log(String(date))
+        $http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/' + query.limit, send).success(function(data) {
+		    console.log(data);
+            
 			$scope.data = data;
             $scope.filter.btn = "Done"
 	    });

@@ -109,17 +109,38 @@ def home(limit):
     res = db.get_event("portscan_h", limit)
     return(str(res))
 
-@app.route(C['url'] + '<int:items>', methods=['GET'])
+@app.route(C['url'] + 'indexes', methods=['GET'])
+def indexes():
+    indexes = db.collection.index_information()
+    for item in indexes.keys():
+        if item == "DetectTime":
+            print('indexes are here')
+            return(json.dumps(indexes))
+    db.collection.create_index([( "DetectTime", 1)])
+    indexes = db.collection.index_information()
+#            mongo.collection.create_index([( "type", 1)])
+#            mongo.collection.create_index([( "time_first", 1), ("type", 1)])
+    return(json.dumps(indexes))
+
+
+@app.route(C['url'] + '<int:items>', methods=['GET', 'POST'])
 def get_last(items):
     if request.method == 'GET':
         if items != 0:
-            docs = list(db.collection.find().sort( [( "$natural", -1)] ).limit(items))
+            docs = list(db.collection.find().sort( [( "DetectTime", -1)] ).limit(items))
         else:
             return("You cannot dump the whole DB!")
+    if request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        if data["limit"] != 0:
+            query = {  "DetectTime" : { "$lt" : data["to"]}, "DetectTime" : { "$gt" : data["from"]} } 
+            print(query)
+            docs = list(db.collection.find({ "$and" : [{"DetectTime" : { "$gt" : data["from"]}}, {"DetectTime" : { "$lt" : data["to"]}}] }).sort( [( "DetectTime", -1)] ).limit(int(data["limit"])))
         
 #temp = db.parse_doc(docs)
 
-        return (json.dumps(docs, default=json_util.default))
+    return (json.dumps(docs, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):

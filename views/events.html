@@ -2,33 +2,26 @@
     <sidebar-menu></sidebar-menu>
         <!--topbar-menu></topbar-menu-->
     
-    <md-content flex layout="column" layout-padding class="content">
-        <md-toolbar hide-gt-md ng-controller="topBar as ctrl" >
-            <div class="md-toolbar-tools">
-            <md-button ng-click="ctrl.toggleLeft()" md-no-ink id="menu-toggle" class="md-icon-button" >
-		        <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
-		    </md-button>
-            <span flex></span>
-            <h2>
-            <span>Nemea Dashboard bitches!</span>
-            </h2>
-<md-button class="md-icon-button" aria-label="Favorite">
-<md-icon md-svg-icon="img/icons/favorite.svg" style="color: greenyellow;"></md-icon>
-</md-button>
-<md-button class="md-icon-button" aria-label="More">
-<md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
-</md-button>
-</div>
-</md-toolbar>       <section class="" >
+    <md-content flex layout="column" class="content">
+        
+        <section class="" layout-padding>
 
         <div flex>
-            
-            
+            <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)"></md-datepicker>
             <md-input-container>
-                <label>Items</label>
-                <input ng-model="filter.items">
+                <label>From</label>
+                <input ng-model="query.from" type="time">
             </md-input-container>
-            <md-button class="md-raised md-primary" ng-click="loadItems(filter.items)">{{ filter.btn }}</md-button>
+            <md-input-container>
+                <label>To</label>
+                <input ng-model="query.to" type="time">
+            </md-input-container>
+            <md-input-container>
+                <label>Limit</label>
+                <input ng-model="query.limit">
+            </md-input-container>
+
+            <md-button class="md-raised md-primary" ng-click="loadItems(query)">{{ filter.btn }}</md-button>
         </div>
 
     <div class="table" layout="column" flex>
@@ -54,10 +47,10 @@
                 Flows
                 <div layout="row">
                 <md-input-container flex>
-                    <label>From</label> <input type="text" ng-model="filter.flows_from"> 
+                    <label>Min</label> <input type="text" ng-model="filter.flows_from"> 
                 </md-input-container>
                 <md-input-container flex>
-                    <label>To</label> <input type="text" ng-model="filter.flows_to"> 
+                    <label>Max</label> <input type="text" ng-model="filter.flows_to"> 
                 </md-input-container>
                 </div>
             </div>
@@ -65,7 +58,7 @@
         </div>
         <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex>
             <div layout="row" flex>
-                <div flex>{{ item.EventTime}}</div>
+                <div flex>{{ item.DetectTime}}</div>
                 <div flex>{{ item.Category[0] }}</div>
                 <div flex>{{ item.Source[0].Proto[0] }} | {{ item.Source[0].IP4[0] }}</div>
                 <div flex>{{ item.Description }}</div>
