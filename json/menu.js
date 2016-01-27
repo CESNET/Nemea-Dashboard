@@ -1,4 +1,4 @@
-[
+app.constant("MENU", [
 	{
 		"title" : "Dashboard",
 		"items" : [
@@ -54,4 +54,4 @@
 			}
 		]
 	}
-]
+]);

@@ -226,38 +226,66 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $
 
 });
 
-app.controller('sidebar', function($scope, $mdSidenav, menu, $window) {
 
-	menu.success(function(data) {
-		$scope.menu = data;
-	})
+app.constant("MENU", [
+	{
+		"title" : "Dashboard",
+		"items" : [
+			{
+				"title" : "Users",
+				"link"	: "user"
+			},
+			{
+				"title" : "My profile"
+			}
+		]
+	},
+	{
+		"title" : "Events",
+		"link" 	: "events"
+	},
+	{
+		"title" : "Analytics23",
+		"items" : [
+			{
+				"title" : "Users",
+				"link" 	: "settings"
+			},
+			{
+				"title" : "My profile",
+				"link"	: "profile"
+			},
+			{
+				"title" : "My profile",
+				"link"	: "profile"
+			}
+		]
 
-  $scope.changeMode = function() {
-    $scope.$emit('reqChangeMode');
-  }
+	},
+	{
+		"title" : "Analytics123",
+		"link" 	: "login"
+	},
+	{
+		"title" : "Settings",
+		"items" : [
+			{
+				"title" : "Users",
+				"link" 	: "settings"
+			},
+			{
+				"title" : "My profile",
+				"link"	: "profile"
+			},
+			{
+				"title" : "My profile",
+				"link"	: "profile"
+			}
+		]
+	}
+]);
 
-  $scope.enable = true;
-  $scope.toggleItem = function() {
-    $scope.toggleBtn = "toggled";
-  };
 
-
-  var w = angular.element($window);
-  $scope.windowHeight = w.height();
-
-  w.bind('resize', function () {
-    $scope.windowHeight = w.height();
-    $scope.$apply();
-  })
-  //$scope.windowHeight = $scope.height();
-
-
-  $scope.closeLeft = function() {
-      $mdSidenav('left').toggle();
-
-    };
-    
-});
 
 app.factory('confirmLogout', function(){
 	return function (){
@@ -300,8 +328,12 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element){
-  
+app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog){
+    $scope.openMenu = function($mdOpenMenu, ev) {
+        console.log("hello")
+        originatorEv = ev;
+        $mdOpenMenu(ev);
+    };
   //Add element to given row
   $scope.addElem = function(index) {
     $log.info("adding element");

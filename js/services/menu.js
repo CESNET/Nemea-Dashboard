@@ -44,10 +44,30 @@ app.factory('api', ['$http', function($http) {
 
 app.directive("sidebarMenu", function() {
 	return {
-		scope: {
+        scope: {
 			section: '='
 		},
-		templateUrl: 'partials/sidebar-menu.html'
+		templateUrl: 'partials/sidebar-menu.html',
+        controller: function($scope, $mdSidenav, MENU) {
+            $scope.menu = MENU;
+
+            $scope.changeMode = function() {
+                $scope.$emit('reqChangeMode');
+            }
+
+            $scope.enable = true;
+
+            $scope.toggleItem = function() {
+                $scope.toggleBtn = "toggled";
+            };
+
+
+            $scope.closeLeft = function() {
+                $mdSidenav('left').toggle();
+            };
+    
+ 
+        }
 	};
 });
 
