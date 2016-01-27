@@ -48,3 +48,6 @@ bower_components
 #virtualenv
 api
 __pycache__
+
+#SASS
+css
