@@ -1,8 +1,11 @@
 app.controller('eventsController', function($scope, $http) {
     $scope.hello = 'Hello';  
     $scope.filter = {
-        "category" : null,
-        "proto" : null,
+        "category" : "",
+        "proto" : "",
+        "desc" : "",
+        "flows_from" : "",
+        "flows_to" : "",
         "items" : 100,
         "btn" : "Load"
     };
@@ -41,7 +44,7 @@ app.controller('eventsController', function($scope, $http) {
     $scope.events = function(item) {
         //console.log(JSON.stringify(item));
         var res = [];
-        if ($scope.filter.proto != null && $scope.filter.proto != ""){
+        if ($scope.filter.proto != ""){
             if (i == 50) {console.log("filtering proto"); i = 0;}
             if ("Source" in item) {
                 if ("Proto" in item.Source[0] && item.Source[0].Proto[0].toLowerCase().indexOf($scope.filter.proto.toLowerCase()) > -1) {
@@ -54,13 +57,35 @@ app.controller('eventsController', function($scope, $http) {
             }
         }
 
-        if ($scope.filter.category != null && $scope.filter.category != "") {
+        if ($scope.filter.category != "") {
             if (item.Category[0].toLowerCase().indexOf($scope.filter.category.toLowerCase()) > -1) {
                 res.push(1);
             } else {
                 res.push(0);
             }
         }
+
+        if ($scope.filter.desc != "") {
+            if (item.Description.toLowerCase().indexOf($scope.filter.desc.toLowerCase()) > -1)
+                res.push(1);
+            else
+                res.push(0);
+        }
+
+        if ($scope.filter.flows_from != "") {
+            if (item.FlowCount > Number($scope.filter.flows_from))
+                res.push(1);
+            else
+                res.push(0);
+        }
+
+        if ($scope.filter.flows_to != "") {
+            if (item.FlowCount < Number($scope.filter.flows_to))
+                res.push(1);
+            else
+                res.push(0);
+        }
+
         var logicvalue = 1;
   //      console.log(res);
         for (var i = 0; i < res.length; i++) {

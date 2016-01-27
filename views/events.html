@@ -1,21 +1,31 @@
-<section layout="row" flex>
-    <div flex="20">
-        <sidebar-menu></sidebar-menu>
-        <topbar-menu></topbar-menu>
-    </div>
+<section layout="row">
+    <sidebar-menu></sidebar-menu>
+        <!--topbar-menu></topbar-menu-->
     
-    <md-content flex="80">
-        <section class="" layout="column" >
+    <md-content flex layout="column" layout-padding class="content">
+        <md-toolbar hide-gt-md ng-controller="topBar as ctrl" >
+            <div class="md-toolbar-tools">
+            <md-button ng-click="ctrl.toggleLeft()" md-no-ink id="menu-toggle" class="md-icon-button" >
+		        <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
+		    </md-button>
+            <span flex></span>
+            <h2>
+            <span>Nemea Dashboard bitches!</span>
+            </h2>
+<md-button class="md-icon-button" aria-label="Favorite">
+<md-icon md-svg-icon="img/icons/favorite.svg" style="color: greenyellow;"></md-icon>
+</md-button>
+<md-button class="md-icon-button" aria-label="More">
+<md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
+</md-button>
+</div>
+</md-toolbar>       <section class="" >
 
         <div flex>
+            
+            
             <md-input-container>
-            <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
-            </md-input-container>
-            <md-input-container>
-            <label>Filter by category</label> <input type="text" ng-model="filter.category"> 
-            </md-input-container>
-            <md-input-container>
-                <label>Limit</label>
+                <label>Items</label>
                 <input ng-model="filter.items">
             </md-input-container>
             <md-button class="md-raised md-primary" ng-click="loadItems(filter.items)">{{ filter.btn }}</md-button>
@@ -23,31 +33,53 @@
 
     <div class="table" layout="column" flex>
         <div class="head" layout="row" flex>
-            <div flex>ConnCount</div>
-            <div flex>Category</div>
-            <div flex>Source</div>
-            <div flex>Detect Time</div>
-            <div flex>Description</div>
+            <div flex>Event Time</div>
+            <div flex>
+                Category
+                <md-input-container>
+                    <label>Filter by category</label> <input type="text" ng-model="filter.category"> 
+                </md-input-container></div>
+            <div flex>
+                Source<br>
+                <md-input-container>
+                    <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
+                </md-input-container>
+            </div>
+            <div flex>Description
+                <md-input-container>
+                    <label>Filter by description</label> <input type="text" ng-model="filter.desc"> 
+                </md-input-container>
+            </div>
+            <div flex>
+                Flows
+                <div layout="row">
+                <md-input-container flex>
+                    <label>From</label> <input type="text" ng-model="filter.flows_from"> 
+                </md-input-container>
+                <md-input-container flex>
+                    <label>To</label> <input type="text" ng-model="filter.flows_to"> 
+                </md-input-container>
+                </div>
+            </div>
             <div flex>JSON</div>
         </div>
-        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row" flex>
+        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex>
             <div layout="row" flex>
-                <div flex>{{ item.ConnCount }}</div>
+                <div flex>{{ item.EventTime}}</div>
                 <div flex>{{ item.Category[0] }}</div>
                 <div flex>{{ item.Source[0].Proto[0] }} | {{ item.Source[0].IP4[0] }}</div>
-                <div flex>{{ item.EventTime | date : 'hh:mm:ss yyyy-MM-dd' }}</div> <!--  | date : 'yyyy-MM-dd' -->
                 <div flex>{{ item.Description }}</div>
+                <div flex>{{ item.FlowCount }}</div>
                 <div flex>
-                    <md-button class="md-button-toggle" ng-click="enableSub = !enableSub"  >
+                    <md-button class="md-button-toggle" ng-click="enableSub = !enableSub"  aria-label="Enable details">
                         <span ng-if="enableSub">Show details</span>
                         <span ng-if="!enableSub">Hide details</span>
                     </md-button>
                 </div>
             </div>
-            <div ng-if="!enableSub" class="item_info" flex ng-class="{'toggled-item' : !enableSub}">
+            <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex>
                 <div>{{ item | json }}</div>
-            </div>
-                                    <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
+            </div>                                <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
         </div>
     </div>
         
