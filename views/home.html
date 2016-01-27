@@ -1,19 +1,41 @@
-<section layout="row" flex>
-<div flex="20">	
-<sidebar-menu flex></sidebar-menu>
-</div>
+<section layout="row">
+    <sidebar-menu></sidebar-menu>
 	<!--topbar-menu></topbar-menu-->
 	
 
 
-<md-content flex="80" layout-padding>
-<section class="content">
+    <md-content flex layout-padding layout="column" class="content">
 	
-	<div layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row" flex>
-		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
-			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
-			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
-
+	    <div layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row" flex>
+		    <div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
+			    <md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
+			    <md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
+                
+                <md-menu md-position-mode="target-right target">
+                    <md-button aria-label="Open phone interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+                    <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
+                </md-button>
+                <md-menu-content width="4">
+                    <md-menu-item>
+                        <md-button ng-click="edit(box)">
+                            <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
+                            Edit
+                        </md-button>
+                    </md-menu-item>
+                    <md-menu-item>
+                        <md-button disabled="disabled" ng-click="ctrl.checkVoicemail()">
+                            Move
+                        </md-button>
+                    </md-menu-item>
+                    <md-menu-divider></md-menu-divider>
+                    <md-menu-item>
+                        <md-button ng-click="toggleNotifications()">
+                            <md-icon md-menu-align-target md-svg-src="img/close.svg" style="margin: auto 3px auto 0;"></md-icon> 
+                            Delete
+                        </md-button>
+                    </md-menu-item>
+                </md-menu-content>
+                </md-menu>
 			<!-- <div ng-init="showTitle = true">
 				<h2 ng-show="showTitle" ng-click="editTitle(); showTitle=!showTitle">{{box.title}}</h2>
 				<md-input-container ng-hide="showTitle">
@@ -21,10 +43,10 @@
 				</md-input-container>
 			</div> -->
 
-			<div click-to-edit="box.title" ng-if="editMode"></div>
-			<div class="click-to-edit disabled" ng-if="!editMode">{{box.title}}</div>
+			    <div click-to-edit="box.title" ng-if="editMode"></div>
+			    <div class="click-to-edit disabled" ng-if="!editMode">{{box.title}}</div>
 
-			
+		        {{ box }}	
 
 			<br />
 
@@ -47,8 +69,5 @@
 
 	<md-button ng-click="addRow()"> + Add Row</md-button>
 	
-</section>
-</md-content>
-
-
+    </md-content>
 </section>
