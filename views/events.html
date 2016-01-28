@@ -1,10 +1,10 @@
 <section layout="row">
     <sidebar-menu></sidebar-menu>
-        <!--topbar-menu></topbar-menu-->
     
-    <md-content flex layout="column" class="content">
+    <md-content flex layout="column" >
         
-        <section class="" layout-padding>
+        <topbar-menu></topbar-menu>
+        <section class="content" layout-padding>
 
         <div flex>
             <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)"></md-datepicker>
