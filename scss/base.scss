@@ -137,8 +137,10 @@ md-toolbar:not(.md-menu-toolbar) {
 //     }
 // }
 
-md-content.content {
+.content {
     height: 100vh;
+    
+     
 }
 
 .content {
@@ -213,4 +215,15 @@ md-content.content {
         padding: 0.5em 0;
     }
 }
+
+.actionBtn {
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.25em;
+
+    .md-button {
+    //    color: $white;
+    }
+}
+
 

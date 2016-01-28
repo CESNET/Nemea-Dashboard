@@ -1,6 +1,6 @@
 <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" layout="column" layout-fill>
 		<md-toolbar class="sidebar-logo" flex="15">
-			<md-button ng-click="closeLeft()" id="menu-toggle" hide-gt-md>
+			<md-button ng-click="closeLeft()" id="menu-toggle" hide-gt-md class="md-icon-button">
 		        <md-icon md-svg-src="img/icons/close.svg" aria-label="Enable Menu"></md-icon>
 			</md-button>
 
@@ -10,7 +10,7 @@
 
 		<md-content flex>
 			<div ng-repeat="menu_item in menu">
-				<md-button class="md-button-toggle menu_item" ng-href="#/{{menu_item.link}}" ng-click="enable=!enable" ng-class="{'toggled-item' : !enable}">
+				<md-button class="md-button-toggle menu_item" ng-href="#/{{menu_item.link}}" ng-click="enable=!enable; selected=true" ng-class="{'toggled-item' : selected}">
 					{{menu_item.title}} <span ng-if="menu_item.items && enable" class="toggle">+</span> <span ng-if="menu_item.items && !enable" class="toggle">-</span>
 				</md-button>
 				<md-button class="md-button-toggle submenu_item" ng-href="#/{{submenu_item.link}}" ng-repeat="submenu_item in menu_item.items" ng-if="!enable" ng-class="{'animate fadeIn' : !enable}" >{{submenu_item.title}}</md-button>
