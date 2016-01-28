@@ -5,8 +5,13 @@ app.value('boxes_arr', [
     "items" : [
       {
         "title"   : "one",
-        "type"    : "incident",
-        "content" : ""
+        "type"    : "piechart",
+        "content" : "",
+        "config"  : {
+            "metric" : "category",
+            "period" : "10",
+            "begintime" : ""
+        }
       },
       {
         "title"   : "10 TOP SCANPORTS",
@@ -113,7 +118,31 @@ app.value('boxes_arr', [
   },
   ]);
 
-app.value('editMode', false);
+app.constant('PIECHART', { "options": {
+            chart: {
+                type: 'pieChart',
+                height: 500,
+                x: function(d){return d.key[0];},
+                y: function(d){return d.x;},
+                showLabels: true,
+                donut : true,
+                padAngle : 0.02,
+                cornerRadius : 3,
+                transitionDuration: 500,
+                labelThreshold: 0.1,
+                color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
+                legend: {
+                    margin: {
+                        top: 0,
+                        right: 100,
+                        bottom: 5,
+                        left: 0
+                    }
+                }
+            }
+        }});
+
+//app.value('editMode', false);
 
 function processData(data) {
   var dataArr = [];
@@ -174,7 +203,7 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $
 
         console.log($scope.data);
 */
-  api('type/portscan/top/10').success(function(data) {
+  /*api('type/portscan/top/10').success(function(data) {
     var proccessed = processData(data);
     //console.log(proccessed);
     boxes_arr[0].items[1].data = proccessed;
@@ -191,23 +220,12 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $
   api('last/1000').success(function(data) {
     boxes_arr[1].items[0].data = pieChart(data);
     //console.log(pieChart(data));
-  })
+  })*/
 
   
 
         //console.log(data);
         //boxes_arr[0].items[1].data = data;
-
-  $scope.editTitle = function(inputText) {
-
-    $log.log(inputText);
-    if ($scope.showTitle = true) {
-      $timeout(function() {
-        angular.element('.focusTitle').trigger('focus');
-        console.log("trigger");
-      }, 100);
-    }
-  }
 
 
   $scope.addRow = function() {
@@ -230,7 +248,7 @@ app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $
 app.constant("MENU", [
 	{
 		"title" : "Dashboard",
-		"items" : [
+		/*"items" : [
 			{
 				"title" : "Users",
 				"link"	: "user"
@@ -238,13 +256,13 @@ app.constant("MENU", [
 			{
 				"title" : "My profile"
 			}
-		]
+		]*/
 	},
 	{
 		"title" : "Events",
 		"link" 	: "events"
 	},
-	{
+	/*{
 		"title" : "Analytics23",
 		"items" : [
 			{
@@ -265,7 +283,7 @@ app.constant("MENU", [
 	{
 		"title" : "Analytics123",
 		"link" 	: "login"
-	},
+	},*/
 	{
 		"title" : "Settings",
 		"items" : [
@@ -328,19 +346,86 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART){
+    
+    function timeShift() {    
+        if ($scope.box != undefined && $scope.box.type == "piechart") {
+            $scope.box.config.begintime = (function() {
+                var now = new Date();
+                now.setHours(now.getHours() - $scope.box.config.period);
+                console.log(now)
+                return now;
+            })();
+        }
+    }
+
+    timeShift();
+
+        
     $scope.openMenu = function($mdOpenMenu, ev) {
-        console.log("hello")
         originatorEv = ev;
         $mdOpenMenu(ev);
     };
+    $scope.editMode = false;
+    $scope.backupModel = {};
+
+
+    $scope.protocol = PROTOCOLS;
+    $scope.types = TYPES;
+    $scope.categories = CATEGORIES;
+
+
+    ///////////////////////////////////////////////////////
+    // Edit mode handling
+    ///////////////////////////////////////////////////////
+
+    // Trigger editing mode and save current state
+    $scope.edit = function(box) {
+        $scope.editMode = true;
+        $scope.backupModel = angular.copy(box);
+    }
+
+    // Save changes and disable edit mode
+    $scope.save = function() {
+        $scope.backupModel = {};
+        $log.info("Edit is done");
+        $log.info(JSON.stringify($scope.box));
+        $scope.editMode = false;
+        timeShift();
+        $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+    //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
+            console.log(data);
+            $scope.box.data = data;
+    });
+ 
+    }
+
+    // Revert to original and disable edit mode
+    $scope.cancel = function(box) {
+        $scope.box = angular.copy($scope.backupModel);
+        $scope.backupModel = {};
+        $scope.editMode = false;
+    }
+    
+    console.log($scope.box)
+
+    if ($scope.box != undefined && $scope.box.type == "piechart") {
+        $scope.box.options = PIECHART.options;
+    $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+    //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
+            console.log(data);
+            $scope.box.data = data;
+    });
+    }
+
+
   //Add element to given row
-  $scope.addElem = function(index) {
-    $log.info("adding element");
+    $scope.addElem = function(index) {
+        $log.info("adding element");
 
-    var item = {};
+        var item = {};
 
-    $scope.full = false;
+        $scope.full = false;
 
     if (boxes_arr[index].items.length > 5) {
       $scope.full = true;
