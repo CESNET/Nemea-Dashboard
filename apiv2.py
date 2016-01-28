@@ -142,6 +142,33 @@ def get_last(items):
 
     return (json.dumps(docs, default=json_util.default))
 
+@app.route(C['url'] + 'agg', methods=['POST'])
+def aggregate():
+    if request.method == 'POST':
+        req = request.get_json()
+        print(req)
+#db.alerts.aggregate([{$match : { "DetectTime" : { "$gt" : "2016-01-27T06:08:17.274Z"}}}, {$group : { _id : {"Categories" : "$Category"}, count : {$sum : 1}}}])
+        query = [
+            {
+                "$match" : {
+                    "DetectTime" : {
+                        "$gt" : req["begintime"]
+                    }
+                }
+            },
+            {
+                "$group" : {
+                    "_id" : {
+                        "Categories" : "$Category"
+                    },
+                    "count" : { "$sum" : 1}
+                }
+            }
+        ]
+        res = list(db.collection.aggregate(query))
+        print(str(res))
+    return(json.dumps(res, default=json_util.default))
+
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
 
