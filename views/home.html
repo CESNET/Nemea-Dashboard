@@ -1,21 +1,18 @@
 <section layout="row">
     <sidebar-menu></sidebar-menu>
-	<!--topbar-menu></topbar-menu-->
-	
 
-
-    <md-content flex layout-padding layout="column" class="content">
+    <md-content flex layout="column" >
+	    <topbar-menu></topbar-menu>
+        <section class="content">
 	
 	    <div layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row" flex>
 		    <div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
-			    <md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
-			    <md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
                 
                 <md-menu md-position-mode="target-right target">
-                    <md-button aria-label="Open phone interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+                    <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
                     <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
                 </md-button>
-                <md-menu-content width="4">
+                <md-menu-content width="3">
                     <md-menu-item>
                         <md-button ng-click="edit(box)">
                             <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
@@ -29,7 +26,7 @@
                     </md-menu-item>
                     <md-menu-divider></md-menu-divider>
                     <md-menu-item>
-                        <md-button ng-click="toggleNotifications()">
+                        <md-button ng-click="removeElem(parIndex, $index)">
                             <md-icon md-menu-align-target md-svg-src="img/close.svg" style="margin: auto 3px auto 0;"></md-icon> 
                             Delete
                         </md-button>
@@ -43,14 +40,69 @@
 				</md-input-container>
 			</div> -->
 
-			    <div click-to-edit="box.title" ng-if="editMode"></div>
-			    <div class="click-to-edit disabled" ng-if="!editMode">{{box.title}}</div>
+			    <h2 ng-if="!editMode">{{box.title}}</h2>
+                <nvd3 ng-if="box.type != ''" options="box.options" api="api" showXAxis="true"
+	                showYAxis="true"
+	                tooltips="true"
+	                interactive="true" 
+	                data="box.data"
+	                autorefresh="true"
+                    objectEquality="true" 
+                    config="{refreshDataOnly: true, deepWatchData : true}" >
+                </nvd3>
 
-		        {{ box }}	
+{{ box.data }}
+
+                <div ng-if="editMode"> 
+                
+                    <md-input-container>
+                        <label>Title</label>
+                        <input ng-model="box.title">
+                    </md-input-container>    
+                   </br> 
+                    <md-input-container>
+                        <label>Type of view</label>
+                        <md-select ng-model="box.type">
+                            <md-optgroup label="Types">
+                                <md-option ng-value="type" ng-repeat="type in types track by $index">{{type}}</md-option>
+                            </md-optgroup>
+                        </md-select>
+                    </md-input-container>
+                    
+                    
+                    <md-input-container ng-if="box.type == 'piechart'">
+                        <label>Metric</label>
+                        <md-select ng-model="box.config.metric">
+                            <md-optgroup label="Metric">
+                                <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
+                            </md-optgroup>
+                        </md-select>
+                    </md-input-container>
+                    
+                    
+                    <md-input-container ng-if="box.type == 'histogram'">
+                        <label>Protocol</label>
+                        <md-select ng-model="box.config.protocol">
+                            <md-optgroup label="Protocols">
+                                <md-option ng-value="proto" ng-repeat="proto in protocol track by $index">{{proto}}</md-option>
+                            </md-optgroup>
+                        </md-select>
+                    </md-input-container>
+
+                    <md-input-container ng-if="box.config.metric != ''">
+                        <label>Period</label>
+                        <input ng-model="box.config.period">
+                    </md-input-container>
+
+                </div>
+                <div class="actionBtn" ng-if="editMode">
+                    <md-button aria-label="Cancel changes" ng-click="box = backupModel; cancel(box)" class="cancel" >Cancel</md-button>
+                    <md-button aria-label="Save changes" ng-click="save()" class="md-raised md-primary" >Save</md-button>
+                </div>
 
 			<br />
 
-			<div ng-if="box.type == 'incident'">BLblablabla</div>
+			<!--div ng-if="box.type == 'incident'">BLblablabla</div-->
 
 			<div ng-if="box.type == 'graph'" class="graph">
 				<nvd3 options="box.options" api="api" showXAxis="true"
@@ -68,6 +120,6 @@
 	</div>
 
 	<md-button ng-click="addRow()"> + Add Row</md-button>
-	
+</section>	
     </md-content>
 </section>
