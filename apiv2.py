@@ -166,8 +166,13 @@ def aggregate():
             }
         ]
         res = list(db.collection.aggregate(query))
-        print(str(res))
-    return(json.dumps(res, default=json_util.default))
+        tmp = list()
+        for item in res:
+            tmp.push({
+                "key" : item["Category"],
+                "x" : item["count"]
+            })
+    return(json.dumps(tmp, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
