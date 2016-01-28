@@ -1,4 +1,4 @@
-var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'loginService', 'ngMessages', 'nvd3', 'LocalStorageModule']);
+var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'LocalStorageModule']);
 
 app.config(config);
 
@@ -109,4 +109,8 @@ app.constant('AUTH_EVENTS', {
   sessionTimeout: 'auth-session-timeout',
   notAuthenticated: 'auth-not-authenticated',
   notAuthorized: 'auth-not-authorized'
-})
+});
+
+app.constant('CATEGORIES', [ "Recon.Scanning", "Attempt.Login", "Availability.DoS" ]);
+app.constant('PROTOCOLS', [ "tcp", "dns", "udp" ]);
+app.constant('TYPES', ["histogram", "piechart"])
