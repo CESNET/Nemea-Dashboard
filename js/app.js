@@ -8,7 +8,7 @@ app.config(config);
 //   console.log(info);
 // })
 
-function config($routeProvider, $locationProvider, localStorageServiceProvider) {
+function config($routeProvider, $locationProvider, localStorageServiceProvider, $mdThemingProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',
@@ -38,6 +38,8 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 		.otherwise({
 			redirectTo: '/login'
 		});
+
+    $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
 
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
