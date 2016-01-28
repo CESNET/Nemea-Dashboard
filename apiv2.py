@@ -167,9 +167,10 @@ def aggregate():
         ]
         res = list(db.collection.aggregate(query))
         tmp = list()
+        print(res)
         for item in res:
-            tmp.push({
-                "key" : item["Category"],
+            tmp.append({
+                "key" : item["_id"]["Categories"],
                 "x" : item["count"]
             })
     return(json.dumps(tmp, default=json_util.default))
