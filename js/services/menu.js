@@ -89,18 +89,6 @@ app.directive("boxes", function() {
 	};
 });
 
-var loginService = angular.module('loginService', []);
-
-loginService.factory('loginAuth', ['$http', function($http){
-
-	var loginAuth = {};
-
-	loginAuth.fetchUser = function (user) {
-		return $http.post('http://pcstehlik.fit.vutbr.cz:5555/login', user);
-	};
-
-	return loginAuth;
-}]);
 
 app.directive('clickEdit', function() {
 	var template = '<div><h2 ng-show="view.showTitle" ng-click="editTitle()">{{box.title}}</h2>' +

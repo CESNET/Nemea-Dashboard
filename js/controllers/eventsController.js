@@ -1,5 +1,4 @@
 app.controller('eventsController', function($scope, $http) {
-    $scope.hello = 'Hello';  
     $scope.filter = {
         "category" : "",
         "proto" : "",
@@ -18,7 +17,7 @@ app.controller('eventsController', function($scope, $http) {
     
     $scope.data = [];
 
-    $http.get('http://pcstehlik.fit.vutbr.cz:5555/v2/events/' + $scope.filter.items).success(function(data) {
+    $http.get('http://benefizio.liberouter.org:5555/v2/events/' + $scope.filter.items).success(function(data) {
 				//console.log(JSON.stringify(data));
 				$scope.data = data;
 	});
@@ -53,14 +52,12 @@ app.controller('eventsController', function($scope, $http) {
 
 
 
-  $scope.enableTable = true;
+    $scope.enableTable = true;
     /*$scope.filter = "$";
     $scope.search = {$ : '', "Source": [ { "Proto": [ "" ], "IP4": [ "" ] }]}
     $scope.changeFilterTo = function(pr) {
         $scope.filter = pr; 
     }*/
-
-    var i = 0;
 
     $scope.events = function(item) {
         //console.log(JSON.stringify(item));
@@ -115,7 +112,6 @@ app.controller('eventsController', function($scope, $http) {
     //        console.log(logicvalue);
         }
         return logicvalue == 1 ? true : false;
-
 
     }
 
