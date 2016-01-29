@@ -178,6 +178,9 @@ def aggregate():
             })
         if req['type'] == "areachart":
             print("areachart here")
+            query = { "DetectTime" : {$gt : req["begintime"]}}
+            res = list(db.collection.find(query))
+            #for item in res
     return(json.dumps(tmp, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
