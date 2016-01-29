@@ -176,6 +176,8 @@ def aggregate():
                 "key" : item["_id"]["Categories"],
                 "x" : item["count"]
             })
+        if req['type'] == "areachart":
+            print("areachart here")
     return(json.dumps(tmp, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
