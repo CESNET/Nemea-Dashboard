@@ -1,19 +1,12 @@
-CONFIG = {
-	'db' : {
-        'host' : 'localhost',
-		'port' : 27017,
-		'database' : 'nemeadb',
-        'collection' : {
-            'events' : 'alerts',
-            'users' : 'users'
-        },
-		'user' : None,
-		'password' : None,
-	},
-	#'unix_socket' : '/Applications/MAMP/tmp/mysql/mysql.sock'
-	'debug' : True,
-	'version' : 'v2',
-    'base' : 'events'
-}
+import os
+import json
+class Config:
+    def __init__(self):
+        self.raw_data = open(os.path.dirname(os.path.abspath(__file__)) + "/config.json").read()
+        self.data = json.loads(self.raw_data)
+        self.create_urls()
 
-CONFIG['url'] = '/' + CONFIG['version'] + '/' + CONFIG['base'] + '/'
+    def create_urls(self):
+        self.data['events'] = '/' + self.data['api']['version'] + '/events/'
+        self.data['users'] = '/' + self.data['api']['version'] + '/users/'
+

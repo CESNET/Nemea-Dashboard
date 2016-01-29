@@ -1,4 +1,4 @@
-from config import CONFIG as C
+from config import Config
 
 from flask import Flask, session, escape, request
 from flask.ext.cors import CORS
@@ -8,6 +8,9 @@ import sys
 from datetime import date
 from bson import json_util
 from time import mktime
+
+config = Config()
+C = config.data
 
 class jsonReturn(object):
     base = {
@@ -109,7 +112,7 @@ def home(limit):
     res = db.get_event("portscan_h", limit)
     return(str(res))
 
-@app.route(C['url'] + 'indexes', methods=['GET'])
+@app.route(C['events'] + 'indexes', methods=['GET'])
 def indexes():
     indexes = db.collection.index_information()
     for item in indexes.keys():
@@ -123,7 +126,7 @@ def indexes():
     return(json.dumps(indexes))
 
 
-@app.route(C['url'] + '<int:items>', methods=['GET', 'POST'])
+@app.route(C['events'] + '<int:items>', methods=['GET', 'POST'])
 def get_last(items):
     if request.method == 'GET':
         if items != 0:
@@ -142,7 +145,7 @@ def get_last(items):
 
     return (json.dumps(docs, default=json_util.default))
 
-@app.route(C['url'] + 'agg', methods=['POST'])
+@app.route(C['events'] + 'agg', methods=['POST'])
 def aggregate():
     if request.method == 'POST':
         req = request.get_json()
