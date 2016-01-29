@@ -51,3 +51,6 @@ __pycache__
 
 #SASS
 css
+
+#node modules
+node_modules/
