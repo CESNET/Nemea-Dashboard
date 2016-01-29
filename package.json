@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "test": "test",
-    "sass" : "sass ./scss:./css --style compressed"
+    "sass": "sass ./scss:./css --style compressed"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/CESNET/Nemea-Dashboard/issues"
   },
-  "homepage": "https://github.com/CESNET/Nemea-Dashboard#readme"
+  "homepage": "https://github.com/CESNET/Nemea-Dashboard#readme",
+  "devDependencies": {
+    "gulp-concat": "^2.6.0",
+    "gulp-ng-annotate": "^1.1.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.1"
+  }
 }

@@ -9,7 +9,7 @@ app.value('boxes_arr', [
         "content" : "",
         "config"  : {
             "metric" : "category",
-            "period" : "10",
+            "period" : "24",
             "begintime" : ""
         }
       },
@@ -117,30 +117,6 @@ app.value('boxes_arr', [
     ]
   },
   ]);
-
-app.constant('PIECHART', { "options": {
-            chart: {
-                type: 'pieChart',
-                height: 500,
-                x: function(d){return d.key[0];},
-                y: function(d){return d.x;},
-                showLabels: true,
-                donut : true,
-                padAngle : 0.02,
-                cornerRadius : 3,
-                transitionDuration: 500,
-                labelThreshold: 0.1,
-                color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
-                legend: {
-                    margin: {
-                        top: 0,
-                        right: 100,
-                        bottom: 5,
-                        left: 0
-                    }
-                }
-            }
-        }});
 
 //app.value('editMode', false);
 
@@ -411,11 +387,13 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
     if ($scope.box != undefined && $scope.box.type == "piechart") {
         $scope.box.options = PIECHART.options;
-    $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+        $scope.box.config["type"] = "areachart";
+        $log.info(JSON.stringify($scope.box.config));
+        $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
     //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
             console.log(data);
             $scope.box.data = data;
-    });
+        });
     }
 
 
