@@ -42,7 +42,7 @@ app.controller('eventsController', function($scope, $http) {
             "limit" : query.limit
         }
         console.log(String(date))
-        $http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/' + query.limit, send).success(function(data) {
+        $http.post('http://benefizio.liberouter.org:5555/v2/events/' + query.limit, send).success(function(data) {
 		    console.log(data);
             
 			$scope.data = data;
