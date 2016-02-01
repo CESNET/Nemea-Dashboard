@@ -178,10 +178,30 @@ def aggregate():
             })
         if req['type'] == "areachart":
             print("areachart here")
-            query = { "DetectTime" : {$gt : req["begintime"]}}
+            query = { "DetectTime" : {"$gt" : req["begintime"]}}
             res = list(db.collection.find(query))
             #for item in res
     return(json.dumps(tmp, default=json_util.default))
+
+@app.route(C['events'] + 'time', methods=['GET'])
+def timeagg():
+    query = [{
+        "$group": {
+            "_id": {
+                "year": { "$year": "$DetectTime" },
+                "dayOfYear": { "$dayOfYear": "$DetectTime" },
+                "interval": {
+                    "$subtract": [ 
+                        { "$minute": "$DetectTime" },
+                        { "$mod": [{ "$minute": "$DetectTime", 15 }] }
+                    ]
+                }
+            }},
+        "count": { "$sum": 1 }
+        }]
+
+    res = list(db.collection.aggregate(query))
+    return(str(res))
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
