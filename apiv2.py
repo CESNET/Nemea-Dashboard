@@ -5,12 +5,25 @@ from flask.ext.cors import CORS
 import pymongo
 import json
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta
 from bson import json_util
 from time import mktime
 
 config = Config()
 C = config.data
+
+def roundTime(dt=None, roundTo=60):
+    """Round a datetime object to any time laps in seconds
+    dt : datetime.datetime object, default now.
+    roundTo : Closest number of seconds to round to, default 1 minute.
+    Author: Thierry Husson 2012 - Use it as you want but don't blame me.
+    """
+    if dt == None : dt = datetime.datetime.now()
+    seconds = (dt - dt.min).seconds
+    # // is a floor division, not a comment on following line:
+    rounding = (seconds+roundTo/2) // roundTo * roundTo
+    return dt + timedelta(0,rounding-seconds,-dt.microsecond)
+
 
 class jsonReturn(object):
     base = {
@@ -151,57 +164,131 @@ def aggregate():
         req = request.get_json()
         print(req)
 #db.alerts.aggregate([{$match : { "DetectTime" : { "$gt" : "2016-01-27T06:08:17.274Z"}}}, {$group : { _id : {"Categories" : "$Category"}, count : {$sum : 1}}}])
-        query = [
-            {
-                "$match" : {
-                    "DetectTime" : {
-                        "$gt" : req["begintime"]
+        if req['type'] == 'piechart':
+            query = [
+                {
+                    "$match" : {
+                        "DetectTime" : {
+                            "$gt" : req["begintime"]
+                        }
+                    }
+                },
+                {
+                    "$group" : {
+                        "_id" : {
+                            "Categories" : "$Category"
+                        },
+                        "count" : { "$sum" : 1}
                     }
                 }
-            },
-            {
-                "$group" : {
-                    "_id" : {
-                        "Categories" : "$Category"
-                    },
-                    "count" : { "$sum" : 1}
-                }
-            }
-        ]
-        res = list(db.collection.aggregate(query))
-        tmp = list()
-        print(res)
-        for item in res:
-            tmp.append({
-                "key" : item["_id"]["Categories"],
-                "x" : item["count"]
-            })
-        if req['type'] == "areachart":
+            ]
+            res = list(db.collection.aggregate(query))
+            tmp = list()
+            print(res)
+            for item in res:
+                tmp.append({
+                    "key" : item["_id"]["Categories"],
+                    "x" : item["count"]
+                })
+        if req['type'] == "barchart":
             print("areachart here")
-            query = { "DetectTime" : {"$gt" : req["begintime"]}}
-            res = list(db.collection.find(query))
+
+            window = req['window'] * 60
+
+            res = list(db.collection.find({"DetectTime" : {"$gt" : req["begintime"]}}))
+            aggregate = [
+                {
+                    "DetectTime" : roundTime(datetime.strptime(res[0]["DetectTime"], "%Y-%m-%dT%H:%M:%SZ"), window),
+                    "Category" : res[0]["Category"],
+                    "FlowCount" : 0,
+                    "Count" : 1
+                }
+            ]
+
+            for event in res[1:]:
+                # Check if it is in time window
+                # We want it to be between whole our or 30 minutes
+                inserted = False
+                event_time = datetime.strptime(event["DetectTime"], "%Y-%m-%dT%H:%M:%SZ") 
+                
+                for item in aggregate:
+                    #print(item["DetectTime"])
+                    #item_time = datetime.strptime(item["DetectTime"], "%Y-%m-%dT%H:%M:%SZ")
+                    delta = event_time - item["DetectTime"]
+                    if delta.total_seconds() < window and item["Category"] == event["Category"]:
+                        item["FlowCount"] += event["FlowCount"]
+                        item["Count"] += 1
+                        #print(len(aggregate))
+                        inserted = True
+                        break
+                if not inserted:
+                    aggregate.append({
+                        "Category" : event["Category"],
+                        "DetectTime" : roundTime(event_time, window),
+                        "FlowCount" : 0,
+                        "Count" : 1
+                    })
+
+            tmp = aggregate
+
+        #    query = { "DetectTime" : {"$gt" : req["begintime"]}}
+        #    res = list(db.collection.find(query))
             #for item in res
     return(json.dumps(tmp, default=json_util.default))
 
 @app.route(C['events'] + 'time', methods=['GET'])
 def timeagg():
+    #2016-02-01T07:40:21Z
     query = [{
         "$group": {
             "_id": {
-                "year": { "$year": "$DetectTime" },
-                "dayOfYear": { "$dayOfYear": "$DetectTime" },
+                "year": { "$substr": ["$DetectTime", 0, 4 ]},
+                "dayOfYear": { "$substr": ["$DetectTime", 8, 2] },
                 "interval": {
                     "$subtract": [ 
-                        { "$minute": "$DetectTime" },
-                        { "$mod": [{ "$minute": "$DetectTime", 15 }] }
+                        { "$substr": ["$DetectTime",16,2]},
+                        { "$mod": [{ "$substr": ["$DetectTime", 16,2]}, 15 ] }
                     ]
                 }
-            }},
-        "count": { "$sum": 1 }
+            },
+            "count": { "$sum": 1 }
+        },
         }]
+    res = list(db.collection.find({"DetectTime" : {"$gt" : "2016-01-31T22:40:21Z"}}))
+    aggregate = [
+        {
+            "DetectTime" : roundTime(datetime.strptime(res[0]["DetectTime"], "%Y-%m-%dT%H:%M:%SZ"), 1800),
+            "Category" : res[0]["Category"],
+            "FlowCount" : 0,
+            "Count" : 1
+        }
+    ]
 
-    res = list(db.collection.aggregate(query))
-    return(str(res))
+    for event in res[1:]:
+        # Check if it is in time window
+        # We want it to be between whole our or 30 minutes
+        inserted = False
+        event_time = datetime.strptime(event["DetectTime"], "%Y-%m-%dT%H:%M:%SZ") 
+        
+        for item in aggregate:
+            #print(item["DetectTime"])
+            #item_time = datetime.strptime(item["DetectTime"], "%Y-%m-%dT%H:%M:%SZ")
+            delta = event_time - item["DetectTime"]
+            if delta.total_seconds() < 1800 and item["Category"] == event["Category"]:
+                item["FlowCount"] += event["FlowCount"]
+                item["Count"] += 1
+                #print(len(aggregate))
+                inserted = True
+                break
+        if not inserted:
+            aggregate.append({
+                "Category" : event["Category"],
+                "DetectTime" : roundTime(event_time, 1800),
+                "FlowCount" : 0,
+                "Count" : 1
+            })
+
+    return(json.dumps(aggregate, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
