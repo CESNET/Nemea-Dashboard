@@ -120,11 +120,6 @@ app.debug = C['debug']
 
 CORS(app)
 
-#@app.route(C['base'] + '/<int:limit>')
-def home(limit):
-    res = db.get_event("portscan_h", limit)
-    return(str(res))
-
 @app.route(C['events'] + 'indexes', methods=['GET'])
 def indexes():
     indexes = db.collection.index_information()
@@ -198,7 +193,7 @@ def aggregate():
             res = list(db.collection.find({"DetectTime" : {"$gt" : req["begintime"]}}))
             aggregate = [
                 {
-                    "DetectTime" : roundTime(datetime.strptime(res[0]["DetectTime"], "%Y-%m-%dT%H:%M:%SZ"), window),
+                    "DetectTime" : roundTime(res[0]["DetectTime"]), window),
                     "Category" : res[0]["Category"],
                     "FlowCount" : 0,
                     "Count" : 1
@@ -209,7 +204,7 @@ def aggregate():
                 # Check if it is in time window
                 # We want it to be between whole our or 30 minutes
                 inserted = False
-                event_time = datetime.strptime(event["DetectTime"], "%Y-%m-%dT%H:%M:%SZ") 
+                event_time = event["DetectTime"] 
                 
                 for item in aggregate:
                     #print(item["DetectTime"])
