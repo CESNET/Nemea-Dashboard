@@ -341,6 +341,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
     timeShift();
 
+    $scope.loading = true;
         
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -379,7 +380,6 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
                     var inserted = 0;
                     var item = data[i];
-                    console.log(item)
                     for (var j = 0; j < $scope.box.data.length; j++) {
                         var serie = $scope.box.data[j];
                         
@@ -417,6 +417,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
         //$scope.box.config["type"] = "areachart";
         $scope.box.config.type = $scope.box.type;
         $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+            $scope.loading = false;
     //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
             if ($scope.box.type == "barchart") {
                 $scope.box.options = AREA.options;
@@ -425,7 +426,6 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
                     var inserted = 0;
                     var item = data[i];
-                    console.log(item)
                     for (var j = 0; j < $scope.box.data.length; j++) {
                         var serie = $scope.box.data[j];
                         
