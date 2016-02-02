@@ -19,7 +19,15 @@ app.constant('PIECHART', {
                     bottom: 5,
                     left: 0
                 }
-            }
+            },
+pie : {
+            dispatch: {
+                //chartClick: function(e) {console.log(e)},
+                elementClick: function(e) {console.log(e)},
+                //elementDblClick: function(e) {console.log("element double click")},
+                //elementMouseover: function(e) {console.log("element mouseover")},
+                //elementMouseout: function(e) {console.log("element mouse out")}            
+            },}
         }
     }
 });
@@ -28,7 +36,7 @@ app.constant('PIECHART', {
 app.constant('AREA', {
     options : {
         chart: {
-            type: 'stackedAreaChart',
+            type: 'multiBarChart',
             height: 500,
             margin : {
                 top: 20,
@@ -36,8 +44,8 @@ app.constant('AREA', {
                 bottom: 30,
                 left: 40
             },
-            x: function(d){return d.x;},
-            y: function(d){return d.y;},
+            x: function(d) { return d.x },
+            y: function(d) { return d.Count },
             useVoronoi: false,
             clipEdge: true,
             duration: 100,
@@ -45,22 +53,34 @@ app.constant('AREA', {
             xAxis: {
                 showMaxMin: false,
                 tickFormat: function(d) {
-                    return d3.time.format('%x')(new Date(d))
+                    return d3.time.format('%X')(new Date(d))
                 }
             },
             yAxis: {
-                tickFormat: function(d){
-                    return d3.format(',.2f')(d);
-                }
+                //tickFormat: function(d){
+                //    return d3.format(',.2f')(d);
+               // }
             },
             zoom: {
                 enabled: true,
-                scaleExtent: [1, 10],
+                //scaleExtent: [1, 10],
                 useFixedDomain: false,
                 useNiceScale: false,
                 horizontalOff: false,
                 verticalOff: true,
                 unzoomEventType: 'dblclick.zoom'
+            }, 
+            dispatch: {
+                stateChange: function(e){ console.log("stateChange"); },
+                changeState: function(e){ console.log("changeState"); },
+                tooltipShow: function(e){ console.log("tooltipShow"); },
+                tooltipHide: function(e){ console.log("tooltipHide"); }
+            },
+            multibar: {
+                dispatch : {
+                    elementClick: function(e) {console.log(e)},
+
+                }
             }
         }
     }

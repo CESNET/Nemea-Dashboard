@@ -8,17 +8,25 @@ app.value('boxes_arr', [
         "type"    : "piechart",
         "content" : "",
         "config"  : {
-            "metric" : "category",
-            "period" : "24",
+            "metric"    : "category",
+            "type"      : "piechart",
+            "period"    : "24",
             "begintime" : ""
         }
       },
       {
         "title"   : "10 TOP SCANPORTS",
-        "type"    : "graph",
+        "type"    : "barchart",
         "data"    : "",
         "timestamp": "",
-        "options" : { 
+        "config" : {
+            "metric" : "category",
+            "type" : "barchart",
+            "period" : 24,
+            "window" : 60,
+            "begintime" : ""
+        }
+        /*"options" : { 
             chart: {
                 type: 'multiBarChart',
                 height: 300,
@@ -55,16 +63,12 @@ app.value('boxes_arr', [
                 enable: true,
                 text: 'Title for Line Chart 2'
             },
-          }
+          }*/
       },
       // {
       //   "title": "three",
       //   "type"    : "incident"
       // },
-      {
-        "title": "four",
-        "type"    : "incident"
-      }
     ]
   },
   { 
@@ -322,10 +326,10 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA){
     
     function timeShift() {    
-        if ($scope.box != undefined && $scope.box.type == "piechart") {
+        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" )) {
             $scope.box.config.begintime = (function() {
                 var now = new Date();
                 now.setHours(now.getHours() - $scope.box.config.period);
@@ -337,6 +341,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
     timeShift();
 
+    $scope.loading = true;
         
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -364,15 +369,39 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
     // Save changes and disable edit mode
     $scope.save = function() {
         $scope.backupModel = {};
-        $log.info("Edit is done");
-        $log.info(JSON.stringify($scope.box));
+        $scope.box.config.type = $scope.box.type;
         $scope.editMode = false;
         timeShift();
         $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
-    //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
-            console.log(data);
-            $scope.box.data = data;
-    });
+            if ($scope.box.type == "barchart") {
+                $scope.box.options = AREA.options;
+                $scope.box.data = []
+                for(var i = 0; i < data.length; i++ ) {
+
+                    var inserted = 0;
+                    var item = data[i];
+                    for (var j = 0; j < $scope.box.data.length; j++) {
+                        var serie = $scope.box.data[j];
+                        
+                        if (serie.key == item.Category[0]) {
+                            serie.values.push({ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count});
+                            inserted = 1;
+                            break;
+                        }
+                    }
+
+                    if (inserted == 0) {
+                        $scope.box.data.push({
+                            "key" : item.Category[0],
+                            "values" : [{ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count}]
+                        });
+                    }
+                }
+
+            } else {
+                $scope.box.data = data;
+            }
+        });
  
     }
 
@@ -383,18 +412,45 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
         $scope.editMode = false;
     }
     
-    console.log($scope.box)
-
-    if ($scope.box != undefined && $scope.box.type == "piechart") {
+    if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart")) {
         $scope.box.options = PIECHART.options;
-        $scope.box.config["type"] = "areachart";
-        $log.info(JSON.stringify($scope.box.config));
+        //$scope.box.config["type"] = "areachart";
+        $scope.box.config.type = $scope.box.type;
         $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+            $scope.loading = false;
     //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
-            console.log(data);
-            $scope.box.data = data;
+            if ($scope.box.type == "barchart") {
+                $scope.box.options = AREA.options;
+                $scope.box.data = []
+                for(var i = 0; i < data.length; i++ ) {
+
+                    var inserted = 0;
+                    var item = data[i];
+                    for (var j = 0; j < $scope.box.data.length; j++) {
+                        var serie = $scope.box.data[j];
+                        
+                        if (serie.key == item.Category[0]) {
+                            serie.values.push({ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count});
+                            inserted = 1;
+                            break;
+                        }
+                    }
+
+                    if (inserted == 0) {
+                        $scope.box.data.push({
+                            "key" : item.Category[0],
+                            "values" : [{ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count}]
+                        });
+                    }
+                }
+
+            } else {
+                $scope.box.data = data;
+            }
         });
     }
+
+    
 
 
   //Add element to given row
