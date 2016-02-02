@@ -143,11 +143,23 @@ def get_last(items):
             return("You cannot dump the whole DB!")
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
+        #print(data)
         if data["limit"] != 0:
-            query = {  "DetectTime" : { "$lt" : data["to"]}, "DetectTime" : { "$gt" : data["from"]} } 
+            query = {  
+                "DetectTime" : { 
+                    "$lt" : datetime.strptime(data["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                }, 
+                "DetectTime" : { 
+                    "$gt" : datetime.strptime(data["from"],"%Y-%m-%dT%H:%M:%S.%fZ")
+                } 
+            } 
             print(query)
-            docs = list(db.collection.find({ "$and" : [{"DetectTime" : { "$gt" : data["from"]}}, {"DetectTime" : { "$lt" : data["to"]}}] }).sort( [( "DetectTime", -1)] ).limit(int(data["limit"])))
+            docs = list(db.collection.find({ 
+                "$and" : [
+                    { "DetectTime" : { "$gt" : datetime.strptime(data["from"],"%Y-%m-%dT%H:%M:%S.%fZ") } }, 
+                    { "DetectTime" : { "$lt" : datetime.strptime(data["to"], "%Y-%m-%dT%H:%M:%S.%fZ") } }
+                    ] 
+                }).sort( [( "DetectTime", -1)] ).limit(int(data["limit"])))
         
 #temp = db.parse_doc(docs)
 
@@ -164,7 +176,7 @@ def aggregate():
                 {
                     "$match" : {
                         "DetectTime" : {
-                            "$gt" : req["begintime"]
+                            "$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")
                         }
                     }
                 },
@@ -186,11 +198,11 @@ def aggregate():
                     "x" : item["count"]
                 })
         if req['type'] == "barchart":
-            print("areachart here")
+            #print("areachart here")
 
             window = req['window'] * 60
 
-            res = list(db.collection.find({"DetectTime" : {"$gt" : req["begintime"]}}))
+            res = list(db.collection.find({"DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}}))
             aggregate = [
                 {
                     "DetectTime" : roundTime(res[0]["DetectTime"], window),
