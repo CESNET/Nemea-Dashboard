@@ -193,7 +193,7 @@ def aggregate():
             res = list(db.collection.find({"DetectTime" : {"$gt" : req["begintime"]}}))
             aggregate = [
                 {
-                    "DetectTime" : roundTime(res[0]["DetectTime"]), window),
+                    "DetectTime" : roundTime(res[0]["DetectTime"], window),
                     "Category" : res[0]["Category"],
                     "FlowCount" : 0,
                     "Count" : 1
