@@ -41,10 +41,13 @@
 			</div> -->
 
 			    <h2 ng-if="!editMode">{{box.title}}</h2>
-                <div ng-if="loading == true" flex class="loading">
-                    <img src="img/loading.gif" alt="Loading">
+                <div ng-if="loading == true" class="loading" layout-align="center center" layout="row">
+                    <!--img src="img/loading.gif" alt="Loading">
                     <br>
-                    Loading...
+                    Loading...-->
+                    <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
+                    <br>
+                    Fetching data
                 </div>
                 <nvd3 ng-if="box.type != ''" options="box.options" api="api" showYAxis="true"
 	                tooltips="true"
