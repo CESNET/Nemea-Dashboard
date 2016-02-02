@@ -1,4 +1,4 @@
-app.controller('eventsController', function($scope, $http) {
+app.controller('eventsController', function($scope, $http, $mdToast) {
     $scope.filter = {
         "category" : "",
         "proto" : "",
@@ -47,6 +47,12 @@ app.controller('eventsController', function($scope, $http) {
             
 			$scope.data = data;
             $scope.filter.btn = "Done"
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent('Date loaded!')
+                    .position("top right")
+                    .hideDelay(3000)
+                );
 	    });
     }
 
