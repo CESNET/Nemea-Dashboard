@@ -198,50 +198,64 @@ def aggregate():
                     "x" : item["count"]
                 })
         if req['type'] == "barchart":
-            #print("areachart here")
-
-            window = req['window'] * 60
-
-            res = list(db.collection.find({"DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}}))
-            aggregate = [
+            time = datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            query = [
                 {
-                    "DetectTime" : roundTime(res[0]["DetectTime"], window),
-                    "Category" : res[0]["Category"],
-                    "FlowCount" : 0,
-                    "Count" : 1
+                    "$match" : {
+                        "DetectTime" : { "$gte" : time }
+                    }
+                },
+                {
+                    "$project" : {
+                        "_id" : 0,
+                        "res" : {
+                            "$subtract": [ 
+                                "$DetectTime",
+                                { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
+                            ]
+                        },
+                         "Time" : "$DetectTime",
+                         "Category" : "$Category",
+                         "FlowCount" : "$FlowCount"
+                    }
+                },
+                {
+                    "$group" : {
+                        "_id" : {
+                            "DetectTime" : "$res",
+                            "Category" : "$Category"
+                        },
+                        "Count" : {"$sum" : 1},
+                        "FlowCount" : {"$sum" : "$FlowCount"}
+                    }
+                },
+                {
+                    "$sort" : { "_id.DetectTime" : 1, "_id.Category" : 1 }
                 }
             ]
-
-            for event in res[1:]:
-                # Check if it is in time window
-                # We want it to be between whole our or 30 minutes
+            res = list(db.collection.aggregate(query))
+            data = list()
+            for item in res:
                 inserted = False
-                event_time = event["DetectTime"] 
-                
-                for item in aggregate:
-                    #print(item["DetectTime"])
-                    #item_time = datetime.strptime(item["DetectTime"], "%Y-%m-%dT%H:%M:%SZ")
-                    delta = event_time - item["DetectTime"]
-                    if delta.total_seconds() < window and item["Category"] == event["Category"]:
-                        item["FlowCount"] += event["FlowCount"]
-                        item["Count"] += 1
-                        #print(len(aggregate))
+                for serie in data:
+                    if serie['key'] == item['_id']['Category'][0]:
+                        serie['values'].append({'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 'FlowCount' : item['FlowCount'], 'Count' : item['Count']})
                         inserted = True
                         break
+
                 if not inserted:
-                    aggregate.append({
-                        "Category" : event["Category"],
-                        "DetectTime" : roundTime(event_time, window),
-                        "FlowCount" : 0,
-                        "Count" : 1
-                    })
+                    data.append({
+                            'key' : item['_id']['Category'][0], 
+                            'values' : [{
+                                'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
+                                'FlowCount' : item['FlowCount'], 
+                                'Count' : item['Count']
+                            }]
+                        })
+            tmp = data
 
-            tmp = aggregate
 
-        #    query = { "DetectTime" : {"$gt" : req["begintime"]}}
-        #    res = list(db.collection.find(query))
-            #for item in res
-    return(json.dumps(tmp, default=json_util.default))
+    return(json_util.dumps(tmp))
 
 @app.route(C['events'] + 'time', methods=['GET'])
 def timeagg():
@@ -296,6 +310,14 @@ def timeagg():
             })
 
     return(json.dumps(aggregate, default=json_util.default))
+
+@app.route(C['events'] + 'test', methods=['POST'])
+def agg():
+    if request.method == 'POST':
+        params = request.get_json()
+        #{"type": "barchart", "period": 24, "metric": "category", "window": 60, "begintime": "2016-02-03T08:49:53.016Z"}
+                #print(len(res))
+    return(json.dumps(res, default=json_util.default))
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
