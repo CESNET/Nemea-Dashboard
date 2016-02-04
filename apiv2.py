@@ -7,6 +7,7 @@ import json
 import sys
 from datetime import date, datetime, timedelta
 from bson import json_util
+from bson.objectid import ObjectId
 from time import mktime
 
 config = Config()
@@ -52,6 +53,7 @@ class dbConnector(object):
     eventsCollection = C["db"]["collection"]["events"]
     usersCollection = C["db"]["collection"]["users"]
     collection = None
+    users = None
     db = None
     socket = None
 
@@ -79,6 +81,7 @@ class dbConnector(object):
             self.socket.server_info()
             self.db = self.socket[self.dbName]
             self.collection = self.db[self.eventsCollection]
+            self.users = self.db[self.usersCollection]
 
         # Small trick to catch exception for unavailable database
         except pymongo.errors.ServerSelectionTimeoutError as err:
@@ -256,6 +259,21 @@ def aggregate():
 
 
     return(json_util.dumps(tmp))
+
+@app.route(C['users'], methods=['GET', 'PUT'])
+def get_users():
+    if request.method == 'GET':
+        res = list(db.users.find())
+
+    if request.method == 'PUT':
+        print('updating a user')
+        user = request.get_json()
+        
+        res = db.users.find_one_and_update({'_id' : ObjectId(user['id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
+        print(user)
+    return(json_util.dumps(res))
+
+
 
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
