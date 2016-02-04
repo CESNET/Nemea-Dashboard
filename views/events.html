@@ -58,7 +58,7 @@
         </div>
         <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex>
             <div layout="row" flex>
-                <div flex>{{ item.DetectTime}}</div>
+                <div flex>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
                 <div flex>{{ item.Category[0] }}</div>
                 <div flex>{{ item.Source[0].Proto[0] }} | {{ item.Source[0].IP4[0] }}</div>
                 <div flex>{{ item.Description }}</div>
@@ -73,7 +73,11 @@
             <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex>
                 <div>{{ item | json }}</div>
             </div>                                <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
+            <div layout="row" flex ng-if="$last">
+                Load next 100 items {{ item.DetectTime }}
+            </div>
         </div>
+        
     </div>
         
 

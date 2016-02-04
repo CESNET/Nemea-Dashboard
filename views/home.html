@@ -49,7 +49,7 @@
                     <br>
                     Fetching data
                 </div>
-                <nvd3 ng-if="box.type != ''" options="box.options" api="api" showYAxis="true"
+                <nvd3 options="box.options" api="api" showYAxis="true"
 	                tooltips="true"
 	                interactive="true" 
 	                data="box.data"
@@ -58,8 +58,8 @@
                     config="{refreshDataOnly: true, deepWatchData : true}" >
                 </nvd3>
 
-
-{{ box.config }}
+                <h3 ng-if="total > 0">{{ total | number}}</h3>
+                <md-button ng-click='user()'>User</md-button>
                 <div ng-if="editMode"> 
                 
                     <md-input-container>
@@ -69,15 +69,15 @@
                    </br> 
                     <md-input-container>
                         <label>Type of view</label>
-                        <md-select ng-model="box.type">
-                            <md-optgroup label="Types">
-                                <md-option ng-value="type" ng-repeat="type in types track by $index">{{type}}</md-option>
-                            </md-optgroup>
+                        <md-select ng-model="box.type" >
+                            <!--md-optgroup label="Types"-->
+                                <md-option ng-value="type" ng-repeat="type in types">{{type}}</md-option>
+                            <!--/md-optgroup-->
                         </md-select>
                     </md-input-container>
                     
                     
-                    <md-input-container ng-if="box.type == 'piechart'">
+                    <md-input-container ng-if="box.type == 'piechart' || box.type == 'barchart'">
                         <label>Metric</label>
                         <md-select ng-model="box.config.metric">
                             <md-optgroup label="Metric">
@@ -100,6 +100,12 @@
                         <label>Period</label>
                         <input ng-model="box.config.period">
                     </md-input-container>
+                    
+                    <md-input-container ng-if="box.type == 'barchart'">
+                        <label>Sampling</label>
+                        <input ng-model="box.config.window">
+                    </md-input-container>
+
 
                 </div>
                 <div class="actionBtn" ng-if="editMode">
