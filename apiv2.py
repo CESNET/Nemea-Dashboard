@@ -257,68 +257,6 @@ def aggregate():
 
     return(json_util.dumps(tmp))
 
-@app.route(C['events'] + 'time', methods=['GET'])
-def timeagg():
-    #2016-02-01T07:40:21Z
-    query = [{
-        "$group": {
-            "_id": {
-                "year": { "$substr": ["$DetectTime", 0, 4 ]},
-                "dayOfYear": { "$substr": ["$DetectTime", 8, 2] },
-                "interval": {
-                    "$subtract": [ 
-                        { "$substr": ["$DetectTime",16,2]},
-                        { "$mod": [{ "$substr": ["$DetectTime", 16,2]}, 15 ] }
-                    ]
-                }
-            },
-            "count": { "$sum": 1 }
-        },
-        }]
-    res = list(db.collection.find({"DetectTime" : {"$gt" : "2016-01-31T22:40:21Z"}}))
-    aggregate = [
-        {
-            "DetectTime" : roundTime(datetime.strptime(res[0]["DetectTime"], "%Y-%m-%dT%H:%M:%SZ"), 1800),
-            "Category" : res[0]["Category"],
-            "FlowCount" : 0,
-            "Count" : 1
-        }
-    ]
-
-    for event in res[1:]:
-        # Check if it is in time window
-        # We want it to be between whole our or 30 minutes
-        inserted = False
-        event_time = datetime.strptime(event["DetectTime"], "%Y-%m-%dT%H:%M:%SZ") 
-        
-        for item in aggregate:
-            #print(item["DetectTime"])
-            #item_time = datetime.strptime(item["DetectTime"], "%Y-%m-%dT%H:%M:%SZ")
-            delta = event_time - item["DetectTime"]
-            if delta.total_seconds() < 1800 and item["Category"] == event["Category"]:
-                item["FlowCount"] += event["FlowCount"]
-                item["Count"] += 1
-                #print(len(aggregate))
-                inserted = True
-                break
-        if not inserted:
-            aggregate.append({
-                "Category" : event["Category"],
-                "DetectTime" : roundTime(event_time, 1800),
-                "FlowCount" : 0,
-                "Count" : 1
-            })
-
-    return(json.dumps(aggregate, default=json_util.default))
-
-@app.route(C['events'] + 'test', methods=['POST'])
-def agg():
-    if request.method == 'POST':
-        params = request.get_json()
-        #{"type": "barchart", "period": 24, "metric": "category", "window": 60, "begintime": "2016-02-03T08:49:53.016Z"}
-                #print(len(res))
-    return(json.dumps(res, default=json_util.default))
-
 @app.route('/events/type/<event_type>/')
 def get_event_item(event_type):
 
