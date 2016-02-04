@@ -4,7 +4,7 @@ app.value('boxes_arr', [
     "height" : "",
     "items" : [
       {
-        "title"   : "one",
+        "title"   : "Events shares",
         "type"    : "piechart",
         "content" : "",
         "config"  : {
@@ -15,7 +15,7 @@ app.value('boxes_arr', [
         }
       },
       {
-        "title"   : "10 TOP SCANPORTS",
+        "title"   : "Last 24 hours",
         "type"    : "barchart",
         "data"    : "",
         "timestamp": "",
@@ -23,7 +23,7 @@ app.value('boxes_arr', [
             "metric" : "category",
             "type" : "barchart",
             "period" : 24,
-            "window" : 60,
+            "window" : 15,
             "begintime" : ""
         }
         /*"options" : { 
@@ -326,7 +326,7 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA){
     
     function timeShift() {    
         if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" )) {
@@ -368,41 +368,19 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
 
     // Save changes and disable edit mode
     $scope.save = function() {
-        $scope.backupModel = {};
+        if ($scope.box.type == 'piechart')
+            $scope.box.options = PIECHART.options;
+        if ($scope.box.type == 'barchart')
+            $scope.box.options = AREA.options;$scope.backupModel = {};
         $scope.box.config.type = $scope.box.type;
         $scope.editMode = false;
+        $scope.loading = true;
         timeShift();
         $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
-            if ($scope.box.type == "barchart") {
-                $scope.box.options = AREA.options;
-                $scope.box.data = []
-                for(var i = 0; i < data.length; i++ ) {
-
-                    var inserted = 0;
-                    var item = data[i];
-                    for (var j = 0; j < $scope.box.data.length; j++) {
-                        var serie = $scope.box.data[j];
-                        
-                        if (serie.key == item.Category[0]) {
-                            serie.values.push({ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count});
-                            inserted = 1;
-                            break;
-                        }
-                    }
-
-                    if (inserted == 0) {
-                        $scope.box.data.push({
-                            "key" : item.Category[0],
-                            "values" : [{ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count}]
-                        });
-                    }
-                }
-
-            } else {
-                $scope.box.data = data;
-            }
+            $scope.loading = false;    
+            $scope.box.data = data;
+            $scope.api.updateWithTimeout(5);        
         });
- 
     }
 
     // Revert to original and disable edit mode
@@ -411,43 +389,53 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
         $scope.backupModel = {};
         $scope.editMode = false;
     }
+    $scope.total = 0;
     
     if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart")) {
-        $scope.box.options = PIECHART.options;
-        //$scope.box.config["type"] = "areachart";
+        if ($scope.box.type == 'piechart')
+            $scope.box.options = PIECHART.options;
+        if ($scope.box.type == 'barchart')
+            $scope.box.options = AREA.options;
+       
         $scope.box.config.type = $scope.box.type;
+        
         $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
             $scope.loading = false;
-    //$http.post('http://pcstehlik.fit.vutbr.cz:5555/v2/events/agg', $scope.box.config).success(function(data) {
-            if ($scope.box.type == "barchart") {
-                $scope.box.options = AREA.options;
-                $scope.box.data = []
-                for(var i = 0; i < data.length; i++ ) {
-
-                    var inserted = 0;
-                    var item = data[i];
-                    for (var j = 0; j < $scope.box.data.length; j++) {
-                        var serie = $scope.box.data[j];
-                        
-                        if (serie.key == item.Category[0]) {
-                            serie.values.push({ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count});
-                            inserted = 1;
-                            break;
-                        }
-                    }
-
-                    if (inserted == 0) {
-                        $scope.box.data.push({
-                            "key" : item.Category[0],
-                            "values" : [{ x : item.DetectTime["$date"], FlowCount : item.FlowCount, Count : item.Count}]
-                        });
-                    }
+            $scope.box.data = data;
+            if ($scope.box.type == 'piechart') {
+                console.log($scope.box.data)
+                for(var i = 0; i < $scope.box.data.length; i++) {
+                    console.log($scope.box.data[i].x)
+                    $scope.total = $scope.total + Number($scope.box.data[i].x);
                 }
-
-            } else {
-                $scope.box.data = data;
             }
         });
+        //}
+    }
+
+
+    $scope.user = function() {
+        var settings = angular.copy($scope.boxes_arr);
+        console.log(settings);
+        for (var i = 0; i < settings.length; i++) {
+            for (var j = 0; j < settings[i].items.length; j++) {
+                settings[i].items[j].data = [];
+                console.log(settings[i].items[j].data);
+            }
+        }
+        
+        var query = {
+            'id' : '56b33e737194ed8d440db2b7',
+            'password' : 'password',
+            'settings' : settings
+        }
+        $http.put('http://benefizio.liberouter.org:5555/v2/users/', JSON.stringify(query))
+            .success(function(data) {
+                console.log(data);
+            })
+            .error(function(data){
+                $log.error(data)
+            })
     }
 
     
@@ -457,9 +445,13 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $ele
     $scope.addElem = function(index) {
         $log.info("adding element");
 
-        var item = {};
+        var item = {
+            title : 'New widget',
+            config : {}
 
+        };
         $scope.full = false;
+
 
     if (boxes_arr[index].items.length > 5) {
       $scope.full = true;
