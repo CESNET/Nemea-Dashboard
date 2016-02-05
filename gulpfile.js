@@ -25,5 +25,5 @@ gulp.task('scss', function() {
 
 gulp.task('watch', ['js', 'scss'], function () {
     gulp.watch('js/**/*.js', ['js'])
-    gulp.watch('scss/**/*.js', ['scss'])
+    gulp.watch('scss/**/*.scss', ['scss'])
 })
