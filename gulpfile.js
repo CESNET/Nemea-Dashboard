@@ -6,9 +6,9 @@ var ngAnnotate = require('gulp-ng-annotate')
 var sass = require('gulp-sass')
 
 gulp.task('js', function () {
-gulp.src(['js/**/*.js'])
+gulp.src(['js/**/*.js', '!js/**/*.min.js'])
     .pipe(sourcemaps.init())
-    .pipe(concat('app.min.js'))
+    .pipe(concat('js/app.min.js'))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(sourcemaps.write())
