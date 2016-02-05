@@ -1,14 +1,8 @@
-var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'LocalStorageModule']);
+var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage']);
 
 app.config(config);
 
-//var db = new PouchDB('http://localhost:5984/users');
-
-// db.info().then(function (info) {
-//   console.log(info);
-// })
-
-function config($routeProvider, $locationProvider, localStorageServiceProvider, $mdThemingProvider) {
+function config($routeProvider, $mdThemingProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',

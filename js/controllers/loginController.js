@@ -1,4 +1,4 @@
-app.controller('loginController', function($scope, $location, $log, loginAuth, $rootScope, localStorageService) {
+app.controller('loginController', function($scope, $location, $log, loginAuth, $rootScope) {
 	$scope.title = "Login!";
 	$scope.loginBtn = "Login";
     
@@ -11,7 +11,7 @@ app.controller('loginController', function($scope, $location, $log, loginAuth, $
 
 		$scope.loginBtn = "Please wait...";
 		
-		loginAuth.fetchUser(user)
+		/*loginAuth.fetchUser(user)
 		.success(function(data) {
 
 			$log.info(data);
@@ -30,6 +30,6 @@ app.controller('loginController', function($scope, $location, $log, loginAuth, $
 				loginCorrect = false;
 				localStorageService.set('loggedIn', false);	
 			}
-		});
+		});*/
 	};
 });
