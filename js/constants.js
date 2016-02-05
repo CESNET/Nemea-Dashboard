@@ -9,7 +9,7 @@ app.constant('AUTH_EVENTS', {
 
 app.constant('CATEGORIES', [ "Recon.Scanning", "Attempt.Login", "Availability.DoS" ]);
 app.constant('PROTOCOLS', [ "tcp", "dns", "udp" ]);
-app.constant('TYPES', ["barchart", "piechart"])
+app.constant('TYPES', ["barchart", "piechart", "top"])
 
 app.constant('PIECHART', { 
     options: {
