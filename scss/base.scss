@@ -234,3 +234,11 @@ md-toolbar:not(.md-menu-toolbar) {
         display: block;
     }
 }
+
+
+.md-success-toast-theme {
+    .md-toast-content {
+    //    background: $white;
+    //    color: $black;
+    }
+}
