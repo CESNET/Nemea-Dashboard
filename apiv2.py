@@ -260,6 +260,25 @@ def aggregate():
 
     return(json_util.dumps(tmp))
 
+@app.route(C['events'] + 'top', methods=['POST'])
+def top():
+    if request.method == 'POST':
+        req = request.get_json()
+        query = [
+            {
+                '$match' : {
+                    'DetectTime' : {'$gt' : datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")}
+                }
+            }, 
+            {
+                '$group' : {
+                    '_id' : '$Category', 
+                    'FlowCount' : { '$max' : '$FlowCount' }
+                }
+            }]
+        res = list(db.collection.aggregate(query))
+    return(json_util.dumps(res))
+
 @app.route(C['users'], methods=['GET', 'PUT'])
 def get_users():
     if request.method == 'GET':
