@@ -23,7 +23,7 @@ app.value('boxes_arr', [
             "metric" : "category",
             "type" : "barchart",
             "period" : 24,
-            "window" : 15,
+            "window" : 60,
             "begintime" : ""
         }
         /*"options" : { 
@@ -75,8 +75,12 @@ app.value('boxes_arr', [
     "row"   : 1,
     "items" : [
       {
-        "title" : "Last 1000 events",
-        "type"  : "graph",
+        "title" : "Top events in 1 hour",
+        "type"  : "top",
+        "config" : {
+            "period" : 1,
+            "begintime" : ""
+        },
         // "data"  : [
         //   { 'key' : 'PORTSCAN_H',
         //     'y': 687
@@ -158,69 +162,28 @@ app.controller('userController', function($scope){
   console.log("hello!");
 });
 
-app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http, $rootScope) {
-	$scope.boxes_arr = boxes_arr;
-  $scope.title = "Home sweet home";
-  
-  //Show/hide edit buttons on button click
-  //@default: hidden/false
-  $scope.$on('reqChangeMode', function(e) {
-    if ($scope.editMode == undefined) {
-      $scope.editMode = true;
-    } else {
-      $scope.editMode = !($scope.editMode);
-    }
-  });
+app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user) {
+	$scope.$storage = $localStorage.$default({
+        counter : 42,
+        //config : user.config()
+    });
 
-  /*var resp = $http.get('http://localhost:5000/events/type/portscan/last/100')
-        .success(function(response) {
-          $scope.data = response;
-          return processData(response)
-        })
-        .error(function(response) {
-          console.log(response);
-        });
 
-        console.log($scope.data);
-*/
-  /*api('type/portscan/top/10').success(function(data) {
-    var proccessed = processData(data);
-    //console.log(proccessed);
-    boxes_arr[0].items[1].data = proccessed;
-    //console.log(JSON.stringify(boxes_arr[0].items[1].data));
-  })
-
-  api('type/portscan/top/1').success(function(data) {
-    //var proccessed = processData(data);
-    //console.log(proccessed);
-    //boxes_arr[0].items[1].data = proccessed;
-    //console.log(JSON.stringify(data));
-  })
-
-  api('last/1000').success(function(data) {
-    boxes_arr[1].items[0].data = pieChart(data);
-    //console.log(pieChart(data));
-  })*/
-
+    $scope.boxes_arr = boxes_arr;
+    $scope.title = "Home sweet home";
   
 
-        //console.log(data);
-        //boxes_arr[0].items[1].data = data;
+    $scope.addRow = function() {
+        $log.info("adding row");
+        console.log(boxes_arr);
+        var tmp = {};
 
-
-  $scope.addRow = function() {
-    $log.info("adding row");
-    console.log(boxes_arr);
-    var tmp = {};
-
-    tmp.row = boxes_arr.length;
-    tmp.items = [{
-      "title" : "aloha!"
-    }];
-    boxes_arr.push(tmp);
-  };
-
-  $scope.showTitle = true;
+        tmp.row = boxes_arr.length;
+        tmp.items = [{
+            "title" : "aloha!"
+        }];
+        boxes_arr.push(tmp);
+    };
 
 });
 
@@ -326,10 +289,10 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api){
     
     function timeShift() {    
-        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" )) {
+        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' )) {
             $scope.box.config.begintime = (function() {
                 var now = new Date();
                 now.setHours(now.getHours() - $scope.box.config.period);
@@ -372,15 +335,30 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             $scope.box.options = PIECHART.options;
         if ($scope.box.type == 'barchart')
             $scope.box.options = AREA.options;$scope.backupModel = {};
+
         $scope.box.config.type = $scope.box.type;
+        
+        // Disable edit mode
         $scope.editMode = false;
+
+        // Show loading indicator
         $scope.loading = true;
+
+        // Shift time for query
         timeShift();
-        $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
-            $scope.loading = false;    
-            $scope.box.data = data;
-            $scope.api.updateWithTimeout(5);        
-        });
+
+        // Get required data
+        if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
+            api.post('agg', $scope.box.config, true).success(function(data) {
+                $scope.loading = false;    
+                $scope.box.data = data;
+            })
+        } else if ($scope.box.type == 'top') {
+            api.post('top', $scope.box.config, true).success(function(data) {
+                $scope.loading = false;    
+                $scope.box.data = data; 
+            })
+        }
     }
 
     // Revert to original and disable edit mode
@@ -390,6 +368,13 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         $scope.editMode = false;
     }
     $scope.total = 0;
+
+    $scope.top = function() {
+        timeShift()
+        api.post('top', $scope.box.config, true).success(function(data) {
+                console.log(data);
+                })
+    }
     
     if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart")) {
         if ($scope.box.type == 'piechart')
@@ -399,18 +384,18 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
        
         $scope.box.config.type = $scope.box.type;
         
-        $http.post('http://benefizio.liberouter.org:5555/v2/events/agg', JSON.stringify($scope.box.config)).success(function(data) {
+        api.post('agg', $scope.box.config).success(function(data) {
             $scope.loading = false;
             $scope.box.data = data;
+            
+            // Sum all events
             if ($scope.box.type == 'piechart') {
-                console.log($scope.box.data)
                 for(var i = 0; i < $scope.box.data.length; i++) {
                     console.log($scope.box.data[i].x)
                     $scope.total = $scope.total + Number($scope.box.data[i].x);
                 }
             }
         });
-        //}
     }
 
 

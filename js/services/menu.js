@@ -14,32 +14,95 @@ app.factory('jsondata', ['$http', function($http) {
 	//	.error(console.log('Cannot retrieve data'));
 }]);
 
-app.factory('api', ['$http', function($http) {
-	return function(url) {
-		/*$http.get('http://localhost:5000/events/' + url)
+app.service('api', ['$http', '$log', '$mdToast', function($http, $log, $mdToast) {
+
+	var addr = "http://benefizio.liberouter.org:5555/v2/events/";
+
+    this.get = function(url, info) {
+		return $http.get(addr + url)
 			.success(function(data) {
-				console.log(data);
-				response = data;
-				return response;
+                if (info != undefined) {
+                    $mdToast.show(
+                        $mdToast
+                            .simple()
+                            .textContent('Data successully loaded')
+                            .position("top right")
+                            .hideDelay(5000)
+                            .theme("success-toast")
+                    );
+                }
+
+				return data;
 			})
 			.error(function() {
-				console.log('Cannot fetch data');
+				$log.error('Cannot fetch data');
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent('Something went wrong')
+                        .position("top right")
+                        .hideDelay(5000)
+                        .theme("error-toast")
+                );
+
 			});
-		return response;*/
+    }
 
-		var addr = "http://pcstehlik.fit.vutbr.cz:5555/events/" + url
+    this.post = function(url, data, info) {
+        return $http.post(addr + url, JSON.stringify(data))
+            .success(function(data) {
+                if (info) {
+                    $mdToast.show(
+                        $mdToast
+                            .simple()
+                            .textContent('Data successfully loaded')
+                            .position("top right")
+                            .hideDelay(5000)
+                            .theme("success-toast")
+                    );
+                }
+                return data;        
+            })
+            .error(function() {
+            	$log.error('Cannot fetch data');
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent('Something went wrong')
+                        .position("top right")
+                        .hideDelay(5000)
+                        .theme("error-toast")
+                );
+            })
+    }
 
-		return $http.get(addr)
-			.success(function(data) {
-				//console.log(JSON.stringify(data));
-				return data;
-			});
+    this.put = function(url, data, info) {
+        return $http.put(addr + url, JSON.stringify(data))
+            .success(function(data) {
+                if (info) {
+                    $mdToast.show(
+                        $mdToast
+                            .simple()
+                            .textContent('Data successfully loaded')
+                            .position("top right")
+                            .hideDelay(5000)
+                            .theme("success-toast")
+                    );
+                }
+                return data;        
+            })
+            .error(function() {
+            	$log.error('Cannot fetch data');
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent('Something went wrong')
+                        .position("top right")
+                        .hideDelay(5000)
+                        .theme("error-toast")
+                );
+            })
+    }
 
-		//return $resource(addr, { query: { method: 'GET', isArray : false } } );
-	}
+//    this.put = function
 
-
-//	.error(console.log('Cannot retrieve data'));
 }]);
 
 app.directive("sidebarMenu", function() {
