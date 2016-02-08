@@ -63,7 +63,14 @@
                     config="{refreshDataOnly: true, deepWatchData : true}" >
                 </nvd3>
 
-                <div ng-if="box.type == 'top'">{{ box.data }}</div>
+                <div ng-if="box.type == 'top'" layout="column">
+                    {{ box.data }}
+                    <div ng-repeat="event in box.data" flex>
+                        {{ event._id }}
+                        {{ event.FlowCount | number}}
+                        <md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button>
+                    </div>
+                </div>
 
                 <h3 ng-if="total > 0">{{ total | number}}</h3>
                 <md-button ng-click='top()'>User</md-button>
