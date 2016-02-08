@@ -310,9 +310,9 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         originatorEv = ev;
         $mdOpenMenu(ev);
     };
+
     $scope.editMode = false;
     $scope.backupModel = {};
-
 
     $scope.protocol = PROTOCOLS;
     $scope.types = TYPES;
@@ -376,26 +376,33 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 })
     }
     
-    if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart")) {
-        if ($scope.box.type == 'piechart')
-            $scope.box.options = PIECHART.options;
-        if ($scope.box.type == 'barchart')
-            $scope.box.options = AREA.options;
-       
-        $scope.box.config.type = $scope.box.type;
-        
-        api.post('agg', $scope.box.config).success(function(data) {
-            $scope.loading = false;
-            $scope.box.data = data;
+    if ($scope.box != undefined) {
+        if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
+            if ($scope.box.type == 'piechart')
+                $scope.box.options = PIECHART.options;
+            if ($scope.box.type == 'barchart')
+                $scope.box.options = AREA.options;
+           
+            $scope.box.config.type = $scope.box.type;
             
-            // Sum all events
-            if ($scope.box.type == 'piechart') {
-                for(var i = 0; i < $scope.box.data.length; i++) {
-                    console.log($scope.box.data[i].x)
-                    $scope.total = $scope.total + Number($scope.box.data[i].x);
+            api.post('agg', $scope.box.config).success(function(data) {
+                $scope.loading = false;
+                $scope.box.data = data;
+                
+                // Sum all events
+                if ($scope.box.type == 'piechart') {
+                    for(var i = 0; i < $scope.box.data.length; i++) {
+                        console.log($scope.box.data[i].x)
+                        $scope.total = $scope.total + Number($scope.box.data[i].x);
+                    }
                 }
-            }
-        });
+            });
+        } else if ($scope.box.type == 'top') {
+            api.post('top', $scope.box.config).success(function(data) {
+                $scope.loading = false;
+                $scope.box.data = data;        
+            })
+        }
     }
 
 
