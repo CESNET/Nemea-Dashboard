@@ -29,6 +29,10 @@ function config($routeProvider, $mdThemingProvider) {
             controller : 'eventsController',
             templateUrl : 'views/events.html'
         })
+        .when('/events/:id', {
+            controller: 'eventController',
+            templateUrl : 'views/event.html'
+        })
 		.otherwise({
 			redirectTo: '/login'
 		});
