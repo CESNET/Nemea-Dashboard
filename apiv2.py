@@ -269,14 +269,31 @@ def top():
                 '$match' : {
                     'DetectTime' : {'$gt' : datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")}
                 }
-            }, 
+            },
+            {
+                '$sort' : {'FlowCount' : -1}
+            },
             {
                 '$group' : {
-                    '_id' : '$Category', 
-                    'FlowCount' : { '$max' : '$FlowCount' }
+                    '_id' : '$Category',
+                    'FlowCount' : { '$first' : '$FlowCount' },
+                    'id' : {'$first' : '$_id'}
                 }
+            },
+            {
+                '$unwind' : '$_id'
             }]
         res = list(db.collection.aggregate(query))
+    return(json_util.dumps(res))
+
+@app.route(C['events'] + 'id/<string:id>', methods=['GET'])
+def get_by_id(id):
+    if request.method == 'GET':
+        query = {
+            '_id' : ObjectId(id)
+        }
+        
+        res = db.collection.find_one(query)
     return(json_util.dumps(res))
 
 @app.route(C['users'], methods=['GET', 'PUT'])
