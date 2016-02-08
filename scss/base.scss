@@ -242,3 +242,21 @@ md-toolbar:not(.md-menu-toolbar) {
     //    color: $black;
     }
 }
+
+
+
+.event {
+    line-height: 1.4em;
+    em {
+        font-weight: bold;
+        font-style: normal;
+    }
+    .sub {
+        padding-left: 1em;
+    }
+
+    span {
+        font-family: 'Consolas', fixed-width;
+        font-size: 1.2em;
+    }
+}
