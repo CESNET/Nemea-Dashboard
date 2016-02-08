@@ -71,7 +71,7 @@
                 </div>
             </div>
             <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex>
-                <div>{{ item | json }}</div>
+                <div class="event" ng-bind-html="item | json2html"></div>
             </div>                                <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
             <div layout="row" flex ng-if="$last">
                 Load next 100 items {{ item.DetectTime }}
