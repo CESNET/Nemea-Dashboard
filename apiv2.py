@@ -10,6 +10,7 @@ from bson import json_util
 from bson.objectid import ObjectId
 from time import mktime
 
+# Load config.json
 config = Config()
 C = config.data
 
@@ -54,33 +55,39 @@ class dbConnector(object):
     usersCollection = C["db"]["collection"]["users"]
     collection = None
     users = None
+    events = None
     db = None
     socket = None
 
-    def __init__(self, host = None, port = None, db = None, collection = None, users = None):
+    def __init__(self, host = None, port = None, db = None, events = None, users = None):
 
         # Setup host and port for DB 
         if host != None and port != None:
             self.host = host
             self.port = port
         
-        # Set up database and events collection
-        if db != None and events != None:
+        # Set up database name
+        if db != None:
             self.dbName = db
+        
+        # Set up events collection
+        if events != None:
             self.eventsCollection = events
 
         # Set up users collection
         if users != None:
             self.usersCollection = users
 
-        # Connect to database and events collection 
+        # Connect to database and bind events and users collections 
         try:
             self.socket = pymongo.MongoClient(self.host, self.port, serverSelectionTimeoutMS=100)
+            
             # Try to print out server info
             # This raises ServerSelectionTimeoutError
             self.socket.server_info()
+            
             self.db = self.socket[self.dbName]
-            self.collection = self.db[self.eventsCollection]
+            self.collection = self.events = self.db[self.eventsCollection]
             self.users = self.db[self.usersCollection]
 
         # Small trick to catch exception for unavailable database
@@ -103,17 +110,6 @@ class dbConnector(object):
     def get_event_time(self, event_type, from_time, to_time):
         return(self.collection.find( {"type" : event_type.upper(), "time_first" : {"$gt" : from_time},  "time_first" : {"$lt" : to_time} } ).sort( [( "$natural", -1)] )).limit(10000)
 
-    def get_event_type(self, event_type):
-        if event_type == "portscan":
-            return "PORTSCAN_H"
-        elif event_type == "voipguess":
-            return "VOIP_PREFIX_GUESS"
-        elif event_type == "voipcall":
-            return "VOIP_CALL_DIFFERENT_COUNTRY"
-        elif event_type == "dnstunnel":
-            return "DNS_TUNNEL"
-        else:
-            return event_type
 #END db
 
 db = dbConnector()
@@ -121,8 +117,10 @@ db = dbConnector()
 app = Flask(__name__)
 app.debug = C['debug']
 
+# Enable Cross-Origin
 CORS(app)
 
+# Create indexes
 @app.route(C['events'] + 'indexes', methods=['GET'])
 def indexes():
     indexes = db.collection.index_information()
@@ -132,10 +130,17 @@ def indexes():
             return(json.dumps(indexes))
     db.collection.create_index([( "DetectTime", 1)])
     indexes = db.collection.index_information()
-#            mongo.collection.create_index([( "type", 1)])
-#            mongo.collection.create_index([( "time_first", 1), ("type", 1)])
     return(json.dumps(indexes))
 
+@app.route('/config', methods=['GET'])
+def get_config():
+    config = {
+        'events' : C['events'],
+        'users' : C['users'],
+        'host' : C['api']['host'],
+        'port' : C['api']['port']
+    }
+    return(json.dumps(config))
 
 @app.route(C['events'] + '<int:items>', methods=['GET', 'POST'])
 def get_last(items):
@@ -146,34 +151,20 @@ def get_last(items):
             return("You cannot dump the whole DB!")
     if request.method == 'POST':
         data = request.get_json()
-        #print(data)
         if data["limit"] != 0:
-            query = {  
-                "DetectTime" : { 
-                    "$lt" : datetime.strptime(data["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                }, 
-                "DetectTime" : { 
-                    "$gt" : datetime.strptime(data["from"],"%Y-%m-%dT%H:%M:%S.%fZ")
-                } 
-            } 
-            print(query)
             docs = list(db.collection.find({ 
                 "$and" : [
                     { "DetectTime" : { "$gt" : datetime.strptime(data["from"],"%Y-%m-%dT%H:%M:%S.%fZ") } }, 
                     { "DetectTime" : { "$lt" : datetime.strptime(data["to"], "%Y-%m-%dT%H:%M:%S.%fZ") } }
                     ] 
-                }).sort( [( "DetectTime", -1)] ).limit(int(data["limit"])))
+                }).sort( [( "DetectTime", 1)] ).limit(int(data["limit"])))
         
-#temp = db.parse_doc(docs)
-
     return (json.dumps(docs, default=json_util.default))
 
 @app.route(C['events'] + 'agg', methods=['POST'])
 def aggregate():
     if request.method == 'POST':
         req = request.get_json()
-        print(req)
-#db.alerts.aggregate([{$match : { "DetectTime" : { "$gt" : "2016-01-27T06:08:17.274Z"}}}, {$group : { _id : {"Categories" : "$Category"}, count : {$sum : 1}}}])
         if req['type'] == 'piechart':
             query = [
                 {
@@ -194,7 +185,6 @@ def aggregate():
             ]
             res = list(db.collection.aggregate(query))
             tmp = list()
-            print(res)
             for item in res:
                 tmp.append({
                     "key" : item["_id"]["Categories"],
@@ -253,8 +243,8 @@ def aggregate():
                                 'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
                                 'FlowCount' : item['FlowCount'], 
                                 'Count' : item['Count']
-                            }]
-                        })
+                            }] # values
+                        }) # data
             tmp = data
 
 
@@ -264,10 +254,13 @@ def aggregate():
 def top():
     if request.method == 'POST':
         req = request.get_json()
+
+        # Query date shifted by period set up in front-end
+        time = datetime.utcnow() - timedelta(hours=int(req['period']))
         query = [
             {
                 '$match' : {
-                    'DetectTime' : {'$gt' : datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")}
+                    'DetectTime' : {'$gt' : time}
                 }
             },
             {
@@ -277,7 +270,8 @@ def top():
                 '$group' : {
                     '_id' : '$Category',
                     'FlowCount' : { '$first' : '$FlowCount' },
-                    'id' : {'$first' : '$_id'}
+                    'id' : {'$first' : '$_id'},
+                    'DetectTime' : {'$first' : '$DetectTime'}
                 }
             },
             {
@@ -286,6 +280,7 @@ def top():
         res = list(db.collection.aggregate(query))
     return(json_util.dumps(res))
 
+# Fetch event with given ID
 @app.route(C['events'] + 'id/<string:id>', methods=['GET'])
 def get_by_id(id):
     if request.method == 'GET':
@@ -311,34 +306,10 @@ def get_users():
 
 
 
-@app.route('/events/type/<event_type>/')
-def get_event_item(event_type):
-
-    docs = db.get_event(mongo.get_event_type(event_type), 1)
-
-    return(db.parse_doc(docs))
-
-@app.route('/events/type/<event_type>/last/<int:limit>')
-def get_type(event_type, limit):
-    docs = db.get_event(db.get_event_type(event_type), limit)
-
-    return(db.parse_doc(docs))
-
-@app.route('/events/type/<event_type>/from/<int:from_time>/to/<int:to_time>')
-def get_type_time(event_type, from_time, to_time):
-    docs = db.get_event_time(db.get_event_type(event_type), from_time, to_time)
-
-    return(db.parse_doc(docs))
-
-@app.route('/events/type/<event_type>/top/<int:limit>')
-def get_top_events(event_type, limit):
-    docs = db.collection.find( {"type" : db.get_event_type(event_type).upper() } ).sort( [( "scale", -1)] ).limit(limit)
-
-    return(db.parse_doc(docs))
-
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5555)
+    # Start API as local server on given port
+    app.run(host="0.0.0.0", port=int(C['api']['port']))
 
 

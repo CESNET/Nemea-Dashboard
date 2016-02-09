@@ -12,7 +12,8 @@
 	},
 	"api": {
 		"version": "v2",
-        "port" : 5555
+        "port" : 5555,
+        "host" : "http://benefizio.liberouter.org"
 	},
 	"debug": true
 }
