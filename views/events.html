@@ -1,4 +1,4 @@
-<section layout="row">
+<section layout="row" class="wrapper">
     <sidebar-menu></sidebar-menu>
     
     <md-content flex layout="column" >
@@ -26,24 +26,31 @@
 
     <div class="table" layout="column" flex>
         <div class="head" layout="row" flex>
-            <div flex>Event Time</div>
-            <div flex>
+            <div flex=15>Event Time</div>
+            <div flex=15>
                 Category
                 <md-input-container>
                     <label>Filter by category</label> <input type="text" ng-model="filter.category"> 
                 </md-input-container></div>
-            <div flex>
+            <div flex=15>
                 Source<br>
                 <md-input-container>
                     <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
                 </md-input-container>
             </div>
-            <div flex>Description
+            <div flex=15>
+                Target<br>
+                <md-input-container>
+                    <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
+                </md-input-container>
+            </div>
+            <div flex=20>
+                Description
                 <md-input-container>
                     <label>Filter by description</label> <input type="text" ng-model="filter.desc"> 
                 </md-input-container>
             </div>
-            <div flex>
+            <div flex=10>
                 Flows
                 <div layout="row">
                 <md-input-container flex>
@@ -54,24 +61,43 @@
                 </md-input-container>
                 </div>
             </div>
-            <div flex>JSON</div>
+            <div flex=5>Action</div>
         </div>
-        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex>
-            <div layout="row" flex>
-                <div flex>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
-                <div flex>{{ item.Category[0] }}</div>
-                <div flex>{{ item.Source[0].Proto[0] }} | {{ item.Source[0].IP4[0] }}</div>
-                <div flex>{{ item.Description }}</div>
-                <div flex>{{ item.FlowCount }}</div>
-                <div flex>
-                    <md-button class="md-button-toggle" ng-click="enableSub = !enableSub"  aria-label="Enable details">
-                        <span ng-if="enableSub">Show details</span>
-                        <span ng-if="!enableSub">Hide details</span>
+        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex >
+            <div layout="row" layout-align="start center">
+                <div flex=15 layout-padding>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
+                <div flex=15 layout-padding>{{ item.Category[0] }}</div>
+                <div flex=15 layout-padding>{{ item.Source[0].IP4[0] }}</div>
+                <div flex=15 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">Nan</small></div>
+                <div flex=20 layout-padding>{{ item.Description | limitTo : 50 : 0 }}</div>
+                <div flex=10 layout-padding>{{ item.FlowCount | number }}</div>
+                <div flex=5>
+                    <md-button class="md-button-toggle md-raised" ng-click="enableSub = !enableSub"  aria-label="Enable details">
+                        <span ng-if="enableSub">Info</span>
+                        <span ng-if="!enableSub">Hide</span>
                     </md-button>
                 </div>
             </div>
             <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex>
-                <div class="event" ng-bind-html="item | json2html"></div>
+                Detect Time: {{ item.DetectTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}<br>
+                Event Time: {{ item.EventTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}<br>
+                Cease Time: {{ item.CeaseTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}
+
+                Category : {{ item.Category[0] }}
+                Description : {{ item.Description }}
+
+                Source: <span ng-if="item.Source[0]">{{ item.Source[0].IP4[0] }} | {{ item.Source[0].Proto[0] }}</span>
+                <span ng-if="!item.Source[0]">Data not available</span>
+                Target: <span ng-if="item.Target[0]">{{ item.Target[0].IP4[0] }} | {{ item.Target[0].Proto[0] }}</span>
+                <span ng-if="!item.Target[0]">Data not available</span>
+                Flow count: {{ item.FlowCount | number }}
+                
+                <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}"  aria-label="Show details">
+                    Details
+                </md-button>
+
+                <!--div class="event" ng-bind-html="item | json2html"></div-->
+
             </div>                                <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
             <div layout="row" flex ng-if="$last">
                 Load next 100 items {{ item.DetectTime }}
