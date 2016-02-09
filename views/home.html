@@ -41,40 +41,40 @@
 			</div> -->
 
 			    <h2 ng-if="!editMode">{{box.title}}</h2>
-                {{ $storage.counter }}
 
-                <md-button ng-click="$storage.counter = $storage.counter + 1">Click</md-button>
                 <div ng-if="loading == true" class="loading" layout-align="center center" layout="row">
-                    <!--img src="img/loading.gif" alt="Loading">
-                    <br>
-                    Loading...-->
                     <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
                     <br>
                     Fetching data
                 </div>
-                <nvd3 ng-if="box.type == 'piechart' || box.type == 'barchart'"
-                    options="box.options" 
-                    api="api" 
-	                tooltips="true"
-	                interactive="true" 
-	                data="box.data"
-	                autorefresh="true"
-                    objectEquality="true" 
-                    config="{refreshDataOnly: true, deepWatchData : true}" >
-                </nvd3>
 
-                <div ng-if="box.type == 'top'" layout="column">
-                    {{ box.data }}
-                    <div ng-repeat="event in box.data" flex>
-                        {{ event._id }}
-                        {{ event.FlowCount | number}}
-                        <md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button>
+                <div layout="row">
+                    <nvd3 flex ng-if="box.type == 'piechart' || box.type == 'barchart'"
+                        options="box.options" 
+                        api="api" 
+                        tooltips="true"
+                        interactive="true" 
+                        data="box.data"
+                        autorefresh="true"
+                        objectEquality="true" 
+                        config="{refreshDataOnly: true, deepWatchData : true}" >
+                    </nvd3>
+                    <div flex="35" ng-if="total > 0">
+                        There was <h3 >{{ total | number}}</h3> events in last {{ box.config.period }} hours
                     </div>
                 </div>
 
-                <h3 ng-if="total > 0">{{ total | number}}</h3>
-                <md-button ng-click='top()'>User</md-button>
-                <div ng-if="editMode"> 
+                <div ng-if="box.type == 'top'" layout="column">
+                    <div ng-repeat="event in box.data" flex layout="row">
+                        <span flex>{{ event.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</span>
+                        <span flex>{{ event._id }}</span>
+                        <span flex>{{ event.FlowCount | number}}</span>
+                        <md-button flex ng-href="#/events/{{event.id['$oid']}}">Detail</md-button>
+                    </div>
+                </div>
+
+                
+                <div ng-if="editMode" class="edit-mode-box"> 
                 
                     <md-input-container>
                         <label>Title</label>
