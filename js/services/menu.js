@@ -14,105 +14,18 @@ app.factory('jsondata', ['$http', function($http) {
 	//	.error(console.log('Cannot retrieve data'));
 }]);
 
-app.service('api', ['$http', '$log', '$mdToast', function($http, $log, $mdToast) {
-
-	var addr = "http://benefizio.liberouter.org:5555/v2/events/";
-
-    this.get = function(url, info) {
-		return $http.get(addr + url)
-			.success(function(data) {
-                if (info != undefined) {
-                    $mdToast.show(
-                        $mdToast
-                            .simple()
-                            .textContent('Data successully loaded')
-                            .position("top right")
-                            .hideDelay(5000)
-                            .theme("success-toast")
-                    );
-                }
-
-				return data;
-			})
-			.error(function() {
-				$log.error('Cannot fetch data');
-                $mdToast.show(
-                    $mdToast.simple()
-                        .textContent('Something went wrong')
-                        .position("top right")
-                        .hideDelay(5000)
-                        .theme("error-toast")
-                );
-
-			});
-    }
-
-    this.post = function(url, data, info) {
-        return $http.post(addr + url, JSON.stringify(data))
-            .success(function(data) {
-                if (info) {
-                    $mdToast.show(
-                        $mdToast
-                            .simple()
-                            .textContent('Data successfully loaded')
-                            .position("top right")
-                            .hideDelay(5000)
-                            .theme("success-toast")
-                    );
-                }
-                return data;        
-            })
-            .error(function() {
-            	$log.error('Cannot fetch data');
-                $mdToast.show(
-                    $mdToast.simple()
-                        .textContent('Something went wrong')
-                        .position("top right")
-                        .hideDelay(5000)
-                        .theme("error-toast")
-                );
-            })
-    }
-
-    this.put = function(url, data, info) {
-        return $http.put(addr + url, JSON.stringify(data))
-            .success(function(data) {
-                if (info) {
-                    $mdToast.show(
-                        $mdToast
-                            .simple()
-                            .textContent('Data successfully loaded')
-                            .position("top right")
-                            .hideDelay(5000)
-                            .theme("success-toast")
-                    );
-                }
-                return data;        
-            })
-            .error(function() {
-            	$log.error('Cannot fetch data');
-                $mdToast.show(
-                    $mdToast.simple()
-                        .textContent('Something went wrong')
-                        .position("top right")
-                        .hideDelay(5000)
-                        .theme("error-toast")
-                );
-            })
-    }
-
-//    this.put = function
-
-}]);
-
 app.directive("sidebarMenu", function() {
 	return {
         scope: {
 			section: '='
 		},
 		templateUrl: 'partials/sidebar-menu.html',
-        controller: function($scope, $mdSidenav, MENU) {
+        controller: function($scope, $mdSidenav, $location, MENU) {
             $scope.menu = MENU;
+
+            $scope.isActive = function(current) {
+                return($location.path() == current);
+            }
 
             $scope.changeMode = function() {
                 $scope.$emit('reqChangeMode');
