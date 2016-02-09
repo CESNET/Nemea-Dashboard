@@ -81,42 +81,6 @@ app.value('boxes_arr', [
             "period" : 1,
             "begintime" : ""
         },
-        // "data"  : [
-        //   { 'key' : 'PORTSCAN_H',
-        //     'y': 687
-        //   },
-        //   { 'key' : 'DNSAMP',
-        //     'y': 2
-        //   },
-        //   { 'key' : 'VOIP_PREFIX_GUESS',
-        //     'y': 189
-        //   },
-        //   { 'key' : 'BRUTEFORCE',
-        //     'y': 122
-        //   }],
-        "options": {
-            chart: {
-                type: 'pieChart',
-                height: 500,
-                x: function(d){return d.key;},
-                y: function(d){return d.y;},
-                showLabels: true,
-                donut : true,
-                padAngle : 0.02,
-                cornerRadius : 3,
-                transitionDuration: 500,
-                labelThreshold: 0.1,
-                color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
-                legend: {
-                    margin: {
-                        top: 0,
-                        right: 100,
-                        bottom: 5,
-                        left: 0
-                    }
-                }
-            }
-        }
       },
       {
         "title": "2",
@@ -191,6 +155,7 @@ app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $
 app.constant("MENU", [
 	{
 		"title" : "Dashboard",
+        "link" : "/"
 		/*"items" : [
 			{
 				"title" : "Users",
@@ -203,7 +168,7 @@ app.constant("MENU", [
 	},
 	{
 		"title" : "Events",
-		"link" 	: "events"
+		"link" 	: "/events"
 	},
 	/*{
 		"title" : "Analytics23",
@@ -232,15 +197,15 @@ app.constant("MENU", [
 		"items" : [
 			{
 				"title" : "Users",
-				"link" 	: "settings"
+				"link" 	: "/settings"
 			},
 			{
 				"title" : "My profile",
-				"link"	: "profile"
+				"link"	: "/profile"
 			},
 			{
 				"title" : "My profile",
-				"link"	: "profile"
+				"link"	: "/profile"
 			}
 		]
 	}
@@ -331,6 +296,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
     // Save changes and disable edit mode
     $scope.save = function() {
+        $scope.user();
         if ($scope.box.type == 'piechart')
             $scope.box.options = PIECHART.options;
         if ($scope.box.type == 'barchart')
@@ -404,7 +370,6 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             })
         }
     }
-
 
     $scope.user = function() {
         var settings = angular.copy($scope.boxes_arr);
