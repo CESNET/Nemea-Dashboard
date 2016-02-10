@@ -10,33 +10,38 @@ app.service('api', ['$http', '$log', '$mdToast', function($http, $log, $mdToast,
         });
     }
 
-    this.get = function(url, info) {
-		return $http.get(addr + url)
-			.success(function(data) {
-                if (info != undefined) {
-                    $mdToast.show(
-                        $mdToast
-                            .simple()
-                            .textContent('Data successully loaded')
-                            .position("top right")
-                            .hideDelay(5000)
-                            .theme("success-toast")
-                    );
-                }
-
-				return data;
-			})
-			.error(function() {
-				$log.error('Cannot fetch data');
+    this.get = function(url, params, info) {
+        console.log(params)
+		return $http({
+            url : addr + url,
+            method : "GET",
+            params : params
+        })
+        .success(function(data) {
+            if (info != undefined) {
                 $mdToast.show(
-                    $mdToast.simple()
-                        .textContent('Something went wrong')
+                    $mdToast
+                        .simple()
+                        .textContent('Data successully loaded')
                         .position("top right")
                         .hideDelay(5000)
-                        .theme("error-toast")
+                        .theme("success-toast")
                 );
+            }
 
-			});
+            return data;
+        })
+        .error(function() {
+            $log.error('Cannot fetch data');
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent('Something went wrong')
+                    .position("top right")
+                    .hideDelay(5000)
+                    .theme("error-toast")
+            );
+
+        });
     }
 
     this.post = function(url, data, info) {
