@@ -5,6 +5,7 @@ from flask.ext.cors import CORS
 import pymongo
 import json
 import sys
+from subprocess import Popen, PIPE, check_output
 from datetime import date, datetime, timedelta
 from bson import json_util
 from bson.objectid import ObjectId
@@ -161,123 +162,122 @@ def get_last(items):
         
     return (json.dumps(docs, default=json_util.default))
 
-@app.route(C['events'] + 'agg', methods=['POST'])
+@app.route(C['events'] + 'agg', methods=['GET'])
 def aggregate():
-    if request.method == 'POST':
-        req = request.get_json()
-        if req['type'] == 'piechart':
-            query = [
-                {
-                    "$match" : {
-                        "DetectTime" : {
-                            "$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                        }
-                    }
-                },
-                {
-                    "$group" : {
-                        "_id" : {
-                            "Categories" : "$Category"
-                        },
-                        "count" : { "$sum" : 1}
+    req = request.args
+    if req['type'] == 'piechart':
+        query = [
+            {
+                "$match" : {
+                    "DetectTime" : {
+                        "$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")
                     }
                 }
-            ]
-            res = list(db.collection.aggregate(query))
-            tmp = list()
-            for item in res:
-                tmp.append({
-                    "key" : item["_id"]["Categories"],
-                    "x" : item["count"]
-                })
-        if req['type'] == "barchart":
-            time = datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")
-            query = [
-                {
-                    "$match" : {
-                        "DetectTime" : { "$gte" : time }
-                    }
-                },
-                {
-                    "$project" : {
-                        "_id" : 0,
-                        "res" : {
-                            "$subtract": [ 
-                                "$DetectTime",
-                                { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
-                            ]
-                        },
-                         "Time" : "$DetectTime",
-                         "Category" : "$Category",
-                         "FlowCount" : "$FlowCount"
-                    }
-                },
-                {
-                    "$group" : {
-                        "_id" : {
-                            "DetectTime" : "$res",
-                            "Category" : "$Category"
-                        },
-                        "Count" : {"$sum" : 1},
-                        "FlowCount" : {"$sum" : "$FlowCount"}
-                    }
-                },
-                {
-                    "$sort" : { "_id.DetectTime" : 1, "_id.Category" : 1 }
+            },
+            {
+                "$group" : {
+                    "_id" : {
+                        "Categories" : "$Category"
+                    },
+                    "count" : { "$sum" : 1}
                 }
-            ]
-            res = list(db.collection.aggregate(query))
-            data = list()
-            for item in res:
-                inserted = False
-                for serie in data:
-                    if serie['key'] == item['_id']['Category'][0]:
-                        serie['values'].append({'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 'FlowCount' : item['FlowCount'], 'Count' : item['Count']})
-                        inserted = True
-                        break
+            }
+        ]
+        res = list(db.collection.aggregate(query))
+        tmp = list()
+        for item in res:
+            tmp.append({
+                "key" : item["_id"]["Categories"],
+                "x" : item["count"]
+            })
+    if req['type'] == "barchart":
+        time = datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        query = [
+            {
+                "$match" : {
+                    "DetectTime" : { "$gte" : time }
+                }
+            },
+            {
+                "$project" : {
+                    "_id" : 0,
+                    "res" : {
+                        "$subtract": [ 
+                            "$DetectTime",
+                            { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
+                        ]
+                    },
+                     "Time" : "$DetectTime",
+                     "Category" : "$Category",
+                     "FlowCount" : "$FlowCount"
+                }
+            },
+            {
+                "$group" : {
+                    "_id" : {
+                        "DetectTime" : "$res",
+                        "Category" : "$Category"
+                    },
+                    "Count" : {"$sum" : 1},
+                    "FlowCount" : {"$sum" : "$FlowCount"}
+                }
+            },
+            {
+                "$sort" : { "_id.DetectTime" : 1, "_id.Category" : 1 }
+            }
+        ]
+        res = list(db.collection.aggregate(query))
+        data = list()
+        for item in res:
+            inserted = False
+            for serie in data:
+                if serie['key'] == item['_id']['Category'][0]:
+                    serie['values'].append({'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 'FlowCount' : item['FlowCount'], 'Count' : item['Count']})
+                    inserted = True
+                    break
 
-                if not inserted:
-                    data.append({
-                            'key' : item['_id']['Category'][0], 
-                            'values' : [{
-                                'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
-                                'FlowCount' : item['FlowCount'], 
-                                'Count' : item['Count']
-                            }] # values
-                        }) # data
-            tmp = data
+            if not inserted:
+                data.append({
+                        'key' : item['_id']['Category'][0], 
+                        'values' : [{
+                            'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
+                            'FlowCount' : item['FlowCount'], 
+                            'Count' : item['Count']
+                        }] # values
+                    }) # data
+        tmp = data
 
 
     return(json_util.dumps(tmp))
 
-@app.route(C['events'] + 'top', methods=['POST'])
+@app.route(C['events'] + 'top', methods=['GET'])
 def top():
-    if request.method == 'POST':
-        req = request.get_json()
+    # Get URL params
+    req = request.args
 
-        # Query date shifted by period set up in front-end
-        time = datetime.utcnow() - timedelta(hours=int(req['period']))
-        query = [
-            {
-                '$match' : {
-                    'DetectTime' : {'$gt' : time}
-                }
-            },
-            {
-                '$sort' : {'FlowCount' : -1}
-            },
-            {
-                '$group' : {
-                    '_id' : '$Category',
-                    'FlowCount' : { '$first' : '$FlowCount' },
-                    'id' : {'$first' : '$_id'},
-                    'DetectTime' : {'$first' : '$DetectTime'}
-                }
-            },
-            {
-                '$unwind' : '$_id'
-            }]
-        res = list(db.collection.aggregate(query))
+    # Query date shifted by period set up in front-end
+    time = datetime.utcnow() - timedelta(hours=int(req['period']))
+    query = [
+        {
+            '$match' : {
+                'DetectTime' : {'$gt' : time}
+            }
+        },
+        {
+            '$sort' : {'FlowCount' : -1}
+        },
+        {
+            '$group' : {
+                '_id' : '$Category',
+                'FlowCount' : { '$first' : '$FlowCount' },
+                'id' : {'$first' : '$_id'},
+                'DetectTime' : {'$first' : '$DetectTime'}
+            }
+        },
+        {
+            '$unwind' : '$_id'
+        }]
+    res = list(db.collection.aggregate(query))
     return(json_util.dumps(res))
 
 # Fetch event with given ID
@@ -305,7 +305,13 @@ def get_users():
     return(json_util.dumps(res))
 
 
-
+@app.route(C['events'] + 'whois/<string:ip>', methods=['GET'])
+def whois(ip):
+    p =Popen(['whois', ip], stdout=PIPE)
+    tmp = ""
+    for line in p.stdout:
+        tmp += line.decode('utf-8')
+    return(json.dumps({'output' : tmp }))
 
 
 if __name__ == '__main__':
