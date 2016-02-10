@@ -315,15 +315,16 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
         // Get required data
         if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
-            api.post('agg', $scope.box.config, true).success(function(data) {
+            api.get('agg', $scope.box.config, true).success(function(data) {
                 $scope.loading = false;    
                 $scope.box.data = data;
             })
         } else if ($scope.box.type == 'top') {
-            api.post('top', $scope.box.config, true).success(function(data) {
+            api.get('top', $scope.box.config, true).success(function(data) {
                 $scope.loading = false;    
-                $scope.box.data = data; 
+                $scope.box.data = data;
             })
+
         }
     }
 
@@ -337,7 +338,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
     $scope.top = function() {
         timeShift()
-        api.post('top', $scope.box.config, true).success(function(data) {
+        api.get('top', $scope.box.config, true).success(function(data) {
                 console.log(data);
                 })
     }
@@ -351,7 +352,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
            
             $scope.box.config.type = $scope.box.type;
             
-            api.post('agg', $scope.box.config).success(function(data) {
+            api.get('agg', $scope.box.config).success(function(data) {
                 $scope.loading = false;
                 $scope.box.data = data;
                 
@@ -364,7 +365,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 }
             });
         } else if ($scope.box.type == 'top') {
-            api.post('top', $scope.box.config).success(function(data) {
+            api.get('top', $scope.box.config).success(function(data) {
                 $scope.loading = false;
                 $scope.box.data = data;        
             })
@@ -373,11 +374,11 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
     $scope.user = function() {
         var settings = angular.copy($scope.boxes_arr);
-        console.log(settings);
+        //console.log(settings);
         for (var i = 0; i < settings.length; i++) {
             for (var j = 0; j < settings[i].items.length; j++) {
                 settings[i].items[j].data = [];
-                console.log(settings[i].items[j].data);
+                //console.log(settings[i].items[j].data);
             }
         }
         
