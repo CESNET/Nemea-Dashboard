@@ -143,7 +143,7 @@ def get_config():
     }
     return(json.dumps(config))
 
-@app.route(C['events'] + '<int:items>', methods=['GET', 'POST'])
+@app.route(C['events'] + '<int:items>', methods=['GET'])
 def get_last(items):
     if request.method == 'GET':
         if items != 0:
@@ -161,6 +161,51 @@ def get_last(items):
                 }).sort( [( "DetectTime", 1)] ).limit(int(data["limit"])))
         
     return (json.dumps(docs, default=json_util.default))
+
+@app.route(C['events'] + 'query', methods=['GET'])
+def query():
+    req = request.args
+
+    #"from" : from_date,
+    #"to" : to_date,
+    #"category" : query.category,
+    #"description" : query.description,
+    #"limit" : query.limit
+
+    req = req.to_dict()
+    print(req)
+
+    query = {
+        "$and" : [
+            {"DetectTime" : {"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
+        ]
+    }
+
+    if 'to' in req:
+        part = {"DetectTime" : {"$lt" : datetime.strptime(req["to"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
+        query["$and"].append(part)
+
+    if 'category' in req:
+        part = {"Category" : {"$regex" : ".*" + req['category'] + ".*", '$options' : 'i'}}
+        query["$and"].append(part)
+
+    if 'description' in req:
+        part = {"Description" : {"$regex" : ".*" + req['description'] + ".*", '$options' : 'i'}}
+        query["$and"].append(part)
+
+    if 'limit' not in req:
+        req['limit'] = 100
+
+    if int(req['limit']) > 1000:
+        req['limit'] = 1000
+
+    res = list(db.events.find(query).sort([("DetectTime", 1)]).limit(int(req['limit'])))
+
+    print(json_util.dumps(req))
+    print(json_util.dumps(query))
+    print(res)
+    return(json_util.dumps(res))
+
 
 @app.route(C['events'] + 'agg', methods=['GET'])
 def aggregate():
