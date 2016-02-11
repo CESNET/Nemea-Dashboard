@@ -145,35 +145,17 @@ def get_config():
 
 @app.route(C['events'] + '<int:items>', methods=['GET'])
 def get_last(items):
-    if request.method == 'GET':
-        if items != 0:
-            docs = list(db.collection.find().sort( [( "DetectTime", -1)] ).limit(items))
-        else:
-            return("You cannot dump the whole DB!")
-    if request.method == 'POST':
-        data = request.get_json()
-        if data["limit"] != 0:
-            docs = list(db.collection.find({ 
-                "$and" : [
-                    { "DetectTime" : { "$gt" : datetime.strptime(data["from"],"%Y-%m-%dT%H:%M:%S.%fZ") } }, 
-                    { "DetectTime" : { "$lt" : datetime.strptime(data["to"], "%Y-%m-%dT%H:%M:%S.%fZ") } }
-                    ] 
-                }).sort( [( "DetectTime", 1)] ).limit(int(data["limit"])))
-        
+    if items == 0 or items > 10000:
+        items = 100
+    docs = list(db.collection.find().sort( [( "DetectTime", -1)] ).limit(items))
+    
     return (json.dumps(docs, default=json_util.default))
 
 @app.route(C['events'] + 'query', methods=['GET'])
 def query():
     req = request.args
 
-    #"from" : from_date,
-    #"to" : to_date,
-    #"category" : query.category,
-    #"description" : query.description,
-    #"limit" : query.limit
-
     req = req.to_dict()
-    print(req)
 
     query = {
         "$and" : [
@@ -201,9 +183,6 @@ def query():
 
     res = list(db.events.find(query).sort([("DetectTime", 1)]).limit(int(req['limit'])))
 
-    print(json_util.dumps(req))
-    print(json_util.dumps(query))
-    print(res)
     return(json_util.dumps(res))
 
 
