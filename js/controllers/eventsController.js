@@ -1,4 +1,4 @@
-app.controller('eventsController', function($scope, $http, $mdToast) {
+app.controller('eventsController', function($scope, $http, $mdToast, api) {
     $scope.filter = {
         "category" : "",
         "proto" : "",
@@ -12,63 +12,54 @@ app.controller('eventsController', function($scope, $http, $mdToast) {
         "from" : "",
         "to" : "",
         "date" : "",
-        "limit" : 25
+        "limit" : 100
     }
     
     $scope.data = [];
 
-    $http.get('http://benefizio.liberouter.org:5555/v2/events/' + $scope.filter.items).success(function(data) {
+    api.get($scope.filter.items).success(function(data) {
 				//console.log(JSON.stringify(data));
 				$scope.data = data;
 	});
 
-   $scope.parseDate = function(date) {
-        var date_tmp = date;
-        date_tmp.setHours(date_tmp.getHours() + 1);
-        $scope.foodate = date_tmp.toJSON();
-
-   }
-
     $scope.loadItems = function(query) {
-        $scope.filter.btn = "Loading..."
+        $scope.filter.btn = "Loading...";
+        
         var from = query.from.split(':');
-        var to = [];
-        console.log(query.date);
+        var from_date = new Date(query.date);
+        from_date.setUTCHours(from[0]);
+        from_date.setUTCMinutes(from[1]);
 
         if (query.to) {
             var to = query.to.split(':');
+            var to_date = new Date(query.date);
+            to_date.setUTCHours(to[0]);
+            to_date.setUTCMinutes(to[1]);
         } else {
-            to = null;
+            var to_date = null;
         }
-
-        var from_time = new Date(query.date).setUTCHours(from[0]);
-
-        console.log(from_time.toISOString());
-
-        return;
-
-        //var date = JSON.stringify(query.date).split("T");
-        //var from_time = JSON.stringify(query.from).split("T");
-        //var to_time = JSON.stringify(query.to).split("T");
 
         var send = {
-            "from" : JSON.parse(date[0] + "T" + from_time[1]),
-            "to" : JSON.parse(date[0] + "T" + to_time[1]),
+            "from" : from_date,
+            "to" : to_date,
+            "category" : query.category,
+            "description" : query.description,
             "limit" : query.limit
         }
-        console.log(String(date))
-        $http.post('http://benefizio.liberouter.org:5555/v2/events/' + query.limit, send).success(function(data) {
+        api.get('query', send, true).success(function(data) {
 		    console.log(data);
             
 			$scope.data = data;
             $scope.filter.btn = "Load"
             $mdToast.show(
                 $mdToast.simple()
-                    .textContent('Date loaded!')
+                    .textContent('Data loaded!')
                     .position("top right")
                     .hideDelay(3000)
                 );
-	    });
+	    }).error(function() {
+            $scope.filter.btn = "Load";    
+        });
     }
 
 
@@ -138,3 +129,27 @@ app.controller('eventsController', function($scope, $http, $mdToast) {
 
 });
 
+app.directive('validateHours', function() {
+    var to = [];
+    var from = [];
+    return {
+        require: 'ngModel',
+        link: function(scope, element, attrs, ctrl) {
+            ctrl.$validators.time = function(modelValue, viewValue) {
+                if (attrs.ngModel == "query.from" && viewValue) {
+                    from = viewValue.split(':');
+                } else if (viewValue) {
+                    to = viewValue.split(':');
+                }
+            
+            if (to.length == 2) {
+                if (to[0] < from[0] || (to[0] <= from[0] && to[1] < from[1])) {
+                    //ctrl.$setValidity('time', false);
+                    return false;
+                } 
+            }
+            return true;
+            }
+        }
+    }
+});

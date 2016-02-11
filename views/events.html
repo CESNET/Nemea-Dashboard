@@ -6,16 +6,17 @@
         <topbar-menu></topbar-menu>
         <section class="content" layout-padding>
 
-        <form ng-submit="loadItems(query)" flex>
-            <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)"></md-datepicker>
+        <form ng-submit="loadItems(query)" name="query_form" flex>
+            <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)" required></md-datepicker>
             <md-input-container>
                 <label>Time from</label>
-                <input ng-model="query.from" type="string" placeholder="12:00">
+                <input ng-model="query.from" type="string" placeholder="12:00" validate-hours>
             </md-input-container>
             
             <md-input-container>
                 <label>To</label>
-                <input ng-model="query.to" type="string" placeholder="13:00">
+                <input ng-model="query.to" type="string" placeholder="13:00" validate-hours>
+                <p ng-if="query_form.$error.time">Chyba</p>
             </md-input-container>
 
             <md-input-container>
@@ -32,7 +33,7 @@
                 <label>Limit</label>
                 <input ng-model="query.limit">
             </md-input-container>
-            <md-button class="md-raised md-primary" type="submit">{{ filter.btn }}</md-button>
+            <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid">{{ filter.btn }}</md-button>
         </form>
 
     <div class="table" layout="column" flex>
