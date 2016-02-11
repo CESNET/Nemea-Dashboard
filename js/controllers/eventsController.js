@@ -31,10 +31,25 @@ app.controller('eventsController', function($scope, $http, $mdToast) {
 
     $scope.loadItems = function(query) {
         $scope.filter.btn = "Loading..."
-    
-        var date = JSON.stringify(query.date).split("T");
-        var from_time = JSON.stringify(query.from).split("T");
-        var to_time = JSON.stringify(query.to).split("T");
+        var from = query.from.split(':');
+        var to = [];
+        console.log(query.date);
+
+        if (query.to) {
+            var to = query.to.split(':');
+        } else {
+            to = null;
+        }
+
+        var from_time = new Date(query.date).setUTCHours(from[0]);
+
+        console.log(from_time.toISOString());
+
+        return;
+
+        //var date = JSON.stringify(query.date).split("T");
+        //var from_time = JSON.stringify(query.from).split("T");
+        //var to_time = JSON.stringify(query.to).split("T");
 
         var send = {
             "from" : JSON.parse(date[0] + "T" + from_time[1]),
@@ -46,7 +61,7 @@ app.controller('eventsController', function($scope, $http, $mdToast) {
 		    console.log(data);
             
 			$scope.data = data;
-            $scope.filter.btn = "Done"
+            $scope.filter.btn = "Load"
             $mdToast.show(
                 $mdToast.simple()
                     .textContent('Date loaded!')

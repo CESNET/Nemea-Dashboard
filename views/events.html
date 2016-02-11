@@ -6,23 +6,34 @@
         <topbar-menu></topbar-menu>
         <section class="content" layout-padding>
 
-        <div flex>
+        <form ng-submit="loadItems(query)" flex>
             <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)"></md-datepicker>
             <md-input-container>
-                <label>From</label>
-                <input ng-model="query.from" type="time">
+                <label>Time from</label>
+                <input ng-model="query.from" type="string" placeholder="12:00">
             </md-input-container>
+            
             <md-input-container>
                 <label>To</label>
-                <input ng-model="query.to" type="time">
+                <input ng-model="query.to" type="string" placeholder="13:00">
             </md-input-container>
+
+            <md-input-container>
+                <label>Category</label>
+                <input ng-model="query.category">
+            </md-input-container>
+            
+            <md-input-container>
+                <label>Description</label>
+                <input ng-model="query.description">
+            </md-input-container>
+            
             <md-input-container>
                 <label>Limit</label>
                 <input ng-model="query.limit">
             </md-input-container>
-
-            <md-button class="md-raised md-primary" ng-click="loadItems(query)">{{ filter.btn }}</md-button>
-        </div>
+            <md-button class="md-raised md-primary" type="submit">{{ filter.btn }}</md-button>
+        </form>
 
     <div class="table" layout="column" flex>
         <div class="head" layout="row" flex>
