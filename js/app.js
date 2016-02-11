@@ -27,7 +27,8 @@ function config($routeProvider, $mdThemingProvider) {
 		})
         .when('/events', {
             controller : 'eventsController',
-            templateUrl : 'views/events.html'
+            templateUrl : 'views/events.html',
+            reloadOnSearch : false
         })
         .when('/events/:id', {
             controller: 'eventController',
@@ -38,6 +39,7 @@ function config($routeProvider, $mdThemingProvider) {
 		});
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
+
 
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
