@@ -100,6 +100,15 @@ md-toolbar:not(.md-menu-toolbar) {
             color: $grey-dark;
             font-size: 90%;
         }
+        &:hover {
+            background: $grey;
+        }
+        .row-wrapper {
+            &:focus, &:active {
+                outline: none;
+                border: 0px;
+            }
+        }
     }
 }
 
