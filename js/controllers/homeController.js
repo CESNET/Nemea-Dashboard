@@ -196,7 +196,7 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location){
     
     function timeShift() {    
         if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' )) {
@@ -239,10 +239,15 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
     // Save changes and disable edit mode
     $scope.save = function() {
         $scope.user();
-        if ($scope.box.type == 'piechart')
+        if ($scope.box.type == 'piechart') {
             $scope.box.options = PIECHART.options;
+            
+        }
         if ($scope.box.type == 'barchart')
-            $scope.box.options = AREA.options;$scope.backupModel = {};
+            $scope.box.options = AREA.options;
+        
+
+        $scope.backupModel = {};
 
         $scope.box.config.type = $scope.box.type;
         
@@ -287,8 +292,11 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
     
     if ($scope.box != undefined) {
         if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
-            if ($scope.box.type == 'piechart')
+            if ($scope.box.type == 'piechart') {
                 $scope.box.options = PIECHART.options;
+                console.log("piechart")
+                console.log(JSON.stringify($scope.box.options.chart.pie.dispatch))
+            }
             if ($scope.box.type == 'barchart')
                 $scope.box.options = AREA.options;
            

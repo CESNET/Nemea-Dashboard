@@ -43,7 +43,13 @@ app.constant('PIECHART', {
             pie : {
                 dispatch: {
                     //chartClick: function(e) {console.log(e)},
-                    elementClick: function(e) {console.log(e)},
+                    elementClick: function(e) {
+                        var date = new Date();
+                        console.log(e)
+                        date.setTime(date.getTime() - 1000*60*60*24);
+                        date.setHours(0);
+                        date.setMinutes(0)
+                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + new Date().getHours() + ':' + new Date().getMinutes() + '&category=' + e.data.key[0]},
                     //elementDblClick: function(e) {console.log("element double click")},
                     //elementMouseover: function(e) {console.log("element mouseover")},
                     //elementMouseout: function(e) {console.log("element mouse out")}            

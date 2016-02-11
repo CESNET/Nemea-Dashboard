@@ -10,13 +10,14 @@
             <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)" required></md-datepicker>
             <md-input-container>
                 <label>Time from</label>
-                <input ng-model="query.from" type="string" placeholder="12:00" validate-hours>
+                <input ng-model="query.from" type="string" placeholder="12:00" validate-format required>
+                <p ng-if="query_form.$error.time">Bad time format</p>
             </md-input-container>
             
             <md-input-container>
                 <label>To</label>
-                <input ng-model="query.to" type="string" placeholder="13:00" validate-hours>
-                <p ng-if="query_form.$error.time">Chyba</p>
+                <input ng-model="query.to" type="string" placeholder="13:00" validate-format validate-hours>
+                <p ng-if="query_form.$error.time">Bad time format or "TO" time sooner than "FROM" time</p>
             </md-input-container>
 
             <md-input-container>
@@ -33,11 +34,11 @@
                 <label>Limit</label>
                 <input ng-model="query.limit">
             </md-input-container>
-            <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid">{{ filter.btn }}</md-button>
+            <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid">{{ loadbtn }}</md-button>
         </form>
 
     <div class="table" layout="column" flex>
-        <div class="head" layout="row" flex>
+        <div class="head" layout="row" flex layout-align="start center">
             <div flex=15>Event Time</div>
             <div flex=15>
                 Category
@@ -47,17 +48,17 @@
             <div flex=15>
                 Source<br>
                 <md-input-container>
-                    <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
+                    <label>Filter by IP</label> <input type="text" ng-model="filter.src_ip"> 
                 </md-input-container>
             </div>
             <div flex=15>
                 Target<br>
                 <md-input-container>
-                    <label>Filter by protocol</label> <input type="text" ng-model="filter.proto"> 
+                    <label>Filter by IP</label> <input type="text" ng-model="filter.trt_ip"> 
                 </md-input-container>
             </div>
             <div flex=20>
-                Description
+                Description<br>
                 <md-input-container>
                     <label>Filter by description</label> <input type="text" ng-model="filter.desc"> 
                 </md-input-container>
@@ -73,14 +74,13 @@
                 </md-input-container>
                 </div>
             </div>
-            <div flex=5>Action</div>
         </div>
         <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex >
-            <div layout="row" layout-align="start center">
+            <div layout="row" layout-align="start center" class="row-wrapper">
                 <div flex=15 layout-padding>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
                 <div flex=15 layout-padding>{{ item.Category[0] }}</div>
-                <div flex=15 layout-padding>{{ item.Source[0].IP4[0] }}</div>
-                <div flex=15 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">Nan</small></div>
+                <div flex=15 layout-padding>{{ item.Source[0].IP4[0] }}<small ng-if="!item.Source[0].IP4">N/A</small></div>
+                <div flex=15 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">N/A</small></div>
                 <div flex=20 layout-padding>{{ item.Description | limitTo : 50 : 0 }}{{item.Description.length > 50 ? ' ...' : ''}}</div>
                 <div flex=10 layout-padding>{{ item.FlowCount | number }}</div>
                 <div flex=5>
@@ -90,7 +90,7 @@
                     </md-button>
                 </div>
             </div>
-            <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex>
+            <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex layout-padding>
                 Detect Time: {{ item.DetectTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}<br>
                 Event Time: {{ item.EventTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}<br>
                 Cease Time: {{ item.CeaseTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}

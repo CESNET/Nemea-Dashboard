@@ -1,42 +1,59 @@
-app.controller('eventsController', function($scope, $http, $mdToast, api) {
+app.controller('eventsController', function($scope, $http, $location, api) {
     $scope.filter = {
-        "category" : "",
-        "proto" : "",
-        "desc" : "",
-        "flows_from" : "",
-        "flows_to" : "",
-        "items" : 100,
-        "btn" : "Load"
+        "category" : "",    // Category
+        "src_ip" : "",      // Source IP
+        "trt_ip" : "",      // Target IP
+        "desc" : "",        // Description
+        "flows_from" : "",  // FlowCount
+        "flows_to" : "",    // FlowCount
+        "items" : 100,      // Limit number of displayed items
     };
     $scope.query = {
         "from" : "",
         "to" : "",
-        "date" : "",
+        "date" : new Date(),
+        "description" : "",
+        "category" : "",
         "limit" : 100
     }
-    
-    $scope.data = [];
 
-    api.get($scope.filter.items).success(function(data) {
-				//console.log(JSON.stringify(data));
-				$scope.data = data;
-	});
+    $scope.data = [];
+    $scope.loadbtn = "Load";
+    console.log($scope.query.date)
 
     $scope.loadItems = function(query) {
-        $scope.filter.btn = "Loading...";
-        
+        $scope.loadbtn = "Loading...";
         var from = query.from.split(':');
         var from_date = new Date(query.date);
-        from_date.setUTCHours(from[0]);
-        from_date.setUTCMinutes(from[1]);
+        from_date.setHours(from_date.getHours() + from[0]);
+        from_date.setMinutes(from[1]);
+        
+        $location.search('filter', true);
+        $location.search('from', query.from);
+        $location.search('date', query.date);
+        $location.search('limit', query.limit);
+        
 
         if (query.to) {
             var to = query.to.split(':');
             var to_date = new Date(query.date);
-            to_date.setUTCHours(to[0]);
-            to_date.setUTCMinutes(to[1]);
+            to_date.setHours(to_date.getHours() + to[0]);
+            to_date.setMinutes(to[1]);
+            $location.search('to', query.to);
         } else {
             var to_date = null;
+        }
+
+                if (query.description != "") {
+            $location.search('description', query.description);
+        } else {
+            query.description = null;
+        }
+
+        if (query.category != "") {
+            $location.search('category', query.category);
+        } else {
+            query.category = null;
         }
 
         var send = {
@@ -47,37 +64,30 @@ app.controller('eventsController', function($scope, $http, $mdToast, api) {
             "limit" : query.limit
         }
         api.get('query', send, true).success(function(data) {
-		    console.log(data);
-            
 			$scope.data = data;
-            $scope.filter.btn = "Load"
-            $mdToast.show(
-                $mdToast.simple()
-                    .textContent('Data loaded!')
-                    .position("top right")
-                    .hideDelay(3000)
-                );
+            $scope.loadbtn = "Load"
 	    }).error(function() {
-            $scope.filter.btn = "Load";    
+            $scope.loadbtn = "Load";    
+        });
+    }
+    
+    if ($location.search().filter) {
+        $scope.query = $location.search();
+        console.log($scope.query.date)
+        $scope.query.date = new Date($scope.query.date);
+        $scope.loadItems($scope.query);
+    } else {
+
+        api.get("100").success(function(data) {
+            $scope.data = data;
         });
     }
 
-
-
-    $scope.enableTable = true;
-    /*$scope.filter = "$";
-    $scope.search = {$ : '', "Source": [ { "Proto": [ "" ], "IP4": [ "" ] }]}
-    $scope.changeFilterTo = function(pr) {
-        $scope.filter = pr; 
-    }*/
-
     $scope.events = function(item) {
-        //console.log(JSON.stringify(item));
         var res = [];
-        if ($scope.filter.proto != ""){
-            if (i == 50) {console.log("filtering proto"); i = 0;}
+        if ($scope.filter.src_ip != ""){
             if ("Source" in item) {
-                if ("Proto" in item.Source[0] && item.Source[0].Proto[0].toLowerCase().indexOf($scope.filter.proto.toLowerCase()) > -1) {
+                if ("IP4" in item.Source[0] && item.Source[0].IP4[0].toLowerCase().indexOf($scope.filter.src_ip.toLowerCase()) > -1) {
                     res.push(1);
                 }
                 else
@@ -87,6 +97,17 @@ app.controller('eventsController', function($scope, $http, $mdToast, api) {
             }
         }
 
+        if ($scope.filter.trt_ip != ""){
+            if ("Target" in item) {
+                if ("IP4" in item.Target[0] && item.Target[0].IP4[0].toLowerCase().indexOf($scope.filter.trt_ip.toLowerCase()) > -1) {
+                    res.push(1);
+                }
+                else
+                    res.push(0);
+            } else {
+                res.push(0);
+            }
+        }
         if ($scope.filter.category != "") {
             if (item.Category[0].toLowerCase().indexOf($scope.filter.category.toLowerCase()) > -1) {
                 res.push(1);
@@ -117,11 +138,8 @@ app.controller('eventsController', function($scope, $http, $mdToast, api) {
         }
 
         var logicvalue = 1;
-  //      console.log(res);
         for (var i = 0; i < res.length; i++) {
             logicvalue = logicvalue * res[i];
-      //      console.log(Number(res[i]));
-    //        console.log(logicvalue);
         }
         return logicvalue == 1 ? true : false;
 
@@ -141,10 +159,12 @@ app.directive('validateHours', function() {
                 } else if (viewValue) {
                     to = viewValue.split(':');
                 }
-            
-            if (to.length == 2) {
-                if (to[0] < from[0] || (to[0] <= from[0] && to[1] < from[1])) {
-                    //ctrl.$setValidity('time', false);
+            console.log(from)
+            console.log(to) 
+            if (to.length == 2 || from.length == 2) {
+                if (to[0] < from[0] || (to[0] <= from[0] && to[1] < from[1]) ||
+                    to[0] < 0 || to[0] > 23 || to[1] < 0 || to[1] > 59 || from[0] < 0 || from[0] > 23 || from[1] < 0 || from[1] > 59
+                    ) {
                     return false;
                 } 
             }
