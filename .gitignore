@@ -48,6 +48,7 @@ bower_components
 #virtualenv
 api
 __pycache__
+*.pyc
 
 #SASS
 css
