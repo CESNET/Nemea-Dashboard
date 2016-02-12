@@ -1,8 +1,8 @@
-var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage', 'ngMap']);
+var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage', 'ngMap', 'gridster']);
 
 app.config(config);
 
-function config($routeProvider, $mdThemingProvider, $httpProvider) {
+function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorageProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',
@@ -40,7 +40,10 @@ function config($routeProvider, $mdThemingProvider, $httpProvider) {
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
 
-	$httpProvider.defaults.headers.common['Authorization'] = "autentizace";
+    $httpProvider.interceptors.push('notAllowedInterceptor');
+    $localStorageProvider
+        .setKeyPrefix('nd-');
+//	$httpProvider.defaults.headers.common['Authorization'] = "autentizace";
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
 	// 	//PRODUCTION
@@ -64,7 +67,7 @@ function config($routeProvider, $mdThemingProvider, $httpProvider) {
 
 var loginCorrect = null;
 
-checkLogin = function($rootScope, $location, localStorageService) {
+checkLogin = function($rootScope, $location, localStorageService, $rootScope) {
 	// console.log("login: " + loginCorrect);
 	// console.log(localStorageService.keys());
 	// if (localStorageService.keys() == '') {
@@ -82,6 +85,7 @@ checkLogin = function($rootScope, $location, localStorageService) {
     	// }
 	//})
 
+	$rootScope.$on("$locationChangeStart", function(event){
 		if (localStorageService.get("loggedIn")) {
     		//$location.path("/");
     		console.log("correct")	
@@ -89,6 +93,7 @@ checkLogin = function($rootScope, $location, localStorageService) {
     	else {
     		$location.path("/login");
     	}
+    })
 
 	return false;
 }
@@ -101,3 +106,31 @@ app.filter('nospace', function () {
     });
 
 
+app.run(function(user, $localStorage, $location, $rootScope, $log) {
+	$rootScope.$on("$locationChangeStart", function(event) {
+        if ($localStorage["token"] == undefined) {
+            $log.info("no token found, redirecting to /login")
+            $location.path("/login");
+        }
+    })
+})
+
+
+app.factory('notAllowedInterceptor', function($log, $localStorage, $location, $injector) {
+    var notAllowedInterceptor = {
+        responseError : function(response) {
+            var $http = $injector.get('$http');
+            if (response.status == 401) {
+                $log.error('You are not allowed to access');
+                $log.error(response);
+                delete $localStorage["token"];
+                $location.path('/login');
+            }
+
+            
+            return $http(response);
+        }
+    }
+
+    return notAllowedInterceptor;
+})

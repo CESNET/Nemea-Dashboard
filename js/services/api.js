@@ -1,21 +1,27 @@
-app.service('api', ['$http', '$log', '$mdToast', function($http, $log, $mdToast, $localStorage) {
+app.service('api', function($http, $log, $mdToast, $localStorage) {
 
 	var addr = "http://benefizio.liberouter.org:5555/v2/events/";
+
+    this.auth = function() {
+        return $localStorage["token"];
+    }
 
     this.config = function() {
         $http.get('http://benefizio.liberouter.org:5555/config').success(function(data) {
             this.addr = data.host + ':' + data.port + data.events;
-            $localStorage['nd-config'] = data;
+            $localStorage['config'] = data;
             alert(data);
         });
     }
 
     this.get = function(url, params, info) {
-        console.log(params)
 		return $http({
             url : addr + url,
             method : "GET",
-            params : params
+            params : params,
+            headers : {
+                'Authorization' : this.auth()
+            }
         })
         .success(function(data) {
             if (info != undefined) {
@@ -100,6 +106,6 @@ app.service('api', ['$http', '$log', '$mdToast', function($http, $log, $mdToast,
 
 //    this.put = function
 
-}]);
+});
 
 
