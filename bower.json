@@ -9,7 +9,8 @@
     "angular-route": ">1.4.2",
     "jquery": "~1.9.0",
     "ngstorage": "~0.3.10",
-    "ngmap": "~1.16.7"
+    "ngmap": "~1.16.7",
+    "angular-gridster": "~0.13.5"
   },
   "main": "js/app.js",
   "homepage": "https://github.com/CESNET/Nemea-Dashboard",
