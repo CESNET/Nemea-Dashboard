@@ -26,49 +26,7 @@ app.value('boxes_arr', [
             "window" : 60,
             "begintime" : ""
         }
-        /*"options" : { 
-            chart: {
-                type: 'multiBarChart',
-                height: 300,
-                margin : {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                },
-                x: function(d){ return d.x; },
-                y: function(d){ return d.y; },
-                useInteractiveGuideline: true,
-                dispatch: {
-                    stateChange: function(e){ console.log("stateChange"); },
-                    changeState: function(e){ console.log("changeState"); },
-                    //tooltipShow: function(e){ console.log("tooltipShow"); },
-                    //tooltipHide: function(e){ console.log("tooltipHide"); }
-                },
-                xAxis: {
-                    axisLabel: 'Time (ms)',
-                    tickFormat: function(d) {
-                        return d3.time.format('%x/%X')(new Date(d))
-                    }
-                },
-                yAxis: {
-                    axisLabel: 'Voltage (v)',
-                    tickFormat: function(d){
-                        return d3.format('.02f')(d);
-                    },
-                    axisLabelDistance: 0
-                },
-            },
-            title: {
-                enable: true,
-                text: 'Title for Line Chart 2'
-            },
-          }*/
-      },
-      // {
-      //   "title": "three",
-      //   "type"    : "incident"
-      // },
+      }
     ]
   },
   { 
@@ -387,3 +345,94 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
   };
 
 });
+
+app.controller('grid', function($scope) {
+$scope.opt = {
+    outerMargin: false,
+    columns: 6,
+    pushing: true,
+    rowHeight: 'match',
+    colWidth : 'auto',
+    floating: true,
+    draggable: {
+        enabled: true
+    },
+    resizable: {
+        enabled: true,
+        handles: ['n', 'e', 's', 'w', 'se', 'sw']
+    }
+}
+
+$scope.standardItems = [{
+    sizeX: 2,
+    sizeY: 2,
+    row: 0,
+    "data-row": 0,
+    "data-col": 0,
+    col: 0,
+    "title"   : "Events shares",
+    "type"    : "piechart",
+    "content" : "",
+    "config"  : {
+        "metric"    : "category",
+        "type"      : "piechart",
+        "period"    : "24",
+        "begintime" : ""
+    }
+}, {
+    sizeX: 2,
+    sizeY: 2,
+    row: 0,
+    col: 2
+}, {
+    sizeX: 2,
+    sizeY: 1,
+    row: 2,
+    col: 1
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 2,
+    col: 3
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 2,
+    col: 4
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 0,
+    col: 4
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 0,
+    col: 5
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 1,
+    col: 4
+}, {
+    sizeX: 1,
+    sizeY: 2,
+    row: 1,
+    col: 5
+}, {
+    sizeX: 1,
+    sizeY: 1,
+    row: 2,
+    col: 0
+}];
+
+    var row = $scope.standardItems[$scope.standardItems.length - 1].row + 1;
+    var col = $scope.standardItems[$scope.standardItems.length - 1].col + 1;
+$scope.additem = {
+    sizeX: 1,
+    sizeY: 1,
+    row : row,
+    col : col
+} 
+
+})
