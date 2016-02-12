@@ -1,6 +1,6 @@
 from config import Config
 
-from flask import Flask, session, escape, request, Response
+from flask import Flask, session, escape, request, Response, abort
 from flask.ext.cors import CORS
 import pymongo
 import json
@@ -12,6 +12,7 @@ from bson.objectid import ObjectId
 from time import mktime
 import jwt
 import bcrypt
+from functools import wraps
 
 # Load config.json
 config = Config()
@@ -117,8 +118,8 @@ class dbConnector(object):
 
 class Auth(object):
     errors = {
-        '0' : 'User email not found.',
-        '1' : 'User email and password doesn\'t match.',
+        '0' : 'Username not found.',
+        '1' : 'Username and password doesn\'t match.',
         '2' : 'Expired session.',
         '3' : 'Authorization header is missing.'
     }
@@ -135,7 +136,7 @@ class Auth(object):
             'description' : self.errors[str(code)]
         }
         res = json_util.dumps(msg)
-        return msg, 401
+        return msg
 
     def login(self, username, password):
         query = {
@@ -162,12 +163,13 @@ class Auth(object):
 
     # Decorator for required Authorization JWT token
     def required(self, f):
-        def decorated(*args, **kwargs):
+        @wraps(f)
+        def verify_jwt(*args, **kwargs):
             auth = request.headers.get('Authorization', None)
             if not auth:
-                return self.auth_error(3)
+                return abort(401)
             return f(*args, **kwargs)
-        return decorated
+        return verify_jwt
 
 
 db = dbConnector()
@@ -180,7 +182,7 @@ app.config['SECRET_KEY'] = 'secret-super'
 # Enable Cross-Origin
 CORS(app)
 
-@app.route('/v2/auth', methods=['POST'])
+@app.route(C['users'] + 'auth', methods=['POST'])
 def login():
     user = request.get_json()
     
@@ -224,6 +226,7 @@ def get_config():
     return(json.dumps(config))
 
 @app.route(C['events'] + '<int:items>', methods=['GET'])
+@auth.required
 def get_last(items):
     if items == 0 or items > 10000:
         items = 100
@@ -267,6 +270,7 @@ def query():
 
 
 @app.route(C['events'] + 'agg', methods=['GET'])
+@auth.required
 def aggregate():
     req = request.args
     if req['type'] == 'piechart':
