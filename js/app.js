@@ -2,7 +2,7 @@ var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessag
 
 app.config(config);
 
-function config($routeProvider, $mdThemingProvider) {
+function config($routeProvider, $mdThemingProvider, $httpProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',
@@ -40,7 +40,7 @@ function config($routeProvider, $mdThemingProvider) {
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
 
-
+	$httpProvider.defaults.headers.common['Authorization'] = "autentizace";
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
 	// 	//PRODUCTION
