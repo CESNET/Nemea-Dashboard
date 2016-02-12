@@ -1,15 +1,22 @@
-app.controller('loginController', function($scope, $location, $log, loginAuth, $rootScope) {
-	$scope.title = "Login!";
+app.controller('loginController', function($scope, $location, $log, user) {
+	$scope.title = "Login to Nemea Dashboard";
 	$scope.loginBtn = "Login";
     
-    $scope.submit = function(user) {
-        console.log(user);
+    $scope.submit = function(cred) {
+		$scope.loginBtn = "Authenticating...";
+        $scope.loginBtnDisabled = true;
+
+        user.auth(cred)
+        .success(function(data) {
+            $location.path('/');    
+        })
+        .error(function(msg) {
+            $scope.error_mes = msg;
+            $scope.loginBtn = "Login"
+            $scope.loginBtnDisabled = false;
+        })
     }
 
-	$scope.hitSubmit = function(user){
-        console.log("test");
-
-		$scope.loginBtn = "Please wait...";
 		
 		/*loginAuth.fetchUser(user)
 		.success(function(data) {
@@ -31,5 +38,6 @@ app.controller('loginController', function($scope, $location, $log, loginAuth, $
 				localStorageService.set('loggedIn', false);	
 			}
 		});*/
-	};
 });
+
+
