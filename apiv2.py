@@ -1,6 +1,6 @@
 from config import Config
 
-from flask import Flask, session, escape, request
+from flask import Flask, session, escape, request, Response
 from flask.ext.cors import CORS
 import pymongo
 import json
@@ -10,6 +10,8 @@ from datetime import date, datetime, timedelta
 from bson import json_util
 from bson.objectid import ObjectId
 from time import mktime
+import jwt
+import bcrypt
 
 # Load config.json
 config = Config()
@@ -113,13 +115,91 @@ class dbConnector(object):
 
 #END db
 
+class Auth(object):
+    errors = {
+        '0' : 'User email not found.',
+        '1' : 'User email and password doesn\'t match.',
+        '2' : 'Expired session.',
+        '3' : 'Authorization header is missing.'
+    }
+    
+    def check_password(self, password, hash):
+        return bcrypt.checkpw(password, hash)
+
+    def create_hash(self, password):
+        return bcrypt.hashpw(password, bcrypt.gensalt())
+    
+    def auth_error(self, code):
+        msg = {
+            'code' : code,
+            'description' : self.errors[str(code)]
+        }
+        res = json_util.dumps(msg)
+        return msg, 401
+
+    def login(self, username, password):
+        query = {
+            'username' : username
+        }
+        res = db.users.find_one(query)
+
+        if not res:
+            return(0)
+
+        if not self.check_password(password, res['password']):
+            return(1)
+
+        return(res)
+
+    def jwt_create(self, payload):
+        encoded = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+        print(str(encoded))
+        return str(encoded.decode('utf-8'))
+
+    def jwt_decode(self, token):
+        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithm=['HS256'])
+        return decoded
+
+    # Decorator for required Authorization JWT token
+    def required(self, f):
+        def decorated(*args, **kwargs):
+            auth = request.headers.get('Authorization', None)
+            if not auth:
+                return self.auth_error(3)
+            return f(*args, **kwargs)
+        return decorated
+
+
 db = dbConnector()
+auth = Auth()
 
 app = Flask(__name__)
 app.debug = C['debug']
+app.config['SECRET_KEY'] = 'secret-super'
 
 # Enable Cross-Origin
 CORS(app)
+
+@app.route('/v2/auth', methods=['POST'])
+def login():
+    user = request.get_json()
+    
+    # Authorize user using their username and password
+    # @return user's document from the DB including config
+    auth_user = auth.login(user['username'], user['password'])
+    
+    if auth_user == 0 or auth_user == 1:
+        return auth.errors[str(auth_user)], 401
+    
+    # Attach JWT for further authentication
+    auth_user['jwt'] = auth.jwt_create({
+        'username' : auth_user['username'],
+        #'password' : auth_user['password'],
+        'created' : mktime(datetime.utcnow().timetuple())
+    })
+
+    return(json_util.dumps(auth_user))
+
 
 # Create indexes
 @app.route(C['events'] + 'indexes', methods=['GET'])
@@ -278,6 +358,7 @@ def aggregate():
 def top():
     # Get URL params
     req = request.args
+    print(request.headers)
 
     # Query date shifted by period set up in front-end
     time = datetime.utcnow() - timedelta(hours=int(req['period']))
