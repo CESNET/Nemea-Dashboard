@@ -1,29 +1,20 @@
-var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage', 'ngMap']);
+var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage', 'ngMap', 'gridster']);
 
 app.config(config);
 
-function config($routeProvider, $mdThemingProvider, $httpProvider) {
+function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorageProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',
 			templateUrl: 'views/login.html',
-			resolve: {
-				//isLogin: checkLogin
-			}
 		})
 		.when('/', {
 			controller: 'homeController',
 			templateUrl: 'views/home.html',
-			resolve: {
-				//isLogin: checkLogin
-			}
 		})
 		.when('/user', {
 			controller: 'userController',
 			templateUrl: 'views/login.html',
-			resolve: {
-				//isLogin: checkLogin
-			}
 		})
         .when('/events', {
             controller : 'eventsController',
@@ -40,7 +31,9 @@ function config($routeProvider, $mdThemingProvider, $httpProvider) {
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
 
-	$httpProvider.defaults.headers.common['Authorization'] = "autentizace";
+    $httpProvider.interceptors.push('notAllowedInterceptor');
+    $localStorageProvider
+        .setKeyPrefix('nd-');
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
 	// 	//PRODUCTION
@@ -52,47 +45,6 @@ function config($routeProvider, $mdThemingProvider, $httpProvider) {
 //	$locationProvider.html5Mode(true);
 };
 
-// $rootScope.$on('$routeChangeStart', function (event, next) {
-//         var userAuthenticated = false; /* Check if the user is logged in */
-
-//         if (!userAuthenticated && !next.isLogin) {
-//             $rootScope.savedLocation = $location.url();
-
-//             $location.path('/login');
-//         }
-//     });
-
-var loginCorrect = null;
-
-checkLogin = function($rootScope, $location, localStorageService) {
-	// console.log("login: " + loginCorrect);
-	// console.log(localStorageService.keys());
-	// if (localStorageService.keys() == '') {
-	// 	localStorageService.set('loggedIn', null);
-	// }
-
-	//$rootScope.$on("$locationChangeStart", function(event){
-
-    	// if (localStorageService.get("loggedIn")) {
-    	// 	//$location.path("/");
-    	// 	console.log("correct")	
-    	// }
-    	// else {
-    	// 	$location.path("/login");
-    	// }
-	//})
-
-		if (localStorageService.get("loggedIn")) {
-    		//$location.path("/");
-    		console.log("correct")	
-    	}
-    	else {
-    		$location.path("/login");
-    	}
-
-	return false;
-}
-
 //take all whitespace out of string
 app.filter('nospace', function () {
       return function (value) {
@@ -100,4 +52,32 @@ app.filter('nospace', function () {
       };
     });
 
+// Always check for a JWT
+app.run(function(user, $localStorage, $location, $rootScope, $log) {
+	$rootScope.$on("$locationChangeStart", function(event) {
+        if ($localStorage["token"] == undefined) {
+            $log.info("no token found, redirecting to /login")
+            $location.path("/login");
+        }
+    })
+})
 
+// HTTP interceptor injected in config
+app.factory('notAllowedInterceptor', function($log, $localStorage, $location, $injector, $q) {
+    var notAllowedInterceptor = {
+        // Intercept $http errors
+        responseError : function(response) {
+            // Check for 401 error
+            if (response.status == 401) {
+                $log.error('You are not allowed to access, redirecting to /login');
+                // Delete exisiting JWT from localStorage 
+                delete $localStorage["token"];
+                // Redirect to login
+                $location.path('/login');
+            }
+            // Return promise so we can handle the error further
+            return $q.reject(response);
+        }
+    }
+    return notAllowedInterceptor;
+})
