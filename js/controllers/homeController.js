@@ -48,53 +48,12 @@ app.value('boxes_arr', [
   },
   ]);
 
-//app.value('editMode', false);
-
-function processData(data) {
-  var dataArr = [];
-  angular.forEach(data, function(value, key) {
-    //console.log(data[key]["scale"]);
-    dataArr.push({ x : data[key]["time_first"]*1000, y : data[key]["scale"]});
-  });
-
-  return [{values: dataArr}];
-};
-
-function pieChart(data) {
-  var counter = new Object();
-  angular.forEach(data, function(value, key) {
-      var doctype = data[key]['type'];
-
-      if (counter[doctype] != undefined ) {
-        counter[doctype] += 1;
-      } else {
-        counter[doctype] = 1;
-      }
-  });
-
-  var dataArr = [];
-  angular.forEach(counter, function(value, key) {
-    dataArr.push({key : key, y : value});
-  });
-
-  return dataArr;
-}
-
-app.controller('userController', function($scope){
-  console.log("hello!");
-});
 
 app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user) {
-	$scope.$storage = $localStorage.$default({
-        counter : 42,
-        //config : user.config()
-    });
 
+    $scope.boxes_arr = user.config();
 
-    $scope.boxes_arr = boxes_arr;
-    $scope.title = "Home sweet home";
-  
-
+    console.log(user.config())
     $scope.addRow = function() {
         $log.info("adding row");
         console.log(boxes_arr);
@@ -109,19 +68,9 @@ app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $
 
 });
 
-
-
-
-
-app.factory('confirmLogout', function(){
-	return function (){
-	    
-	};
-});
-
 app.controller('topBar', topBarCtrl);
 
-function topBarCtrl($mdDialog, confirmLogout, $location, $mdSidenav){
+function topBarCtrl($mdDialog, $location, $mdSidenav){
 
 	this.user = "Petr"
 
@@ -154,14 +103,13 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location){
+app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location, user){
     
     function timeShift() {    
         if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' )) {
             $scope.box.config.begintime = (function() {
                 var now = new Date();
                 now.setHours(now.getHours() - $scope.box.config.period);
-                console.log(now)
                 return now;
             })();
         }
@@ -192,6 +140,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
     $scope.edit = function(box) {
         $scope.editMode = true;
         $scope.backupModel = angular.copy(box);
+        $scope.$emit("switch-drag");
     }
 
     // Save changes and disable edit mode
@@ -218,6 +167,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         // Shift time for query
         timeShift();
 
+        $scope.$emit("switch-drag");
         // Get required data
         if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
             api.get('agg', $scope.box.config, true).success(function(data) {
@@ -238,22 +188,21 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         $scope.box = angular.copy($scope.backupModel);
         $scope.backupModel = {};
         $scope.editMode = false;
+        $scope.$emit("switch-drag");
     }
-    $scope.total = 0;
-
+    
     $scope.top = function() {
         timeShift()
         api.get('top', $scope.box.config, true).success(function(data) {
-                console.log(data);
-                })
+            console.log(data);
+            $scope.box.data = data;
+        })
     }
     
     if ($scope.box != undefined) {
         if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
             if ($scope.box.type == 'piechart') {
                 $scope.box.options = PIECHART.options;
-                console.log("piechart")
-                console.log(JSON.stringify($scope.box.options.chart.pie.dispatch))
             }
             if ($scope.box.type == 'barchart')
                 $scope.box.options = AREA.options;
@@ -267,7 +216,6 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 // Sum all events
                 if ($scope.box.type == 'piechart') {
                     for(var i = 0; i < $scope.box.data.length; i++) {
-                        console.log($scope.box.data[i].x)
                         $scope.total = $scope.total + Number($scope.box.data[i].x);
                     }
                 }
@@ -282,20 +230,18 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
     $scope.user = function() {
         var settings = angular.copy($scope.boxes_arr);
-        //console.log(settings);
+        console.log($scope.boxes_arr)
         for (var i = 0; i < settings.length; i++) {
             for (var j = 0; j < settings[i].items.length; j++) {
                 settings[i].items[j].data = [];
-                //console.log(settings[i].items[j].data);
             }
         }
         
         var query = {
-            'id' : '56b33e737194ed8d440db2b7',
-            'password' : 'password',
-            'settings' : settings
+            "jwt" : user.jwt(),
+            "settings" : settings
         }
-        $http.put('http://benefizio.liberouter.org:5555/v2/users/', JSON.stringify(query))
+        user.put(query)
             .success(function(data) {
                 console.log(data);
             })
@@ -304,49 +250,17 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             })
     }
 
-    
+    $scope.$on('gridster-item-resized', function(gridster) {
+        $timeout(function() {
+          console.log("request accepted");
+          window.dispatchEvent(new Event('resize'));
+        }, 100);
+    })
 
-
-  //Add element to given row
-    $scope.addElem = function(index) {
-        $log.info("adding element");
-
-        var item = {
-            title : 'New widget',
-            config : {}
-
-        };
-        $scope.full = false;
-
-
-    if (boxes_arr[index].items.length > 5) {
-      $scope.full = true;
-    } else {
-      boxes_arr[index].items.push(item);
-    }
-
-    $scope.$emit('requestRedraw');
-  };
-
-  $scope.removeElem = function(parIndex,index) {
-
-    $log.info(parIndex);
-    $log.info(index);
-
-    boxes_arr[parIndex].items.splice(index, 1);
-    var tmp = {};
-            
-    if(boxes_arr[parIndex].items.length == 0) {
-      tmp = boxes_arr[parIndex].items[index];
-      boxes_arr.splice(parIndex, 1);
-    }
-
-    $scope.$emit('requestRedraw');
-  };
-
+  
 });
 
-app.controller('grid', function($scope) {
+app.controller('grid', function($scope, $timeout, $log) {
 $scope.opt = {
     outerMargin: false,
     columns: 6,
@@ -354,21 +268,53 @@ $scope.opt = {
     rowHeight: 'match',
     colWidth : 'auto',
     floating: true,
+    swapping: true,
     draggable: {
-        enabled: true
+        enabled: false,
     },
     resizable: {
-        enabled: true,
-        handles: ['n', 'e', 's', 'w', 'se', 'sw']
+        enabled: false,
+        handles: ['n', 'e', 's', 'w', 'se', 'sw'],
+        stop: function(event, $element, widget) {
+            console.log("resize end");
+            $scope.$emit('requestRedraw');
+            $timeout(function() {
+              console.log("request accepted");
+              window.dispatchEvent(new Event('resize'));
+            }, 100);
+
+        }
     }
 }
 
-$scope.standardItems = [{
+$scope.$on('switch-drag', function() {
+    $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
+    $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
+})
+
+$scope.remove = function(box) {
+
+    $log.info(box);
+
+    var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
+    $log.info(tmp)
+
+    /*boxes_arr[parIndex].items.splice(index, 1);
+    var tmp = {};
+            
+    if(boxes_arr[parIndex].items.length == 0) {
+      tmp = boxes_arr[parIndex].items[index];
+      boxes_arr.splice(parIndex, 1);
+    }
+
+    $scope.$emit('requestRedraw');*/
+  };
+
+
+$scope.items = [{
     sizeX: 2,
     sizeY: 2,
     row: 0,
-    "data-row": 0,
-    "data-col": 0,
     col: 0,
     "title"   : "Events shares",
     "type"    : "piechart",
@@ -382,57 +328,36 @@ $scope.standardItems = [{
 }, {
     sizeX: 2,
     sizeY: 2,
+    minSizeX : 2,
+    minSizeY : 2,
     row: 0,
-    col: 2
+    col: 2,
+    "title"   : "Last 24 hours",
+    "type"    : "barchart",
+    "data"    : "",
+    "timestamp": "",
+    "config" : {
+        "metric" : "category",
+        "type" : "barchart",
+        "period" : 24,
+        "window" : 60,
+        "begintime" : ""
+    }
 }, {
-    sizeX: 2,
-    sizeY: 1,
-    row: 2,
-    col: 1
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 2,
-    col: 3
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 2,
-    col: 4
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 0,
-    col: 4
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 0,
-    col: 5
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 1,
-    col: 4
-}, {
-    sizeX: 1,
-    sizeY: 2,
-    row: 1,
-    col: 5
-}, {
-    sizeX: 1,
-    sizeY: 1,
-    row: 2,
-    col: 0
+    "title" : "Top events in 1 hour",
+    "type"  : "top",
+    "config" : {
+        "period" : 1,
+        "begintime" : ""
+    }
 }];
-
-    var row = $scope.standardItems[$scope.standardItems.length - 1].row + 1;
-    var col = $scope.standardItems[$scope.standardItems.length - 1].col + 1;
+//    var row = $scope.standardItems[$scope.standardItems.length - 1].row + 1;
+//    var col = $scope.standardItems[$scope.standardItems.length - 1].col + 1;
 $scope.additem = {
     sizeX: 1,
     sizeY: 1,
-    row : row,
-    col : col
+    //row : row,
+    //col : col
 } 
 
 })
