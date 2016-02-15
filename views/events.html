@@ -82,7 +82,7 @@
                 <div flex=15 layout-padding>{{ item.Source[0].IP4[0] }}<small ng-if="!item.Source[0].IP4">N/A</small></div>
                 <div flex=15 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">N/A</small></div>
                 <div flex=20 layout-padding>{{ item.Description | limitTo : 50 : 0 }}{{item.Description.length > 50 ? ' ...' : ''}}</div>
-                <div flex=10 layout-padding>{{ item.FlowCount | number }}</div>
+                <div flex=10 class="flow-count"layout-padding>{{ item.FlowCount | number }}</div>
                 <div flex=5>
                     <md-button class="md-button-toggle md-raised" ng-click="enableSub = !enableSub"  aria-label="Enable details">
                         <span ng-if="enableSub">Info</span>
