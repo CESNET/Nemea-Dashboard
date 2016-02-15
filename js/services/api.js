@@ -30,7 +30,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                         .simple()
                         .textContent('Data successully loaded')
                         .position("top right")
-                        .hideDelay(5000)
+                        .hideDelay(3000)
                         .theme("success-toast")
                 );
             }
@@ -43,7 +43,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                 $mdToast.simple()
                     .textContent('Something went wrong')
                     .position("top right")
-                    .hideDelay(5000)
+                    .hideDelay(3000)
                     .theme("error-toast")
             );
 
@@ -59,7 +59,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                             .simple()
                             .textContent('Data successfully loaded')
                             .position("top right")
-                            .hideDelay(5000)
+                            .hideDelay(3000)
                             .theme("success-toast")
                     );
                 }
@@ -71,7 +71,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                     $mdToast.simple()
                         .textContent('Something went wrong')
                         .position("top right")
-                        .hideDelay(5000)
+                        .hideDelay(3000)
                         .theme("error-toast")
                 );
             })
@@ -86,7 +86,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                             .simple()
                             .textContent('Data successfully loaded')
                             .position("top right")
-                            .hideDelay(5000)
+                            .hideDelay(3000)
                             .theme("success-toast")
                     );
                 }
@@ -98,13 +98,12 @@ app.service('api', function($http, $log, $mdToast, $localStorage) {
                     $mdToast.simple()
                         .textContent('Something went wrong')
                         .position("top right")
-                        .hideDelay(5000)
+                        .hideDelay(3000)
                         .theme("error-toast")
                 );
             })
     }
 
-//    this.put = function
 
 });
 
