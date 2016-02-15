@@ -10,12 +10,12 @@
 
 		<md-content flex>
 			<div ng-repeat="menu_item in menu">
-				<md-button class="md-button-toggle menu_item" ng-href="#{{menu_item.link}}" ng-click="enable=!enable; selected=true" ng-class="{'toggled-item' : isActive(menu_item.link)}">
+				<md-button class="md-button-toggle menu_item" ng-href="{{menu_item.link}}" ng-click="enable=!enable; selected=true" ng-class="{'toggled-item' : isActive(menu_item.link)}">
 					{{menu_item.title}} <span ng-if="menu_item.items && enable" class="toggle">+</span> <span ng-if="menu_item.items && !enable" class="toggle">-</span>
 				</md-button>
 				<md-button class="md-button-toggle submenu_item" ng-href="#/{{submenu_item.link}}" ng-repeat="submenu_item in menu_item.items" ng-if="!enable" ng-class="{'animate fadeIn' : !enable}" >{{submenu_item.title}}</md-button>
 			</div>			
-			<md-button ng-click="changeMode()">Change Mode</md-button>
+			<md-button ng-click="logout()">Logout</md-button>
 		</md-content>
 
 	</md-sidenav>

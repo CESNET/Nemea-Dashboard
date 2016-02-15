@@ -68,7 +68,7 @@ app.constant('AREA', {
     options : {
         chart: {
             type: 'multiBarChart',
-            height: 500,
+            height: 450,
             margin : {
                 top: 30,
                 right: 20,
@@ -123,7 +123,7 @@ app.constant('AREA', {
 app.constant("MENU", [
 	{
 		"title" : "Dashboard",
-        "link" : "/"
+        "link" : "#/"
 		/*"items" : [
 			{
 				"title" : "Users",
@@ -136,7 +136,7 @@ app.constant("MENU", [
 	},
 	{
 		"title" : "Events",
-		"link" 	: "/events"
+		"link" 	: "#/events"
 	},
 	/*{
 		"title" : "Analytics23",
@@ -163,18 +163,14 @@ app.constant("MENU", [
 	{
 		"title" : "Settings",
 		"items" : [
+            {
+				"title" : "My profile",
+				"link"	: "/profile"
+			},
 			{
 				"title" : "Users",
 				"link" 	: "/settings"
 			},
-			{
-				"title" : "My profile",
-				"link"	: "/profile"
-			},
-			{
-				"title" : "My profile",
-				"link"	: "/profile"
-			}
 		]
 	}
 ]);
