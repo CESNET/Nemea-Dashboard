@@ -1,6 +1,6 @@
 from config import Config
 
-from flask import Flask, session, escape, request, Response, abort
+from flask import Flask, session, escape, request, Response, abort, session
 from flask.ext.cors import CORS
 import pymongo
 import json
@@ -57,13 +57,15 @@ class dbConnector(object):
     dbName = C["db"]["database"]
     eventsCollection = C["db"]["collection"]["events"]
     usersCollection = C["db"]["collection"]["users"]
+    sessionsCollection = C["db"]["collection"]["sessions"]
     collection = None
     users = None
     events = None
+    sessions = None
     db = None
     socket = None
 
-    def __init__(self, host = None, port = None, db = None, events = None, users = None):
+    def __init__(self, host = None, port = None, db = None, events = None, users = None, sessions = None):
 
         # Setup host and port for DB 
         if host != None and port != None:
@@ -93,6 +95,7 @@ class dbConnector(object):
             self.db = self.socket[self.dbName]
             self.collection = self.events = self.db[self.eventsCollection]
             self.users = self.db[self.usersCollection]
+            self.sessions = self.db[self.sessionsCollection]
 
         # Small trick to catch exception for unavailable database
         except pymongo.errors.ServerSelectionTimeoutError as err:
@@ -149,17 +152,49 @@ class Auth(object):
 
         if not self.check_password(password, res['password']):
             return(1)
-
+        
         return(res)
 
     def jwt_create(self, payload):
         encoded = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-        print(str(encoded))
         return str(encoded.decode('utf-8'))
 
     def jwt_decode(self, token):
         decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithm=['HS256'])
         return decoded
+
+    def store_session(self, username, jwt, user_id):
+        _id = db.sessions.insert({
+            "username" : username,
+            "expire" : datetime.utcnow(),
+            "jwt" : jwt,
+            "user_id" : ObjectId(user_id)
+        })
+
+        return _id
+        
+    def get_session(self, _id):
+        print(_id)
+        res = db.sessions.find_one({"user_id" : ObjectId(_id)})
+        print('=========QUERY RESULT========')
+        print(res['expire'])
+        if res:
+            print('We got it in session')
+            delta = datetime.utcnow() - res['expire']
+            if delta < timedelta(days=31):
+                return res
+        return False
+
+    # Shift expiry date
+    def update_session(self, _id):
+        db.sessions.update({
+            '_id' : ObjectId(_id)
+        },
+        {
+            "$set" : {
+                "expire" : datetime.utcnow()
+            }
+        })
 
     # Decorator for required Authorization JWT token
     def required(self, f):
@@ -168,6 +203,14 @@ class Auth(object):
             auth = request.headers.get('Authorization', None)
             if not auth:
                 return abort(401)
+            decoded_token = self.jwt_decode(auth)
+            print(decoded_token)
+            session_token = self.get_session(decoded_token['_id'])
+            print(session_token)
+            if not session_token:
+                return abort(401)
+            else:
+                self.update_session(session_token['_id'])
             return f(*args, **kwargs)
         return verify_jwt
 
@@ -196,9 +239,11 @@ def login():
     # Attach JWT for further authentication
     auth_user['jwt'] = auth.jwt_create({
         'username' : auth_user['username'],
+        '_id' : str(auth_user['_id']),
         #'password' : auth_user['password'],
         'created' : mktime(datetime.utcnow().timetuple())
     })
+    auth.store_session(auth_user['username'], auth_user['jwt'], auth_user['_id'])
 
     return(json_util.dumps(auth_user))
 
@@ -235,6 +280,7 @@ def get_last(items):
     return (json.dumps(docs, default=json_util.default))
 
 @app.route(C['events'] + 'query', methods=['GET'])
+@auth.required
 def query():
     req = request.args
 
@@ -359,6 +405,7 @@ def aggregate():
     return(json_util.dumps(tmp))
 
 @app.route(C['events'] + 'top', methods=['GET'])
+@auth.required
 def top():
     # Get URL params
     req = request.args
@@ -391,6 +438,7 @@ def top():
 
 # Fetch event with given ID
 @app.route(C['events'] + 'id/<string:id>', methods=['GET'])
+@auth.required
 def get_by_id(id):
     if request.method == 'GET':
         query = {
@@ -401,6 +449,7 @@ def get_by_id(id):
     return(json_util.dumps(res))
 
 @app.route(C['users'], methods=['GET', 'PUT'])
+@auth.required
 def get_users():
     if request.method == 'GET':
         res = list(db.users.find())
@@ -415,6 +464,7 @@ def get_users():
 
 
 @app.route(C['events'] + 'whois/<string:ip>', methods=['GET'])
+@auth.required
 def whois(ip):
     p =Popen(['whois', ip], stdout=PIPE)
     tmp = ""

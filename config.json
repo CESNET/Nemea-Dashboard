@@ -7,7 +7,8 @@
 		"database": "nemeadb",
 		"collection": {
 			"events": "alerts_new",
-			"users": "users"
+			"users": "users",
+            "sessions" : "sessions"
 		}
 	},
 	"api": {
