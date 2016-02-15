@@ -163,11 +163,10 @@ class Auth(object):
         decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithm=['HS256'])
         return decoded
 
-    def store_session(self, username, jwt, user_id):
+    def store_session(self, username, user_id):
         _id = db.sessions.insert({
             "username" : username,
             "expire" : datetime.utcnow(),
-            "jwt" : jwt,
             "user_id" : ObjectId(user_id)
         })
 
@@ -175,9 +174,7 @@ class Auth(object):
         
     def get_session(self, _id):
         print(_id)
-        res = db.sessions.find_one({"user_id" : ObjectId(_id)})
-        print('=========QUERY RESULT========')
-        print(res['expire'])
+        res = db.sessions.find_one({"_id" : ObjectId(_id)})
         if res:
             print('We got it in session')
             delta = datetime.utcnow() - res['expire']
@@ -195,6 +192,9 @@ class Auth(object):
                 "expire" : datetime.utcnow()
             }
         })
+    def delete_session(self, _id):
+        res = db.sessions.remove({"_id" : ObjectId(_id)})
+        return res['ok']
 
     # Decorator for required Authorization JWT token
     def required(self, f):
@@ -236,20 +236,20 @@ def login():
     if auth_user == 0 or auth_user == 1:
         return auth.errors[str(auth_user)], 401
     
+    _id = auth.store_session(auth_user['username'], auth_user['_id'])
+    
     # Attach JWT for further authentication
     auth_user['jwt'] = auth.jwt_create({
         'username' : auth_user['username'],
-        '_id' : str(auth_user['_id']),
-        #'password' : auth_user['password'],
+        '_id' : str(_id),
         'created' : mktime(datetime.utcnow().timetuple())
     })
-    auth.store_session(auth_user['username'], auth_user['jwt'], auth_user['_id'])
-
     return(json_util.dumps(auth_user))
 
 
 # Create indexes
 @app.route(C['events'] + 'indexes', methods=['GET'])
+@auth.required
 def indexes():
     indexes = db.collection.index_information()
     for item in indexes.keys():
@@ -261,6 +261,7 @@ def indexes():
     return(json.dumps(indexes))
 
 @app.route('/config', methods=['GET'])
+@auth.required
 def get_config():
     config = {
         'events' : C['events'],
@@ -335,6 +336,9 @@ def aggregate():
                     },
                     "count" : { "$sum" : 1}
                 }
+            },
+            {
+                "$sort" : { "_id.Categories" : 1 } 
             }
         ]
         res = list(db.collection.aggregate(query))
@@ -409,7 +413,6 @@ def aggregate():
 def top():
     # Get URL params
     req = request.args
-    print(request.headers)
 
     # Query date shifted by period set up in front-end
     time = datetime.utcnow() - timedelta(hours=int(req['period']))
@@ -457,11 +460,20 @@ def get_users():
     if request.method == 'PUT':
         print('updating a user')
         user = request.get_json()
+        token = auth.jwt_decode(request.headers.get('Authorization', None))
         
-        res = db.users.find_one_and_update({'_id' : ObjectId(user['id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
+        res = db.users.find_one_and_update({'_id' : ObjectId(token['_id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
         print(user)
     return(json_util.dumps(res))
 
+@app.route(C['users'] + 'logout', methods=['DELETE'])
+#@auth.required
+def delete_user_session():
+    print(request.headers)
+    jwt = request.headers.get('Authorization', None)
+    decoded_jwt = auth.jwt_decode(jwt)
+    res = auth.delete_session(decoded_jwt['_id'])
+    return(str(res))   
 
 @app.route(C['events'] + 'whois/<string:ip>', methods=['GET'])
 @auth.required
