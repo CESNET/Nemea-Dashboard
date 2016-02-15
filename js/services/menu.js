@@ -20,7 +20,7 @@ app.directive("sidebarMenu", function() {
 			section: '='
 		},
 		templateUrl: 'partials/sidebar-menu.html',
-        controller: function($scope, $mdSidenav, $location, MENU) {
+        controller: function($scope, $mdSidenav, $location, MENU, user) {
             $scope.menu = MENU;
 
             $scope.isActive = function(current) {
@@ -41,6 +41,10 @@ app.directive("sidebarMenu", function() {
             $scope.closeLeft = function() {
                 $mdSidenav('left').toggle();
             };
+
+            $scope.logout = function() {
+                user.logout();
+            }
     
  
         }
@@ -52,9 +56,23 @@ app.directive("topbarMenu", function() {
 		scope: {
 			section: '='
 		},
-		templateUrl: 'partials/topbar-menu.html'
+		templateUrl: 'partials/topbar-menu.html',
+        controller : function($scope, $mdSidenav) {
+            $scope.toggleLeft = function() {
+                $mdSidenav('left').toggle();
+            }
+        }
 	};
 });
+
+
+app.controller('topBar', topBarCtrl);
+
+function topBarCtrl($mdDialog, $location, $mdSidenav){
+    this.toggleLeft = function() {
+        $mdSidenav('left').toggle();
+    };
+};
 
 app.directive("boxes", function() {
 	return {
