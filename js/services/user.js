@@ -1,4 +1,4 @@
-app.service('user', function($localStorage, $http, $mdToast, $location){
+app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
     var cache = null;
 
     var dashboard = [];

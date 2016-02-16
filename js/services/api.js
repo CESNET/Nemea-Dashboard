@@ -1,4 +1,4 @@
-app.service('api', function($http, $log, $mdToast, $localStorage, CONFIG) {
+app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONFIG) {
 
 	var addr = CONFIG["host"] + ":" + CONFIG["port"] + "/" + CONFIG["version"] + "/events/";
 
