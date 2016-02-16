@@ -2,7 +2,7 @@
 
 ##Installing Nemea-Dashboard
 ###Prequisites
-You'll need `python3`, `pip`, `bower`, `mongoDB` and any HTTP server (tested and run on `httpd`)
+You'll need `python3`, `pip3`, `bower`, `mongoDB` and any HTTP server (tested and run on `httpd`)
 
 ###Installing
 1. Clone this repository
