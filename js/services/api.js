@@ -1,6 +1,6 @@
-app.service('api', function($http, $log, $mdToast, $localStorage) {
+app.service('api', function($http, $log, $mdToast, $localStorage, CONFIG) {
 
-	var addr = "http://benefizio.liberouter.org:5555/v2/events/";
+	var addr = CONFIG["host"] + ":" + CONFIG["port"] + "/" + CONFIG["version"] + "/events/";
 
     this.auth = function() {
         return $localStorage["token"];

@@ -53,7 +53,7 @@ app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $
 
     $scope.boxes_arr = user.config();
 
-    console.log(user.config())
+    //console.log(user.config())
     $scope.addRow = function() {
         $log.info("adding row");
         console.log(boxes_arr);
@@ -117,7 +117,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
 
     timeShift();
 
-    $scope.loading = true;
+    $scope.box.loading = true;
         
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -162,7 +162,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         $scope.editMode = false;
 
         // Show loading indicator
-        $scope.loading = true;
+        $scope.box.loading = true;
 
         // Shift time for query
         timeShift();
@@ -171,12 +171,12 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         // Get required data
         if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
             api.get('agg', $scope.box.config, true).success(function(data) {
-                $scope.loading = false;    
+                $scope.box.loading = false;    
                 $scope.box.data = data;
             })
         } else if ($scope.box.type == 'top') {
             api.get('top', $scope.box.config, true).success(function(data) {
-                $scope.loading = false;    
+                $scope.box.loading = false;    
                 $scope.box.data = data;
             })
 
@@ -210,7 +210,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             $scope.box.config.type = $scope.box.type;
             
             api.get('agg', $scope.box.config).success(function(data) {
-                $scope.loading = false;
+                $scope.box.loading = false;
                 $scope.box.data = data;
                 
                 // Sum all events
@@ -222,27 +222,29 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             });
         } else if ($scope.box.type == 'top') {
             api.get('top', $scope.box.config).success(function(data) {
-                $scope.loading = false;
+                $scope.box.loading = false;
                 $scope.box.data = data;        
             })
         }
     }
 
     $scope.user = function() {
-        var settings = angular.copy($scope.boxes_arr);
-        console.log($scope.boxes_arr)
+        var settings = angular.copy($scope.items);
+        console.log(settings)
         for (var i = 0; i < settings.length; i++) {
-            for (var j = 0; j < settings[i].items.length; j++) {
-                settings[i].items[j].data = [];
-            }
+                delete settings[i]["data"];
+                delete settings[i]["options"];
         }
         
         var query = {
             "jwt" : user.jwt(),
             "settings" : settings
         }
+
+        $log.info(query)
         user.put(query)
             .success(function(data) {
+                console.log("Data");
                 console.log(data);
             })
             .error(function(data){
@@ -260,15 +262,16 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
   
 });
 
-app.controller('grid', function($scope, $timeout, $log) {
+app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/) {
 $scope.opt = {
     outerMargin: false,
     columns: 6,
     pushing: true,
-    rowHeight: 'match',
+    rowHeight: 250 + 10,
     colWidth : 'auto',
     floating: true,
     swapping: true,
+    mobileBreakPoint: 933,
     draggable: {
         enabled: false,
     },
@@ -286,6 +289,12 @@ $scope.opt = {
         }
     }
 }
+/*var w = angular.element($window);
+w.bind('resize', function() {
+    //$scope.opt.mobileModeEnable = $mdMedia('gt-md');
+    $scope.opt.isMobile = !$mdMedia('gt-md');
+});*/
+
 
 $scope.$on('switch-drag', function() {
     $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
@@ -294,20 +303,8 @@ $scope.$on('switch-drag', function() {
 
 $scope.remove = function(box) {
 
-    $log.info(box);
-
     var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
-    $log.info(tmp)
 
-    /*boxes_arr[parIndex].items.splice(index, 1);
-    var tmp = {};
-            
-    if(boxes_arr[parIndex].items.length == 0) {
-      tmp = boxes_arr[parIndex].items[index];
-      boxes_arr.splice(parIndex, 1);
-    }
-
-    $scope.$emit('requestRedraw');*/
   };
 
 
@@ -332,9 +329,9 @@ $scope.items = [{
     minSizeY : 2,
     row: 0,
     col: 2,
-    "title"   : "Last 24 hours",
-    "type"    : "barchart",
-    "data"    : "",
+    "title" : "Last 24 hours",
+    "type" : "barchart",
+    "data" : "",
     "timestamp": "",
     "config" : {
         "metric" : "category",
@@ -351,13 +348,55 @@ $scope.items = [{
         "begintime" : ""
     }
 }];
-//    var row = $scope.standardItems[$scope.standardItems.length - 1].row + 1;
-//    var col = $scope.standardItems[$scope.standardItems.length - 1].col + 1;
-$scope.additem = {
-    sizeX: 1,
-    sizeY: 1,
-    //row : row,
-    //col : col
-} 
+
+$scope.addItem = function() {
+    var item = {
+        "title" : "New box",
+        "loading" : false,
+        sizeX: 1,
+        sizeY: 1,
+        //row : row,
+        //col : col
+    }
+
+    $scope.items.push(item)
+}
 
 })
+
+
+app.directive('gridsterDynamicHeight', gridsterDynamicHeight);
+
+gridsterDynamicHeight.$inject = [];
+function gridsterDynamicHeight() {
+
+    var directive = {
+        scope: {
+            item: "=" //gridster item
+        },
+        link: link,
+        restrict: 'A'
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+
+        scope.$watch(function() {
+
+            return element[0].scrollHeight;
+        },
+        function(newVal, oldVal) { 
+            setTimeout(function() {
+            var rowHeightOption = 270; // Change this value with your own rowHeight option
+            var height = rowHeightOption * scope.item.sizeY;
+            //console.log(scope.item.title);
+            //console.log("newVal: " + newVal + "     height: " + height)
+            if(newVal > height){
+
+                var div = Math.floor(newVal / rowHeightOption);
+                div++;
+                scope.item.sizeY = div; 
+            }}, 10);
+        });
+    }
+}

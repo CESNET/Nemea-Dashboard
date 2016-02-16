@@ -3,6 +3,8 @@ app.service('user', function($localStorage, $http, $mdToast, $location){
 
     var dashboard = [];
 
+	var addr = CONFIG["host"] + ":" + CONFIG["port"] + "/" + CONFIG["version"] + "/users/";
+
     this.config = function() {
         return $localStorage["dashboard"];
     }
@@ -12,7 +14,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location){
     }
 
     this.auth = function(user) {
-        return $http.post("http://benefizio.liberouter.org:5555/v2/users/auth", angular.toJson(user))
+        return $http.post(addr + "auth", angular.toJson(user))
         .success(function(data) {
             $localStorage["token"] = data["jwt"];
             
@@ -31,7 +33,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location){
 
     this.put = function(data, info) {
         return $http({
-            url : "http://benefizio.liberouter.org:5555/v2/users/", 
+            url : addr, 
             method : "PUT",
             data : angular.toJson(data),
             headers : {
@@ -69,7 +71,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location){
         var user = $localStorage["token"];
 
         return $http({
-            url : "http://benefizio.liberouter.org:5555/v2/users/logout",
+            url : addr + "logout",
             method : "DELETE",
             headers : {
                 'Authorization' : $localStorage["token"]

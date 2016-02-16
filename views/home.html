@@ -6,8 +6,8 @@
     <section class="content" layout-padding>
         <div ng-controller="grid">
             <div gridster="opt">
-                <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box">
-                	<div layout-padding>
+                <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" class="box" >
+                	<div layout-padding gridster-dynamic-height item="box">
 	                    <md-menu md-position-mode="target-right target">
 	                            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
 	                            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
@@ -36,7 +36,7 @@
 
 	                        <div ng-if="!editMode">
 	                            <h2>{{box.title}}</h2>
-	                            <div ng-if="loading == true" class="loading" layout-align="center center" layout="row">
+	                            <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
 	                                <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
 	                                <br>
 	                                Fetching data
@@ -54,11 +54,11 @@
 	                            </nvd3>
 
 	                            <div ng-if="box.type == 'top'" layout="column">
-	                                <div ng-repeat="event in box.data" flex layout="row">
-	                                    <span flex>{{ event.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</span>
-	                                    <span flex>{{ event._id }}</span>
-	                                    <span flex>{{ event.FlowCount | number}}</span>
-	                                    <md-button flex ng-href="#/events/{{event.id['$oid']}}">Detail</md-button>
+	                                <div ng-repeat="event in box.data" flex layout="row" layout-align="start center">
+	                                    <span flex="20">{{ event.DetectTime['$date'] | date : 'H:mm:ss'}}</span>
+	                                    <span flex="40">{{ event._id }}</span>
+	                                    <span flex="20">{{ event.FlowCount | number}}</span>
+	                                    <span flex="20"><md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
 	                                </div>
 	                            </div>
 	                        </div>
@@ -111,8 +111,6 @@
 	                                <md-button aria-label="Cancel changes" ng-click="box = backupModel; cancel(box)" class="cancel" >Cancel</md-button>
 	                                <md-button aria-label="Save changes" ng-click="save()" class="md-raised md-primary" >Save</md-button>
 	                            </div>
-
-{{ box | json}}
 	                        </div>
 
 	                        
@@ -120,8 +118,13 @@
                 </div> <!-- /gridster-item -->
             </div> <!-- /gridster -->
             
-            <div class="box md-whiteframe-z1" ng-click="addItem()">Add item</div>
-            {{ opt }}
+            <div class="box md-whiteframe-z1 add-item" layout="column" layout-align="center center">
+                <md-button class="md-icon-button" aria-label="Add item" ng-click="addItem()">
+                    <md-icon md-svg-icon="img/plus.svg"></md-icon>
+                    <br>
+                    Add item
+                </md-button>
+            </div>
     	</div> <!-- /ng-controller grid -->
 	</section> <!-- /content -->
     </md-content>
