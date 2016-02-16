@@ -142,6 +142,11 @@ md-toolbar:not(.md-menu-toolbar) {
         text-align: center;
         display: block;
     }
+    
+    position: absolute;
+    top: 3em;
+    left: 50%;
+    margin-left: -85px;
 }
 
 
@@ -175,11 +180,40 @@ md-toolbar:not(.md-menu-toolbar) {
     }
 }
 
+.box {
+    h2 {
+        margin-top:0;
+    }
 
-.edit-mode-box {
+    &.add-item {
+        width: 200px;
+        height: 200px;
+        margin: 10px 0 0 0;
+position: relative;
+        .md-button.md-icon-button {
+            width: auto!important;
+            height: auto!important;
+
+            md-icon {
+                width: 96px!important;
+                height: 96px!important;
+            }
+        }
+
+        p {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            top: 0;
+            right: 0;
+        }
+    }
+}
+
+/*.edit-mode-box {
     &.ng-leave, &.ng-enter {
-        transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 5.5s;
-        border-color: green;
+        //transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 5.5s;
+        //border-color: green;
         opacity: 1;
     }
 
@@ -189,7 +223,7 @@ md-toolbar:not(.md-menu-toolbar) {
     &.ng-enter-active {
         opacity: 1;
     }
-}
+}*/
 
 @media (max-width: 1280px) {
     .wrapper {
