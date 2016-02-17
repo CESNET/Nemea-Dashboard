@@ -50,21 +50,22 @@ app.value('boxes_arr', [
 
 
 app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user) {
-
-    $scope.boxes_arr = user.config();
-
-    //console.log(user.config())
-    $scope.addRow = function() {
-        $log.info("adding row");
-        console.log(boxes_arr);
-        var tmp = {};
-
-        tmp.row = boxes_arr.length;
-        tmp.items = [{
-            "title" : "aloha!"
-        }];
-        boxes_arr.push(tmp);
+    $scope.activeGrid = false; 
+    $scope.openMenu = function($mdOpenMenu, ev) {
+        originatorEv = ev;
+        $mdOpenMenu(ev);
     };
+
+    $scope.addItem = function() {
+        $scope.$broadcast('addItem');
+    }
+
+    $scope.enableGrid = function() {
+        console.log('Enable grid')
+        $scope.$broadcast('enableGrid');
+        $scope.activeGrid = !$scope.activeGrid;
+    }
+
 
 });
 
@@ -298,7 +299,8 @@ w.bind('resize', function() {
 console.log(user.config())
 
 
-$scope.$on('switch-drag', function() {
+$scope.$on('enableGrid', function() {
+    console.log('Caught request')
     $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
     $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
 })
@@ -351,18 +353,19 @@ $scope.items = user.config();
     }
 }];*/
 
-$scope.addItem = function() {
-    var item = {
-        "title" : "New box",
-        "loading" : false,
-        sizeX: 1,
-        sizeY: 1,
-        //row : row,
-        //col : col
-    }
+    $scope.$on('addItem', function() {
+        var item = {
+            "title" : "New box",
+            "loading" : false,
+            sizeX: 1,
+            sizeY: 1,
+            //row : row,
+            //col : col
+        }
 
-    $scope.items.push(item)
-}
+        $scope.items.push(item)
+    });
+
 
 })
 
