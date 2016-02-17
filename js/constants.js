@@ -110,7 +110,17 @@ app.constant('AREA', {
             },
             multibar: {
                 dispatch : {
-                    elementClick: function(e) {console.log(e)},
+                    elementClick: function(e) {
+                        var date = new Date(e.data.x);
+                        console.log(date)
+                        var hours = date.getHours();
+                        var minutes = date.getMinutes();
+                        date.setHours(0);
+                        date.setMinutes(0);
+                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key;
+                        //console.log(e.data.key);
+                        //console.log(e.data.x);
+                    },
 
                 }
             }
