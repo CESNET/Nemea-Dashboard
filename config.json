@@ -14,7 +14,7 @@
 	"api": {
 		"version": "v2",
         "port" : 5555,
-        "host" : "http://benefizio.liberouter.org"
+        "host" : "http://localhost"
 	},
 	"debug": true
 }
