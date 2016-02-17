@@ -262,7 +262,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
   
 });
 
-app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/) {
+app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, user) {
 $scope.opt = {
     outerMargin: false,
     columns: 6,
@@ -295,6 +295,8 @@ w.bind('resize', function() {
     $scope.opt.isMobile = !$mdMedia('gt-md');
 });*/
 
+console.log(user.config())
+
 
 $scope.$on('switch-drag', function() {
     $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
@@ -307,8 +309,8 @@ $scope.remove = function(box) {
 
   };
 
-
-$scope.items = [{
+$scope.items = user.config();
+/*$scope.items = [{
     sizeX: 2,
     sizeY: 2,
     row: 0,
@@ -347,7 +349,7 @@ $scope.items = [{
         "period" : 1,
         "begintime" : ""
     }
-}];
+}];*/
 
 $scope.addItem = function() {
     var item = {
@@ -365,10 +367,7 @@ $scope.addItem = function() {
 })
 
 
-app.directive('gridsterDynamicHeight', gridsterDynamicHeight);
-
-gridsterDynamicHeight.$inject = [];
-function gridsterDynamicHeight() {
+app.directive('gridsterDynamicHeight', function ($timeout) {
 
     var directive = {
         scope: {
@@ -380,23 +379,20 @@ function gridsterDynamicHeight() {
     return directive;
 
     function link(scope, element, attrs) {
-
         scope.$watch(function() {
-
             return element[0].scrollHeight;
         },
         function(newVal, oldVal) { 
-            setTimeout(function() {
             var rowHeightOption = 270; // Change this value with your own rowHeight option
             var height = rowHeightOption * scope.item.sizeY;
             //console.log(scope.item.title);
             //console.log("newVal: " + newVal + "     height: " + height)
             if(newVal > height){
-
                 var div = Math.floor(newVal / rowHeightOption);
-                div++;
+                //div++;
                 scope.item.sizeY = div; 
-            }}, 10);
+            }
         });
+
     }
-}
+});
