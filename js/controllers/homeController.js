@@ -107,7 +107,7 @@ app.controller('row', function($scope, $timeout){
 app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location, user){
     
     function timeShift() {    
-        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' )) {
+        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' || $scope.box.type == "sum" )) {
             $scope.box.config.begintime = (function() {
                 var now = new Date();
                 now.setHours(now.getHours() - $scope.box.config.period);
@@ -180,7 +180,11 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 $scope.box.loading = false;    
                 $scope.box.data = data;
             })
-
+        } else if ($scope.box.type == 'sum') {
+            api.get('count', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+            })
         }
     }
 
@@ -226,6 +230,11 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 $scope.box.loading = false;
                 $scope.box.data = data;        
             })
+        } else if ($scope.box.type == 'sum') {
+            api.get('count', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+            })
         }
     }
 
@@ -252,6 +261,8 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 $log.error(data)
             })
     }
+
+    $scope.$on('saveUser', function() {$scope.user()});
 
     $scope.$on('gridster-item-resized', function(gridster) {
         $timeout(function() {
@@ -300,7 +311,10 @@ console.log(user.config())
 
 
 $scope.$on('enableGrid', function() {
-    console.log('Caught request')
+    if ($scope.opt.resizable.enabled == true) {
+        $scope.$broadcast('saveUser');
+    }
+    
     $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
     $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
 })

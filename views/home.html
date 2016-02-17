@@ -7,7 +7,7 @@
         <div ng-controller="grid">
             <div gridster="opt">
                 <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" class="box" >
-                	<div layout-padding gridster-dynamic-height item="box">
+                	<div layout-padding gridster-dynamic-height item="box" class="inner-box">
 	                    <md-menu md-position-mode="target-right target">
 	                            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
 	                            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
@@ -34,8 +34,8 @@
 	                        </md-menu-content>
 	                        </md-menu>
 
-	                        <div ng-if="!editMode">
-	                            <h2>{{box.title}}</h2>
+	                        <div ng-if="!editMode" style="height: 100%;">
+	                            <h2 class="md-headline">{{box.title}}</h2>
 	                            <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
 	                                <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
 	                                <br>
@@ -61,6 +61,11 @@
 	                                    <span flex="20"><md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
 	                                </div>
 	                            </div>
+
+                                <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
+                                    <div><span class="md-display-1">{{ box.data | number }}</span><br>
+                                    {{ box.config.category }} events</div>
+                                </div>
 	                        </div>
 
 	                        <div ng-if="editMode" class="edit-mode-box"> 
@@ -86,6 +91,15 @@
 	                                    </md-optgroup>
 	                                </md-select>
 	                            </md-input-container>
+
+                                <md-input-container ng-if="box.type == 'sum'">
+	                                <label>Category</label>
+	                                <md-select ng-model="box.config.category">
+	                                    <md-optgroup label="Category">
+	                                        <md-option ng-value="item" ng-repeat="item in categories track by $index">{{ item }}</md-option>
+	                                    </md-optgroup>
+	                                </md-select>
+	                            </md-input-container>
 	                            
 	                            
 	                            <md-input-container ng-if="box.type == 'histogram'">
@@ -98,12 +112,12 @@
 	                            </md-input-container>
 
 	                            <md-input-container ng-if="box.config.metric != ''">
-	                                <label>Period</label>
+	                                <label>Period [hours]</label>
 	                                <input ng-model="box.config.period">
 	                            </md-input-container>
 	                            
 	                            <md-input-container ng-if="box.type == 'barchart'">
-	                                <label>Sampling</label>
+	                                <label>Sampling [minutes]</label>
 	                                <input ng-model="box.config.window">
 	                            </md-input-container>
                                 
