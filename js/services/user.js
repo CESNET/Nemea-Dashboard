@@ -80,6 +80,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
             .success(function(data) {
                 $location.path("/login");
                 delete $localStorage["token"];
+                delete $localStorage["dashboard"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -92,6 +93,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
             .error(function(error, msg) {
                 $location.path("/login");
                 delete $localStorage["token"];
+                delete $localStorage["dashboard"];
                 $mdToast.show(
                     $mdToast
                         .simple()
