@@ -1,5 +1,5 @@
 app.constant('CONFIG', {
-    "host" : "https://benefizio.liberouter.org",
+    "host" : "https://localhost",
     "port" : "5555",
     "version" : "v2"
 });
