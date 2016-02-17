@@ -1,4 +1,15 @@
-<section class="topbar md-whiteframe-z1" ng-controller="topBar as ctrl" layout="row" hide-gt-md layout-align="space-between center">
+<md-toolbar hide-gt-md ng-controller="topBar as ctrl" layout="row" layout-align="none center">
+    <md-button ng-click="ctrl.toggleLeft()" md-no-ink id="menu-toggle" class="md-icon-button" >
+        <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
+    </md-button>
+    <span flex></span>
+    <h1>
+        <span>Nemea Dashboard</span>
+    </h1>
+</md-toolbar>
+
+
+<!--section class="topbar md-whiteframe-z1" ng-controller="topBar as ctrl" layout="row" hide-gt-md layout-align="space-between center">
 	<div>
 		<md-button ng-click="ctrl.toggleLeft()" hide-gt-md id="menu-toggle">
 		                        <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
@@ -27,4 +38,4 @@
           </md-menu-content>
         </md-menu>
 	</div>
-</section>
+</section-->

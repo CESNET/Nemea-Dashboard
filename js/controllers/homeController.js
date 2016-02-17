@@ -4,61 +4,28 @@ app.value('boxes_arr', [
     "height" : "",
     "items" : [
       {
-        "title"   : "one",
-        "type"    : "incident",
-        "content" : ""
+        "title"   : "Events shares",
+        "type"    : "piechart",
+        "content" : "",
+        "config"  : {
+            "metric"    : "category",
+            "type"      : "piechart",
+            "period"    : "24",
+            "begintime" : ""
+        }
       },
       {
-        "title"   : "10 TOP SCANPORTS",
-        "type"    : "graph",
+        "title"   : "Last 24 hours",
+        "type"    : "barchart",
         "data"    : "",
         "timestamp": "",
-        "options" : { 
-            chart: {
-                type: 'multiBarChart',
-                height: 300,
-                margin : {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                },
-                x: function(d){ return d.x; },
-                y: function(d){ return d.y; },
-                useInteractiveGuideline: true,
-                dispatch: {
-                    stateChange: function(e){ console.log("stateChange"); },
-                    changeState: function(e){ console.log("changeState"); },
-                    //tooltipShow: function(e){ console.log("tooltipShow"); },
-                    //tooltipHide: function(e){ console.log("tooltipHide"); }
-                },
-                xAxis: {
-                    axisLabel: 'Time (ms)',
-                    tickFormat: function(d) {
-                        return d3.time.format('%x/%X')(new Date(d))
-                    }
-                },
-                yAxis: {
-                    axisLabel: 'Voltage (v)',
-                    tickFormat: function(d){
-                        return d3.format('.02f')(d);
-                    },
-                    axisLabelDistance: 0
-                },
-            },
-            title: {
-                enable: true,
-                text: 'Title for Line Chart 2'
-            },
-          }
-      },
-      // {
-      //   "title": "three",
-      //   "type"    : "incident"
-      // },
-      {
-        "title": "four",
-        "type"    : "incident"
+        "config" : {
+            "metric" : "category",
+            "type" : "barchart",
+            "period" : 24,
+            "window" : 60,
+            "begintime" : ""
+        }
       }
     ]
   },
@@ -66,44 +33,12 @@ app.value('boxes_arr', [
     "row"   : 1,
     "items" : [
       {
-        "title" : "Last 1000 events",
-        "type"  : "graph",
-        // "data"  : [
-        //   { 'key' : 'PORTSCAN_H',
-        //     'y': 687
-        //   },
-        //   { 'key' : 'DNSAMP',
-        //     'y': 2
-        //   },
-        //   { 'key' : 'VOIP_PREFIX_GUESS',
-        //     'y': 189
-        //   },
-        //   { 'key' : 'BRUTEFORCE',
-        //     'y': 122
-        //   }],
-        "options": {
-            chart: {
-                type: 'pieChart',
-                height: 500,
-                x: function(d){return d.key;},
-                y: function(d){return d.y;},
-                showLabels: true,
-                donut : true,
-                padAngle : 0.02,
-                cornerRadius : 3,
-                transitionDuration: 500,
-                labelThreshold: 0.1,
-                color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
-                legend: {
-                    margin: {
-                        top: 0,
-                        right: 100,
-                        bottom: 5,
-                        left: 0
-                    }
-                }
-            }
-        }
+        "title" : "Top events in 1 hour",
+        "type"  : "top",
+        "config" : {
+            "period" : 1,
+            "begintime" : ""
+        },
       },
       {
         "title": "2",
@@ -113,161 +48,30 @@ app.value('boxes_arr', [
   },
   ]);
 
-app.value('editMode', false);
 
-function processData(data) {
-  var dataArr = [];
-  angular.forEach(data, function(value, key) {
-    //console.log(data[key]["scale"]);
-    dataArr.push({ x : data[key]["time_first"]*1000, y : data[key]["scale"]});
-  });
-
-  return [{values: dataArr}];
-};
-
-function pieChart(data) {
-  var counter = new Object();
-  angular.forEach(data, function(value, key) {
-      var doctype = data[key]['type'];
-
-      if (counter[doctype] != undefined ) {
-        counter[doctype] += 1;
-      } else {
-        counter[doctype] = 1;
-      }
-  });
-
-  var dataArr = [];
-  angular.forEach(counter, function(value, key) {
-    dataArr.push({key : key, y : value});
-  });
-
-  return dataArr;
-}
-
-app.controller('userController', function($scope){
-  console.log("hello!");
-});
-
-app.controller('homeController', function($scope, $mdSidenav, $log, $sce, api, $mdDialog, $timeout, boxes_arr, $http, $rootScope) {
-	$scope.boxes_arr = boxes_arr;
-  $scope.title = "Home sweet home";
-  
-  //Show/hide edit buttons on button click
-  //@default: hidden/false
-  $scope.$on('reqChangeMode', function(e) {
-    if ($scope.editMode == undefined) {
-      $scope.editMode = true;
-    } else {
-      $scope.editMode = !($scope.editMode);
-    }
-  });
-
-  /*var resp = $http.get('http://localhost:5000/events/type/portscan/last/100')
-        .success(function(response) {
-          $scope.data = response;
-          return processData(response)
-        })
-        .error(function(response) {
-          console.log(response);
-        });
-
-        console.log($scope.data);
-*/
-  api('type/portscan/top/10').success(function(data) {
-    var proccessed = processData(data);
-    //console.log(proccessed);
-    boxes_arr[0].items[1].data = proccessed;
-    //console.log(JSON.stringify(boxes_arr[0].items[1].data));
-  })
-
-  api('type/portscan/top/1').success(function(data) {
-    //var proccessed = processData(data);
-    //console.log(proccessed);
-    //boxes_arr[0].items[1].data = proccessed;
-    //console.log(JSON.stringify(data));
-  })
-
-  api('last/1000').success(function(data) {
-    boxes_arr[1].items[0].data = pieChart(data);
-    //console.log(pieChart(data));
-  })
-
-  
-
-        //console.log(data);
-        //boxes_arr[0].items[1].data = data;
-
-  $scope.editTitle = function(inputText) {
-
-    $log.log(inputText);
-    if ($scope.showTitle = true) {
-      $timeout(function() {
-        angular.element('.focusTitle').trigger('focus');
-        console.log("trigger");
-      }, 100);
-    }
-  }
-
-
-  $scope.addRow = function() {
-    $log.info("adding row");
-    console.log(boxes_arr);
-    var tmp = {};
-
-    tmp.row = boxes_arr.length;
-    tmp.items = [{
-      "title" : "aloha!"
-    }];
-    boxes_arr.push(tmp);
-  };
-
-  $scope.showTitle = true;
-
-});
-
-app.controller('sidebar', function($scope, $mdSidenav, menu, $window) {
-
-	menu.success(function(data) {
-		$scope.menu = data;
-	})
-
-  $scope.changeMode = function() {
-    $scope.$emit('reqChangeMode');
-  }
-
-  $scope.enable = true;
-  $scope.toggleItem = function() {
-    $scope.toggleBtn = "toggled";
-  };
-
-
-  var w = angular.element($window);
-  $scope.windowHeight = w.height();
-
-  w.bind('resize', function () {
-    $scope.windowHeight = w.height();
-    $scope.$apply();
-  })
-  //$scope.windowHeight = $scope.height();
-
-
-  $scope.closeLeft = function() {
-      $mdSidenav('left').toggle();
-
+app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user) {
+    $scope.activeGrid = false; 
+    $scope.openMenu = function($mdOpenMenu, ev) {
+        originatorEv = ev;
+        $mdOpenMenu(ev);
     };
-    
-});
 
-app.factory('confirmLogout', function(){
-	return function (){
-	    
-	};
+    $scope.addItem = function() {
+        $scope.$broadcast('addItem');
+    }
+
+    $scope.enableGrid = function() {
+        console.log('Enable grid')
+        $scope.$broadcast('enableGrid');
+        $scope.activeGrid = !$scope.activeGrid;
+    }
+
+
 });
 
 app.controller('topBar', topBarCtrl);
 
-function topBarCtrl($mdDialog, confirmLogout, $location, $mdSidenav){
+function topBarCtrl($mdDialog, $location, $mdSidenav){
 
 	this.user = "Petr"
 
@@ -300,39 +104,312 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, jsondata, $element){
-  
-  //Add element to given row
-  $scope.addElem = function(index) {
-    $log.info("adding element");
-
-    var item = {};
-
-    $scope.full = false;
-
-    if (boxes_arr[index].items.length > 5) {
-      $scope.full = true;
-    } else {
-      boxes_arr[index].items.push(item);
+app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location, user){
+    
+    function timeShift() {    
+        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' || $scope.box.type == "sum" )) {
+            $scope.box.config.begintime = (function() {
+                var now = new Date();
+                now.setHours(now.getHours() - $scope.box.config.period);
+                return now;
+            })();
+        }
     }
 
-    $scope.$emit('requestRedraw');
-  };
+    timeShift();
 
-  $scope.removeElem = function(parIndex,index) {
+    $scope.box.loading = true;
+        
+    $scope.openMenu = function($mdOpenMenu, ev) {
+        originatorEv = ev;
+        $mdOpenMenu(ev);
+    };
 
-    $log.info(parIndex);
-    $log.info(index);
+    $scope.editMode = false;
+    $scope.backupModel = {};
 
-    boxes_arr[parIndex].items.splice(index, 1);
-    var tmp = {};
+    $scope.protocol = PROTOCOLS;
+    $scope.types = TYPES;
+    $scope.categories = CATEGORIES;
+
+
+    ///////////////////////////////////////////////////////
+    // Edit mode handling
+    ///////////////////////////////////////////////////////
+
+    // Trigger editing mode and save current state
+    $scope.edit = function(box) {
+        $scope.editMode = true;
+        $scope.backupModel = angular.copy(box);
+        $scope.$emit("switch-drag");
+    }
+
+    // Save changes and disable edit mode
+    $scope.save = function() {
+        $scope.user();
+        if ($scope.box.type == 'piechart') {
+            $scope.box.options = PIECHART.options;
             
-    if(boxes_arr[parIndex].items.length == 0) {
-      tmp = boxes_arr[parIndex].items[index];
-      boxes_arr.splice(parIndex, 1);
+        }
+        if ($scope.box.type == 'barchart')
+            $scope.box.options = AREA.options;
+        
+
+        $scope.backupModel = {};
+
+        $scope.box.config.type = $scope.box.type;
+        
+        // Disable edit mode
+        $scope.editMode = false;
+
+        // Show loading indicator
+        $scope.box.loading = true;
+
+        // Shift time for query
+        timeShift();
+
+        $scope.$emit("switch-drag");
+        // Get required data
+        if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
+            api.get('agg', $scope.box.config, true).success(function(data) {
+                $scope.box.loading = false;    
+                $scope.box.data = data;
+            })
+        } else if ($scope.box.type == 'top') {
+            api.get('top', $scope.box.config, true).success(function(data) {
+                $scope.box.loading = false;    
+                $scope.box.data = data;
+            })
+        } else if ($scope.box.type == 'sum') {
+            api.get('count', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+            })
+        }
     }
 
-    $scope.$emit('requestRedraw');
+    // Revert to original and disable edit mode
+    $scope.cancel = function(box) {
+        $scope.box = angular.copy($scope.backupModel);
+        $scope.backupModel = {};
+        $scope.editMode = false;
+        $scope.$emit("switch-drag");
+    }
+    
+    $scope.top = function() {
+        timeShift()
+        api.get('top', $scope.box.config, true).success(function(data) {
+            console.log(data);
+            $scope.box.data = data;
+        })
+    }
+    
+    if ($scope.box != undefined) {
+        if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
+            if ($scope.box.type == 'piechart') {
+                $scope.box.options = PIECHART.options;
+            }
+            if ($scope.box.type == 'barchart')
+                $scope.box.options = AREA.options;
+           
+            $scope.box.config.type = $scope.box.type;
+            
+            api.get('agg', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+                
+                // Sum all events
+                if ($scope.box.type == 'piechart') {
+                    for(var i = 0; i < $scope.box.data.length; i++) {
+                        $scope.total = $scope.total + Number($scope.box.data[i].x);
+                    }
+                }
+            });
+        } else if ($scope.box.type == 'top') {
+            api.get('top', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;        
+            })
+        } else if ($scope.box.type == 'sum') {
+            api.get('count', $scope.box.config).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+            })
+        }
+    }
+
+    $scope.user = function() {
+        var settings = angular.copy($scope.items);
+        console.log(settings)
+        for (var i = 0; i < settings.length; i++) {
+                delete settings[i]["data"];
+                delete settings[i]["options"];
+        }
+        
+        var query = {
+            "jwt" : user.jwt(),
+            "settings" : settings
+        }
+
+        $log.info(query)
+        user.put(query)
+            .success(function(data) {
+                console.log("Data");
+                console.log(data);
+            })
+            .error(function(data){
+                $log.error(data)
+            })
+    }
+
+    $scope.$on('saveUser', function() {$scope.user()});
+
+    $scope.$on('gridster-item-resized', function(gridster) {
+        $timeout(function() {
+          console.log("request accepted");
+          window.dispatchEvent(new Event('resize'));
+        }, 100);
+    })
+
+  
+});
+
+app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, user) {
+$scope.opt = {
+    outerMargin: false,
+    columns: 6,
+    pushing: true,
+    rowHeight: 250 + 10,
+    colWidth : 'auto',
+    floating: true,
+    swapping: true,
+    mobileBreakPoint: 933,
+    draggable: {
+        enabled: false,
+    },
+    resizable: {
+        enabled: false,
+        handles: ['n', 'e', 's', 'w', 'se', 'sw'],
+        stop: function(event, $element, widget) {
+            console.log("resize end");
+            $scope.$emit('requestRedraw');
+            $timeout(function() {
+              console.log("request accepted");
+              window.dispatchEvent(new Event('resize'));
+            }, 100);
+
+        }
+    }
+}
+/*var w = angular.element($window);
+w.bind('resize', function() {
+    //$scope.opt.mobileModeEnable = $mdMedia('gt-md');
+    $scope.opt.isMobile = !$mdMedia('gt-md');
+});*/
+
+console.log(user.config())
+
+
+$scope.$on('enableGrid', function() {
+    if ($scope.opt.resizable.enabled == true) {
+        $scope.$broadcast('saveUser');
+    }
+    
+    $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
+    $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
+})
+
+$scope.remove = function(box) {
+
+    var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
+
   };
 
+$scope.items = user.config();
+/*$scope.items = [{
+    sizeX: 2,
+    sizeY: 2,
+    row: 0,
+    col: 0,
+    "title"   : "Events shares",
+    "type"    : "piechart",
+    "content" : "",
+    "config"  : {
+        "metric"    : "category",
+        "type"      : "piechart",
+        "period"    : "24",
+        "begintime" : ""
+    }
+}, {
+    sizeX: 2,
+    sizeY: 2,
+    minSizeX : 2,
+    minSizeY : 2,
+    row: 0,
+    col: 2,
+    "title" : "Last 24 hours",
+    "type" : "barchart",
+    "data" : "",
+    "timestamp": "",
+    "config" : {
+        "metric" : "category",
+        "type" : "barchart",
+        "period" : 24,
+        "window" : 60,
+        "begintime" : ""
+    }
+}, {
+    "title" : "Top events in 1 hour",
+    "type"  : "top",
+    "config" : {
+        "period" : 1,
+        "begintime" : ""
+    }
+}];*/
+
+    $scope.$on('addItem', function() {
+        var item = {
+            "title" : "New box",
+            "loading" : false,
+            sizeX: 1,
+            sizeY: 1,
+            //row : row,
+            //col : col
+        }
+
+        $scope.items.push(item)
+    });
+
+
+})
+
+
+app.directive('gridsterDynamicHeight', function ($timeout) {
+
+    var directive = {
+        scope: {
+            item: "=" //gridster item
+        },
+        link: link,
+        restrict: 'A'
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+        scope.$watch(function() {
+            return element[0].scrollHeight;
+        },
+        function(newVal, oldVal) { 
+            var rowHeightOption = 270; // Change this value with your own rowHeight option
+            var height = rowHeightOption * scope.item.sizeY;
+            //console.log(scope.item.title);
+            //console.log("newVal: " + newVal + "     height: " + height)
+            if(newVal > height){
+                var div = Math.floor(newVal / rowHeightOption);
+                //div++;
+                scope.item.sizeY = div; 
+            }
+        });
+
+    }
 });

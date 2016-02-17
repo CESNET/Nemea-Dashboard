@@ -1,40 +1,43 @@
-var app = angular.module('gui', ['ngAnimate', 'ngMaterial', 'ngRoute', 'loginService', 'ngMessages', 'nvd3', 'LocalStorageModule']);
+var app = angular.module('gui', ['ngMaterial', 'ngRoute', 'ngMessages', 'nvd3', 'ngStorage', 'ngMap', 'gridster']);
 
 app.config(config);
 
-//var db = new PouchDB('http://localhost:5984/users');
-
-// db.info().then(function (info) {
-//   console.log(info);
-// })
-
-function config($routeProvider, $locationProvider, localStorageServiceProvider) {
+function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorageProvider) {
 	$routeProvider
 		.when('/login', {
 			controller: 'loginController',
 			templateUrl: 'views/login.html',
-			resolve: {
-				isLogin: checkLogin
-			}
 		})
 		.when('/', {
 			controller: 'homeController',
 			templateUrl: 'views/home.html',
-			resolve: {
-				isLogin: checkLogin
-			}
 		})
 		.when('/user', {
 			controller: 'userController',
 			templateUrl: 'views/login.html',
-			resolve: {
-				isLogin: checkLogin
-			}
 		})
+        .when('/events', {
+            controller : 'eventsController',
+            templateUrl : 'views/events.html',
+            reloadOnSearch : false
+        })
+        .when('/events/:id', {
+            controller: 'eventController',
+            templateUrl : 'views/event.html'
+        })
+        .when('/profile', {
+            controller : 'profileController',
+            templateUrl : 'views/profile.html'
+        })
 		.otherwise({
 			redirectTo: '/login'
 		});
 
+    $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
+
+    $httpProvider.interceptors.push('notAllowedInterceptor');
+    $localStorageProvider
+        .setKeyPrefix('nd-');
 	// localStorageServiceProvider
 	// 	.setPrefix('nemea-dashboard')
 	// 	//PRODUCTION
@@ -46,47 +49,6 @@ function config($routeProvider, $locationProvider, localStorageServiceProvider) 
 //	$locationProvider.html5Mode(true);
 };
 
-// $rootScope.$on('$routeChangeStart', function (event, next) {
-//         var userAuthenticated = false; /* Check if the user is logged in */
-
-//         if (!userAuthenticated && !next.isLogin) {
-//             $rootScope.savedLocation = $location.url();
-
-//             $location.path('/login');
-//         }
-//     });
-
-var loginCorrect = null;
-
-checkLogin = function($rootScope, $location, localStorageService) {
-	// console.log("login: " + loginCorrect);
-	// console.log(localStorageService.keys());
-	// if (localStorageService.keys() == '') {
-	// 	localStorageService.set('loggedIn', null);
-	// }
-
-	//$rootScope.$on("$locationChangeStart", function(event){
-
-    	// if (localStorageService.get("loggedIn")) {
-    	// 	//$location.path("/");
-    	// 	console.log("correct")	
-    	// }
-    	// else {
-    	// 	$location.path("/login");
-    	// }
-	//})
-
-		if (localStorageService.get("loggedIn")) {
-    		//$location.path("/");
-    		console.log("correct")	
-    	}
-    	else {
-    		$location.path("/login");
-    	}
-
-	return false;
-}
-
 //take all whitespace out of string
 app.filter('nospace', function () {
       return function (value) {
@@ -94,13 +56,32 @@ app.filter('nospace', function () {
       };
     });
 
-// CONSTANTS
+// Always check for a JWT
+app.run(function(user, $localStorage, $location, $rootScope, $log) {
+	$rootScope.$on("$locationChangeStart", function(event) {
+        if ($localStorage["token"] == undefined) {
+            $log.info("no token found, redirecting to /login")
+            $location.path("/login");
+        }
+    })
+})
 
-app.constant('AUTH_EVENTS', {
-  loginSuccess: 'auth-login-success',
-  loginFailed: 'auth-login-failed',
-  logoutSuccess: 'auth-logout-success',
-  sessionTimeout: 'auth-session-timeout',
-  notAuthenticated: 'auth-not-authenticated',
-  notAuthorized: 'auth-not-authorized'
+// HTTP interceptor injected in config
+app.factory('notAllowedInterceptor', function($log, $localStorage, $location, $injector, $q) {
+    var notAllowedInterceptor = {
+        // Intercept $http errors
+        responseError : function(response) {
+            // Check for 401 error
+            if (response.status == 401) {
+                $log.error('You are not allowed to access, redirecting to /login');
+                // Delete exisiting JWT from localStorage 
+                delete $localStorage["token"];
+                // Redirect to login
+                $location.path('/login');
+            }
+            // Return promise so we can handle the error further
+            return $q.reject(response);
+        }
+    }
+    return notAllowedInterceptor;
 })

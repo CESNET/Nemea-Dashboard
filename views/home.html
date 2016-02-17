@@ -1,53 +1,184 @@
-<div layout="row">
-	<sidebar-menu></sidebar-menu>
+<section layout="row" class="wrapper">
+<sidebar-menu></sidebar-menu>
 
-	<topbar-menu></topbar-menu>
-	
-</div>
+<md-content flex layout="column" >
+    <topbar-menu></topbar-menu>
+    <section class="content" layout-padding>
+        <div ng-controller="grid">
+            <div gridster="opt">
+                <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" class="box" >
+                	<div layout-padding gridster-dynamic-height item="box" class="inner-box">
+	                    <md-menu md-position-mode="target-right target">
+	                            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+	                            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
+	                        </md-button>
+	                        <md-menu-content width="3">
+	                            <md-menu-item>
+	                                <md-button ng-click="edit(box)">
+	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
+	                                    Edit
+	                                </md-button>
+	                            </md-menu-item>
+	                            <md-menu-item>
+	                                <md-button disabled="disabled" ng-click="ctrl.checkVoicemail()">
+	                                    Move
+	                                </md-button>
+	                            </md-menu-item>
+	                            <md-menu-divider></md-menu-divider>
+	                            <md-menu-item>
+	                                <md-button ng-click="remove(box)">
+	                                    <md-icon md-menu-align-target md-svg-src="img/close.svg" style="margin: auto 3px auto 0;"></md-icon> 
+	                                    Delete
+	                                </md-button>
+	                            </md-menu-item>
+	                        </md-menu-content>
+	                        </md-menu>
 
+	                        <div ng-if="!editMode" style="height: 100%;">
+	                            <h2 class="md-headline">{{box.title}}</h2>
+	                            <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
+	                                <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
+	                                <br>
+	                                Fetching data
+	                            </div>
 
+	                            <nvd3 flex ng-if="box.type == 'piechart' || box.type == 'barchart'"
+	                                options="box.options" 
+	                                api="api" 
+	                                tooltips="true"
+	                                interactive="true" 
+	                                data="box.data"
+	                                autorefresh="true"
+	                                objectEquality="true" 
+	                                config="{refreshDataOnly: true, deepWatchData : true}" >
+	                            </nvd3>
 
-<section class="content">
-	<h1>{{title}}</h1>
-	
-	<div layout="column" layout-gt-md="row" ng-repeat="boxes in boxes_arr" ng-init="parIndex = $index" class="row-box" ng-controller="row">
-		<div flex ng-repeat="box in boxes.items" class="box md-whiteframe-z1" ng-animate="'animate'" ng-class="{'last': $last}" ng-controller="box">
-			<md-button ng-click="removeElem(parIndex, $index)" class="close-btn" ng-class="{'md-warn md-raised': hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-if="editMode">
-			<md-icon md-svg-src="img/close.svg"></md-icon>Remove?</md-button>
+	                            <div ng-if="box.type == 'top'" layout="column">
+	                                <div ng-repeat="event in box.data" flex layout="row" layout-align="start center">
+	                                    <span flex="20">{{ event.DetectTime['$date'] | date : 'H:mm:ss'}}</span>
+	                                    <span flex="40">{{ event._id }}</span>
+	                                    <span flex="20">{{ event.FlowCount | number}}</span>
+	                                    <span flex="20"><md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
+	                                </div>
+	                            </div>
 
-			<!-- <div ng-init="showTitle = true">
-				<h2 ng-show="showTitle" ng-click="editTitle(); showTitle=!showTitle">{{box.title}}</h2>
-				<md-input-container ng-hide="showTitle">
-					<input type="text" value="{{box.title}}" ng-blur="editTitle(box.title); showTitle=!showTitle" ng-model="box.title" class="focusTitle" aria-label="Edit Title">
-				</md-input-container>
-			</div> -->
+                                <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
+                                    <div><span class="md-display-1">{{ box.data | number }}</span><br>
+                                    {{ box.config.category }} events</div>
+                                </div>
+	                        </div>
 
-			<div click-to-edit="box.title" ng-if="editMode"></div>
-			<div class="click-to-edit disabled" ng-if="!editMode">{{box.title}}</div>
+	                        <div ng-if="editMode" class="edit-mode-box"> 
+	                            <md-input-container>
+	                                <label>Title</label>
+	                                <input ng-model="box.title">
+	                            </md-input-container>    
 
-			
+	                            <md-input-container>
+	                                <label>Type of view</label>
+	                                <md-select ng-model="box.type" >
+	                                    <!--md-optgroup label="Types"-->
+	                                        <md-option ng-value="type" ng-repeat="type in types">{{type}}</md-option>
+	                                    <!--/md-optgroup-->
+	                                </md-select>
+	                            </md-input-container>
+	                            
+	                            <md-input-container ng-if="box.type == 'piechart' || box.type == 'barchart'">
+	                                <label>Metric</label>
+	                                <md-select ng-model="box.config.metric">
+	                                    <md-optgroup label="Metric">
+	                                        <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
+	                                    </md-optgroup>
+	                                </md-select>
+	                            </md-input-container>
 
-			<br />
+                                <md-input-container ng-if="box.type == 'sum'">
+	                                <label>Category</label>
+	                                <md-select ng-model="box.config.category">
+	                                    <md-optgroup label="Category">
+	                                        <md-option ng-value="item" ng-repeat="item in categories track by $index">{{ item }}</md-option>
+	                                    </md-optgroup>
+	                                </md-select>
+	                            </md-input-container>
+	                            
+	                            
+	                            <md-input-container ng-if="box.type == 'histogram'">
+	                                <label>Protocol</label>
+	                                <md-select ng-model="box.config.protocol">
+	                                    <md-optgroup label="Protocols">
+	                                        <md-option ng-value="proto" ng-repeat="proto in protocol track by $index">{{proto}}</md-option>
+	                                    </md-optgroup>
+	                                </md-select>
+	                            </md-input-container>
 
-			<div ng-if="box.type == 'incident'">BLblablabla</div>
+	                            <md-input-container ng-if="box.config.metric != ''">
+	                                <label>Period [hours]</label>
+	                                <input ng-model="box.config.period">
+	                            </md-input-container>
+	                            
+	                            <md-input-container ng-if="box.type == 'barchart'">
+	                                <label>Sampling [minutes]</label>
+	                                <input ng-model="box.config.window">
+	                            </md-input-container>
+                                
+                                <div class="actionBtn" ng-if="editMode">
+	                                <md-button aria-label="Cancel changes" ng-click="box = backupModel; cancel(box)" class="cancel" >Cancel</md-button>
+	                                <md-button aria-label="Save changes" ng-click="save()" class="md-raised md-primary" >Save</md-button>
+	                            </div>
+	                        </div>
 
-			<div ng-if="box.type == 'graph'" class="graph">
-				<nvd3 options="box.options" api="api" showXAxis="true"
-	            showYAxis="true"
-	            tooltips="true"
-	            interactive="true" 
-	            data="box.data"
-	            autorefresh="true"></nvd3>
-           	</div>
+	                        
+					</div> <!-- /layout-padding -->            
+                </div> <!-- /gridster-item -->
+            </div> <!-- /gridster -->
+            
+            <!--div class="box md-whiteframe-z1 add-item" layout="column" layout-align="center center">
+                <md-button class="md-icon-button" aria-label="Add item" ng-click="addItem()">
+                    <md-icon md-svg-icon="img/plus.svg"></md-icon>
+                    <br>
+                    Add item
+                </md-button>
+            </div-->
+    	</div> <!-- /ng-controller grid -->
+	</section> <!-- /content -->
+    
+    <div class="edit-menu">
+        <md-menu md-position-mode="target-right target">
+            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
+        </md-button>
+        <md-menu-content width="3">
+            <md-menu-item>
+                <md-button ng-click="addItem()">
+                    <md-icon md-menu-align-target md-svg-src="img/plus.svg" style="margin: auto 3px auto 0;"></md-icon> 
+                    Add item
+                </md-button>
+            </md-menu-item>
+            <md-menu-divider></md-menu-divider>
+            <md-menu-item>
+                <md-button ng-click="enableGrid()">
+                    <span ng-if="activeGrid"> 
+                        <md-icon 
+                            md-menu-align-target 
+                            md-svg-src="img/grid_off.svg" 
+                            style="margin: auto 3px auto 0;">
+                        </md-icon>
+                        Disable grid
+                    </span>
+                    
+                    <span ng-if="!activeGrid">
+                        <md-icon 
+                            md-menu-align-target 
+                            md-svg-src="img/grid_on.svg" 
+                            style="margin: auto 3px auto 0;">
+                        </md-icon> 
+                        Enable grid
+                   </span>
+                </md-button>
+            </md-menu-item>
+        </md-menu-content>
+        </md-menu>
+    </div>
 
-		</div>
-		<div flex="10" class="add-elem " ng-click="addElem($index)" ng-class="{'inactive' : $scope.full}" ng-controller="box">
-			+
-		</div>
-	</div>
-
-	<md-button ng-click="addRow()"> + Add Row</md-button>
-	
+    </md-content>
 </section>
-
-

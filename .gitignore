@@ -47,3 +47,12 @@ bower_components
 
 #virtualenv
 api
+__pycache__
+*.pyc
+
+#SASS
+css
+
+#node modules
+node_modules/
+app.min.js

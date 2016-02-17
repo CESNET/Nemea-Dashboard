@@ -1,4 +1,4 @@
-[
+app.constant("MENU", [
 	{
 		"title" : "Dashboard",
 		"items" : [
@@ -12,8 +12,8 @@
 		]
 	},
 	{
-		"title" : "Analytics",
-		"link" 	: "login"
+		"title" : "Events",
+		"link" 	: "events"
 	},
 	{
 		"title" : "Analytics23",
@@ -54,4 +54,4 @@
 			}
 		]
 	}
-]
+]);
