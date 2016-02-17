@@ -181,6 +181,7 @@ md-toolbar:not(.md-menu-toolbar) {
 }
 
 .box {
+    background: $white;
     h2 {
         margin-top:0;
     }
@@ -232,4 +233,15 @@ position: relative;
     .content {
         height: 100%;
     }
+}
+
+.edit-menu {
+    position: fixed;
+    bottom: 4em;
+    right: 1em;
+}
+
+.gridster-preview-holder {
+    background: $grey-dark!important;
+border: 2px dashed #000!important;
 }

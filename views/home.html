@@ -118,14 +118,53 @@
                 </div> <!-- /gridster-item -->
             </div> <!-- /gridster -->
             
-            <div class="box md-whiteframe-z1 add-item" layout="column" layout-align="center center">
+            <!--div class="box md-whiteframe-z1 add-item" layout="column" layout-align="center center">
                 <md-button class="md-icon-button" aria-label="Add item" ng-click="addItem()">
                     <md-icon md-svg-icon="img/plus.svg"></md-icon>
                     <br>
                     Add item
                 </md-button>
-            </div>
+            </div-->
     	</div> <!-- /ng-controller grid -->
 	</section> <!-- /content -->
+    
+    <div class="edit-menu">
+        <md-menu md-position-mode="target-right target">
+            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
+        </md-button>
+        <md-menu-content width="3">
+            <md-menu-item>
+                <md-button ng-click="addItem()">
+                    <md-icon md-menu-align-target md-svg-src="img/plus.svg" style="margin: auto 3px auto 0;"></md-icon> 
+                    Add item
+                </md-button>
+            </md-menu-item>
+            <md-menu-divider></md-menu-divider>
+            <md-menu-item>
+                <md-button ng-click="enableGrid()">
+                    <span ng-if="activeGrid"> 
+                        <md-icon 
+                            md-menu-align-target 
+                            md-svg-src="img/grid_off.svg" 
+                            style="margin: auto 3px auto 0;">
+                        </md-icon>
+                        Disable grid
+                    </span>
+                    
+                    <span ng-if="!activeGrid">
+                        <md-icon 
+                            md-menu-align-target 
+                            md-svg-src="img/grid_on.svg" 
+                            style="margin: auto 3px auto 0;">
+                        </md-icon> 
+                        Enable grid
+                   </span>
+                </md-button>
+            </md-menu-item>
+        </md-menu-content>
+        </md-menu>
+    </div>
+
     </md-content>
 </section>
