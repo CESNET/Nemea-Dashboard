@@ -175,7 +175,7 @@ app.constant("MENU", [
 		"items" : [
             {
 				"title" : "My profile",
-				"link"	: "/profile"
+				"link"	: "#/profile"
 			},
 			{
 				"title" : "Users",
