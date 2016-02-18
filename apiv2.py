@@ -1,6 +1,6 @@
 from config import Config
 
-from flask import Flask, session, escape, request, Response, abort, session
+from flask import Flask, session, escape, request, Response, abort
 from flask.ext.cors import CORS
 import pymongo
 import json
@@ -13,10 +13,14 @@ from time import mktime
 import jwt
 import bcrypt
 from functools import wraps
+import ssl
 
 # Load config.json
 config = Config()
 C = config.data
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_cert_chain('../localhost.crt', '../localhost.key')
 
 def roundTime(dt=None, roundTo=60):
     """Round a datetime object to any time laps in seconds
@@ -173,10 +177,10 @@ class Auth(object):
         return _id
         
     def get_session(self, _id):
-        print(_id)
+        #print(_id)
         res = db.sessions.find_one({"_id" : ObjectId(_id)})
         if res:
-            print('We got it in session')
+            #print('We got it in session')
             delta = datetime.utcnow() - res['expire']
             if delta < timedelta(days=31):
                 return res
@@ -204,9 +208,9 @@ class Auth(object):
             if not auth:
                 return abort(401)
             decoded_token = self.jwt_decode(auth)
-            print(decoded_token)
+            #print(decoded_token)
             session_token = self.get_session(decoded_token['_id'])
-            print(session_token)
+            #print(session_token)
             if not session_token:
                 return abort(401)
             else:
@@ -362,7 +366,7 @@ def aggregate():
                     "res" : {
                         "$subtract": [ 
                             "$DetectTime",
-                            { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
+                            { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 - (int(req['window'])*1000) ]}
                         ]
                     },
                      "Time" : "$DetectTime",
@@ -439,6 +443,27 @@ def top():
     res = list(db.collection.aggregate(query))
     return(json_util.dumps(res))
 
+@app.route(C['events'] + 'count', methods=['GET'])
+@auth.required
+def events_count():
+    req = request.args
+    req = req.to_dict()
+
+    query = {
+        "$and" : [
+            {
+                "DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}
+            }    
+        ]
+    }
+
+    if req["category"] != "any":
+        part = { "Category" : req["category"]}
+        query["$and"].append(part)
+
+    res = db.events.find(query).count()
+    return(json_util.dumps(res))
+
 # Fetch event with given ID
 @app.route(C['events'] + 'id/<string:id>', methods=['GET'])
 @auth.required
@@ -458,25 +483,30 @@ def get_users():
         res = list(db.users.find())
 
     if request.method == 'PUT':
-        print('updating a user')
+        #print('updating a user')
         user = request.get_json()
         token = auth.jwt_decode(request.headers.get('Authorization', None))
+        user_info = auth.get_session(token['_id'])
+        #print("user_info")
+        #print(user_info)
         
-        res = db.users.find_one_and_update({'_id' : ObjectId(token['_id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
-        print(user)
+        res_raw = db.users.find_one_and_update({'_id' : ObjectId(user_info['user_id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
+        res = {
+            "settings" : res_raw["settings"]
+        }
     return(json_util.dumps(res))
 
 @app.route(C['users'] + 'logout', methods=['DELETE'])
-#@auth.required
+@auth.required
 def delete_user_session():
-    print(request.headers)
+    #print(request.headers)
     jwt = request.headers.get('Authorization', None)
     decoded_jwt = auth.jwt_decode(jwt)
     res = auth.delete_session(decoded_jwt['_id'])
     return(str(res))   
 
 @app.route(C['events'] + 'whois/<string:ip>', methods=['GET'])
-@auth.required
+#@auth.required
 def whois(ip):
     p =Popen(['whois', ip], stdout=PIPE)
     tmp = ""
@@ -487,6 +517,6 @@ def whois(ip):
 
 if __name__ == '__main__':
     # Start API as local server on given port
-    app.run(host="0.0.0.0", port=int(C['api']['port']))
+    app.run(host="0.0.0.0", port=int(C['api']['port']), ssl_context=context)
 
 
