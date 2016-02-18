@@ -6,85 +6,63 @@ You'll need `python3`, `pip3`, `bower`, `mongoDB` and any HTTP server (tested an
 
 ###Installing
 1. Clone this repository
+2. Configure front-end (js/config.js) and back-end (config.json) accordingly
 2. (Optional) create python virtual environment (`virtualenv <name>`) and activate it
-3. Run `pip install -r requirements.txt`
-4. Run bower install
-5. Start mongoDB (demo DB TBD)
+3. Run `pip3 install -r requirements.txt`
+5. Start mongoDB (demo database TBD)
 6. Start web server
-7. Start Python API (`python api.py`)
-8. Navigate to the server
+7. Start Python API (`python3 apiv2.py`)
+8. Navigate to the web server
 
-User login (if needed) : `a@a.cz`
-Password: `aa`
+Default user login : `default`
+Password: `test`
 
-##API endpoints
+##API Endpoints
+The API is versioned in the URL and every endpoint starts with the version number (currently `/v2`)
 
-###User control
-Check if user is logged in (built upon Session in Flask)
+###User Management
+Starts with prefix `/users`
+User authorization
 ```
-/login
-```
-
-Log in a user
-```
-/login/<user>/<password>
+/auth
 ```
 
-###Event correlation database
-Sample output from actual database (last 100 events)
+User logout
 ```
-/events
+/logout
 ```
+
+###Events
+Starts with prefix `/events`
+
 
 Create indexes in MongoDB and return all created indexes
 ```
-/events/createindex
+/indexes
 ```
 
-Get last event in DB
+View on aggregated events
 ```
-/events/last
+/agg
 ```
 
 Get last `n` events in DB
 ```
-/events/last/<n>
+/<n>
 ```
 
-Get last `n` events in DB aggregated
+Specific query
 ```
-/events/last/<n>/agg
-```
-
-Get first event in DB
-```
-/events/first
+/query
 ```
 
-Get first `n` events in DB
+Get top event in each category
 ```
-/events/first/<n>
-```
-
-Get last event by type
-```
-/events/type/<event_type>
+/top
 ```
 
-Get last n events by type
+Get one specified event
 ```
-/events/type/<event_type>/last/<n>
+/id/<event_id>
 ```
-
-Get top n events by type
-```
-/events/type/<event_type>/top/<n>
-```
-
-Get all events by attacker IP
->IPv4 address in format: `192-0-0-1`
-
-```
-/events/ip/<ip>
-
 
