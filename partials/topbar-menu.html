@@ -1,10 +1,11 @@
-<md-toolbar hide-gt-md ng-controller="topBar as ctrl" layout="row" layout-align="none center">
-    <md-button ng-click="ctrl.toggleLeft()" md-no-ink id="menu-toggle" class="md-icon-button" >
+<md-toolbar hide-gt-md layout="row" layout-align="none center" layout-padding class="topbar">
+    <md-button ng-click="toggleLeft()" id="menu-toggle" class="" layout-align="center center">
         <md-icon md-svg-src="img/icon-menu.svg" aria-label="Enable Menu"></md-icon>
+        Menu
     </md-button>
     <span flex></span>
-    <h1>
-        <span>Nemea Dashboard</span>
+    <h1 class="md-display-1">
+        Nemea Dashboard
     </h1>
 </md-toolbar>
 

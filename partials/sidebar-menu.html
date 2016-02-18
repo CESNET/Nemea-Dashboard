@@ -1,21 +1,46 @@
-<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" layout="column" layout-fill>
+<md-sidenav 
+    class="md-sidenav-left md-whiteframe-z2" 
+    md-component-id="left" 
+    md-is-locked-open="$mdMedia('gt-md')" 
+    layout="column" 
+    layout-fill >
 		<md-toolbar class="sidebar-logo" flex="15">
 			<md-button ng-click="closeLeft()" id="menu-toggle" hide-gt-md class="md-icon-button">
-		        <md-icon md-svg-src="img/icons/close.svg" aria-label="Enable Menu"></md-icon>
+		        <md-icon md-svg-src="img/icons/close.svg" aria-label="Hide Menu"></md-icon>
 			</md-button>
 
-			<a class="md-toolbar-tools" href="#">Nemea</a>
+			<a class="md-toolbar-tools" href="#" class="md-display-1">Nemea</a>
 			
 		</md-toolbar>
 
 		<md-content flex>
 			<div ng-repeat="menu_item in menu">
-				<md-button class="md-button-toggle menu_item" ng-href="{{menu_item.link}}" ng-click="enable=!enable; selected=true" ng-class="{'toggled-item' : isActive(menu_item.link)}">
-					{{menu_item.title}} <span ng-if="menu_item.items && enable" class="toggle">+</span> <span ng-if="menu_item.items && !enable" class="toggle">-</span>
+				<md-button 
+                    class="md-button-toggle menu_item" 
+                    ng-href="{{menu_item.link}}" 
+                    ng-click="enable=!enable; selected=true" 
+                    ng-class="{'toggled-item' : isActive(menu_item.link)}" >
+					
+                    {{menu_item.title}} 
+                    <span ng-if="menu_item.items && enable" class="toggle">+</span> 
+                    <span ng-if="menu_item.items && !enable" class="toggle">-</span>
 				</md-button>
-				<md-button class="md-button-toggle submenu_item" ng-href="{{submenu_item.link}}" ng-repeat="submenu_item in menu_item.items" ng-if="!enable" ng-class="{'animate fadeIn' : !enable}" >{{submenu_item.title}}</md-button>
-			</div>			
-			<md-button ng-click="logout()">Logout</md-button>
-		</md-content>
 
-	</md-sidenav>
+				<md-button 
+                    class="md-button-toggle submenu_item" 
+                    ng-href="{{submenu_item.link}}" 
+                    ng-repeat="submenu_item in menu_item.items" 
+                    ng-if="!enable" 
+                    ng-class="{'animate fadeIn' : !enable}" >
+                    
+                    {{submenu_item.title}}
+                </md-button>
+			</div>
+
+			<md-button ng-click="logout()">
+                Logout
+            </md-button>
+
+	    </md-content>
+
+</md-sidenav>
