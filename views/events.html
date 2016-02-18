@@ -10,13 +10,13 @@
             <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)" required></md-datepicker>
             <md-input-container>
                 <label>Time from</label>
-                <input ng-model="query.from" type="string" placeholder="12:00" validate-format required>
+                <input ng-model="query.from" type="string" placeholder="12:00" ng-model-options="{ debounce: 100 }" validate-format required>
                 <p ng-if="query_form.$error.time">Bad time format</p>
             </md-input-container>
             
             <md-input-container>
                 <label>To</label>
-                <input ng-model="query.to" type="string" placeholder="13:00" validate-format validate-hours>
+                <input ng-model="query.to" type="string" placeholder="13:00" validate-format validate-hours ng-model-options="{ debounce: 100 }">
                 <p ng-if="query_form.$error.time">Bad time format or "TO" time sooner than "FROM" time</p>
             </md-input-container>
 
@@ -43,34 +43,34 @@
             <div flex=15>
                 Category
                 <md-input-container>
-                    <label>Filter by category</label> <input type="text" ng-model="filter.category"> 
+                    <label>Filter by category</label> <input type="text" ng-model="filter.category" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container></div>
             <div flex=15>
                 Source<br>
                 <md-input-container>
-                    <label>Filter by IP</label> <input type="text" ng-model="filter.src_ip"> 
+                    <label>Filter by IP</label> <input type="text" ng-model="filter.src_ip" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container>
             </div>
             <div flex=15>
                 Target<br>
                 <md-input-container>
-                    <label>Filter by IP</label> <input type="text" ng-model="filter.trt_ip"> 
+                    <label>Filter by IP</label> <input type="text" ng-model="filter.trt_ip" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container>
             </div>
             <div flex=20>
                 Description<br>
                 <md-input-container>
-                    <label>Filter by description</label> <input type="text" ng-model="filter.desc"> 
+                    <label>Filter by description</label> <input type="text" ng-model="filter.desc" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container>
             </div>
             <div flex=10>
                 Flows
                 <div layout="row">
                 <md-input-container flex>
-                    <label>Min</label> <input type="text" ng-model="filter.flows_from"> 
+                    <label>Min</label> <input type="text" ng-model="filter.flows_from" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container>
                 <md-input-container flex>
-                    <label>Max</label> <input type="text" ng-model="filter.flows_to"> 
+                    <label>Max</label> <input type="text" ng-model="filter.flows_to" ng-model-options="{ debounce: 250 }"> 
                 </md-input-container>
                 </div>
             </div>
