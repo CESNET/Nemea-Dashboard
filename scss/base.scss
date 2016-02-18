@@ -6,6 +6,8 @@
 
 $blue: #1ab4f0;
 $white: darken(#ffffff, 1%);
+$grey : #eee;
+$grey-dark : #aaa;
 
 @import     "bootstrap/_mixins.scss";
 @import     "bootstrap/_variables.scss";
@@ -14,133 +16,34 @@ $white: darken(#ffffff, 1%);
 @import     "home.scss";
 
 /* Toggle Styles */
-
+#menu-toggle svg {
+    color: $white;
+}
+md-toolbar:not(.md-menu-toolbar) {
+    background-color: #00bef3;
+}
 .navbar-header {
-    #menu-toggle {
-        margin-top: 0.55em;
-        float: left;
-    }
+    
 
     .navbar-brand {
         font-size: 14px;
     }
 }
 
-// .events {
-//     ul.menu {
-
-//         list-style-type: none;
-//         text-decoration: none;
-//         float: right;
-//         margin: 0;
-
-//         .btn-group.open .dropdown-toggle {
-//             background: $gray-lighter;
-//         }
-
-//         & > div {
-
-//             float: left;
-
-//             & > li {
-
-//                 margin: 0;
-
-//                 a {
-//                     height: 50px;
-//                     width: 45px;
-//                     float: left;
-//                     padding-top: 1.25em;
-//                     border-left: 1px solid $gray-light-2;
-//                     position: relative;
-//                     background: auto;
-
-
-//                     span {
-//                         font-size: 65%;
-//                         @include center-block;
-//                         text-align: center;
-//                         display: none;
-//                         color: $gray-dark;
-
-//                         &.glyphicon {
-//                             font-size: 125%;
-//                             margin: 0 auto;
-//                             text-align: center;
-//                             display: block;
-//                         }
-
-//                         &.num {
-//                             background: $brand-danger;
-//                             @include border-radius(10px);
-//                             color: $white;
-//                             display: inline;
-//                             position: absolute;
-//                             top: 5px;
-//                             right: 5px;
-//                             padding: 0.5em;
-//                             font-size: 60%;
-//                         }
-//                     }
-
-//                     &:hover, &:focus {
-//                         background: $gray-lighter;
-//                         text-decoration: none;
-//                     }
-//                 }
-//             }
-//         }
-
-//         .dropdown-menu {
-//             right: 0;
-//             left: auto;
-//         }
-//     }
-// }
-
-// li.open + ul.dropdown-menu {
-//     display: block;
-
-//     li {
-
-//         a {
-//             white-space: normal;
-//         }
-//     }
-// }
-
-// .notifications {
-//     width: 20em;
-    
-//     li {
-
-//         &:first-child {
-//             border-top: 1px solid $gray-light-2;
-//         }
-
-//         border-bottom: 1px solid $gray-light-2;
-
-//         h4 small{
-//             color: $black;
-//         }
-
-//         p {
-//             font-size: 80%;
-//         }
-
-//         &.error {
-//             background: $brand-danger;
-//         }
-//     }
-// }
 
 .content {
-    margin-top: 64px;
+    height: 100vh;
+}
+
+.md-menu {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 /* Sidebar Styles */
 
-@media(min-width:768px) {
+@media(min-width:1280px) {
 
     .navbar-header a#menu-toggle {
         display: none;
@@ -156,11 +59,16 @@ $white: darken(#ffffff, 1%);
     }
 
     sidebar-menu {
-    position: fixed;
-    z-index: 59; //60 is sidebar
-    bottom: 0;
-    top: 0;
-}
+        z-index: 59; //60 is sidebar
+        bottom: 0;
+        top: 0;
+        height: 100vh;
+        width: 275px;
+
+        md-sidenav {
+            height: 100%;
+        }
+    }
 }
 
 .sidebar-logo {
@@ -181,4 +89,174 @@ $white: darken(#ffffff, 1%);
             color: #fff;
         }
     }
+}
+.table {
+    .row {
+        border-top: 1px solid $grey;
+        padding: 0.5em 0;
+        word-wrap: break-word;
+        
+        small {
+            color: $grey-dark;
+            font-size: 90%;
+        }
+        &:hover {
+            background: $grey;
+        }
+        .row-wrapper {
+            &:focus, &:active {
+                outline: none;
+                border: 0px;
+            }
+            .flow-count {
+                text-align: right;
+                padding-right: 2em;
+            }
+        }
+    }
+}
+
+.item_info {
+    display: block;
+    margin: 0 0 2em 0;
+
+    &.toggled-item {
+        padding: 0.5em 0;
+    }
+}
+
+.actionBtn {
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.25em;
+
+    .md-button {
+    //    color: $white;
+    }
+}
+
+
+.loading {
+    md-progress-circular {
+        margin: 2em auto;
+        text-align: center;
+        display: block;
+    }
+    
+    position: absolute;
+    top: 3em;
+    left: 50%;
+    margin-left: -85px;
+}
+
+
+.md-success-toast-theme {
+    .md-toast-content {
+    //    background: $white;
+    //    color: $black;
+    }
+}
+
+
+
+.event {
+    line-height: 1.4em;
+    em {
+        font-weight: bold;
+        font-style: normal;
+    }
+    .sub {
+        padding-left: 1em;
+    }
+
+    span {
+        font-family: 'Consolas', fixed-width;
+        font-size: 1.2em;
+    }
+
+    textarea {
+        width: 100%;
+        height: 200px;
+    }
+}
+
+
+.box {
+    background: $white;   
+
+    .inner-box {
+        height: 100%;
+    }
+    h2 {
+        margin:0;
+    }
+    &.gridster-item-moving {
+        //box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+        box-shadow: 0px 4px 5px -2px rgba(0, 0, 0, 0.2), 0px 7px 10px 1px rgba(0, 0, 0, 0.14), 0px 2px 16px 1px rgba(0, 0, 0, 0.12);
+    }
+
+    .gridster-item-resizable-handler {
+        border-color: transparent transparent #ccc!important;
+        display: block!important;
+    }
+
+    &.add-item {
+        width: 200px;
+        height: 200px;
+        margin: 10px 0 0 0;
+        position: relative;
+
+        .md-button.md-icon-button {
+            width: auto!important;
+            height: auto!important;
+
+            md-icon {
+                width: 96px!important;
+                height: 96px!important;
+            }
+        }
+
+        p {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            top: 0;
+            right: 0;
+        }
+    }
+}
+
+/*.edit-mode-box {
+    &.ng-leave, &.ng-enter {
+        //transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 5.5s;
+        //border-color: green;
+        opacity: 1;
+    }
+
+    &.ng-leave-active {
+        opacity: 0;
+    }
+    &.ng-enter-active {
+        opacity: 1;
+    }
+}*/
+
+@media (max-width: 1280px) {
+    .wrapper {
+       height: 100%;
+    }
+    .content {
+        height: 100%;
+    }
+}
+
+.edit-menu {
+    position: fixed;
+    bottom: 4em;
+    right: 1em;
+}
+
+.gridster-preview-holder {
+    background: $grey-dark!important;
+border: 2px dashed #000!important;
 }

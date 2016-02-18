@@ -1,0 +1,39 @@
+<section layout="row" class="wrapper">
+<sidebar-menu></sidebar-menu>
+
+<md-content flex layout="column" >
+    <topbar-menu></topbar-menu>
+    <section class="content" layout-padding>
+        <form name="user_form" ng-submit="editUser(user_edit)">
+            <md-input-container>
+	            <label>Current password</label>
+	            <input ng-model="user_edit.password_old" type="password">
+	        </md-input-container>
+
+             <md-input-container>
+	            <label>New password</label>
+	            <input ng-model="user_edit.password" type="password">
+	        </md-input-container>
+
+             <md-input-container>
+	            <label>Repeat new password</label>
+	            <input ng-model="user_edit.password_2" type="password">
+	        </md-input-container>
+
+            <div ng-if="user_edit.password != user_edit.password_2 && user_edit.password_2">
+                <md-icon md-svg-src="img/error.svg" aria-label="Password mismatch"></md-icon>
+Password mismatch
+            </div>
+            <div ng-if="user_edit.password == user_edit.password_2 && user_edit.password_2">
+                <md-icon md-svg-src="img/check.svg" aria-label="Password match"></md-icon>
+OK
+            </div>
+
+            <md-button aria-label="Save changes"  class="md-raised md-primary" type="submit" >Save</md-button>
+
+        </form>
+            
+            
+    </section>
+</md-content>
+</section>

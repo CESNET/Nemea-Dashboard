@@ -50,7 +50,15 @@ api
 __pycache__
 *.pyc
 
+<<<<<<< HEAD
 #node
 node_modules
 
 #
+=======
+#SASS
+css
+
+#node modules
+node_modules/
+app.min.js

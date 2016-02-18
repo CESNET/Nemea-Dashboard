@@ -1,0 +1,20 @@
+{
+	"db": {
+		"host": "localhost",
+		"port": 27017,
+		"user": null,
+		"password": null,
+		"database": "nemeadb",
+		"collection": {
+			"events": "alerts_new",
+			"users": "users",
+            "sessions" : "sessions"
+		}
+	},
+	"api": {
+		"version": "v2",
+        "port" : 5555,
+        "host" : "http://localhost"
+	},
+	"debug": true
+}

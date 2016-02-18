@@ -14,40 +14,40 @@ app.factory('jsondata', ['$http', function($http) {
 	//	.error(console.log('Cannot retrieve data'));
 }]);
 
-app.factory('api', ['$http', function($http) {
-	return function(url) {
-		/*$http.get('http://localhost:5000/events/' + url)
-			.success(function(data) {
-				console.log(data);
-				response = data;
-				return response;
-			})
-			.error(function() {
-				console.log('Cannot fetch data');
-			});
-		return response;*/
-
-		var addr = "http://pcstehlik.fit.vutbr.cz:5555/events/" + url
-
-		return $http.get(addr)
-			.success(function(data) {
-				//console.log(JSON.stringify(data));
-				return data;
-			});
-
-		//return $resource(addr, { query: { method: 'GET', isArray : false } } );
-	}
-
-
-//	.error(console.log('Cannot retrieve data'));
-}]);
-
 app.directive("sidebarMenu", function() {
 	return {
-		scope: {
+        scope: {
 			section: '='
 		},
-		templateUrl: 'partials/sidebar-menu.html'
+		templateUrl: 'partials/sidebar-menu.html',
+        controller: function($scope, $mdSidenav, $location, MENU, user) {
+            $scope.menu = MENU;
+
+            $scope.isActive = function(current) {
+                return($location.path() == current);
+            }
+
+            $scope.changeMode = function() {
+                $scope.$emit('reqChangeMode');
+            }
+
+            $scope.enable = true;
+
+            $scope.toggleItem = function() {
+                $scope.toggleBtn = "toggled";
+            };
+
+
+            $scope.closeLeft = function() {
+                $mdSidenav('left').toggle();
+            };
+
+            $scope.logout = function() {
+                user.logout();
+            }
+    
+ 
+        }
 	};
 });
 
@@ -56,9 +56,23 @@ app.directive("topbarMenu", function() {
 		scope: {
 			section: '='
 		},
-		templateUrl: 'partials/topbar-menu.html'
+		templateUrl: 'partials/topbar-menu.html',
+        controller : function($scope, $mdSidenav) {
+            $scope.toggleLeft = function() {
+                $mdSidenav('left').toggle();
+            }
+        }
 	};
 });
+
+
+app.controller('topBar', topBarCtrl);
+
+function topBarCtrl($mdDialog, $location, $mdSidenav){
+    this.toggleLeft = function() {
+        $mdSidenav('left').toggle();
+    };
+};
 
 app.directive("boxes", function() {
 	return {
@@ -69,18 +83,6 @@ app.directive("boxes", function() {
 	};
 });
 
-var loginService = angular.module('loginService', []);
-
-loginService.factory('loginAuth', ['$http', function($http){
-
-	var loginAuth = {};
-
-	loginAuth.fetchUser = function (user) {
-		return $http.post('http://pcstehlik.fit.vutbr.cz:5555/login', user);
-	};
-
-	return loginAuth;
-}]);
 
 app.directive('clickEdit', function() {
 	var template = '<div><h2 ng-show="view.showTitle" ng-click="editTitle()">{{box.title}}</h2>' +
