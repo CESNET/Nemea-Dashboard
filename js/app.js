@@ -35,6 +35,9 @@ function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorage
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
 
+    $mdThemingProvider.theme('success-toast');
+    $mdThemingProvider.theme('error-toast');
+
     $httpProvider.interceptors.push('notAllowedInterceptor');
     $localStorageProvider
         .setKeyPrefix('nd-');

@@ -44,7 +44,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
             $log.error('Cannot fetch data');
             $mdToast.show(
                 $mdToast.simple()
-                    .textContent('Something went wrong')
+                    .textContent('Cannot load data')
                     .position("top right")
                     .hideDelay(3000)
                     .theme("error-toast")
