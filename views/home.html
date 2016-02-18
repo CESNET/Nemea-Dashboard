@@ -59,7 +59,7 @@
 	                                autorefresh="true"
 	                                objectEquality="true" 
 	                                config="{refreshDataOnly: true, deepWatchData : true}" >
-	                            </nvd3>
+	                            </nvd3> 
 
 	                            <div ng-if="box.type == 'top'" layout="column">
 	                                <div ng-repeat="event in box.data" flex layout="row" layout-align="start center">
@@ -72,8 +72,9 @@
 
                                 <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
                                     <div flex>
-                                        <span class="md-display-1">{{ box.data | number }}</span><br>
-                                    {{ box.config.category }} events</div>
+                                        <h3 class="md-headline">{{ box.data | number }}</h3>
+                                        <p class="md-body-1">{{ box.config.category }} events</p>
+                                    </div>
                                 </div>
 	                        </div>
 
@@ -134,7 +135,7 @@
 	                                <md-button aria-label="Cancel changes" ng-click="box = backupModel; cancel(box)" class="cancel" >Cancel</md-button>
 	                                <md-button aria-label="Save changes" ng-click="save()" class="md-raised md-primary" >Save</md-button>
 	                            </div>
-	                        </div>
+                            </div>
 
 	                        
 					</div> <!-- /layout-padding -->            
@@ -153,7 +154,7 @@
     
     <div class="edit-menu">
         <md-menu md-position-mode="target-right target">
-            <md-button aria-label="Open box interactions menu" class="md-fab md-primary" ng-click="openMenu($mdOpenMenu, $event)">
+            <md-button aria-label="Open box interactions menu" class="md-fab md-primary " ng-click="openMenu($mdOpenMenu, $event)">
             <md-icon md-menu-origin md-svg-src="img/settings.svg"></md-icon>
         </md-button>
         <md-menu-content width="3">
