@@ -185,7 +185,7 @@ md-toolbar:not(.md-menu-toolbar) {
     background: $white;   
 
     .inner-box {
-        height: 100%;
+        //height: 100%;
     }
     h2 {
         margin:0;
@@ -252,8 +252,15 @@ md-toolbar:not(.md-menu-toolbar) {
 
 .edit-menu {
     position: fixed;
-    bottom: 4em;
+    bottom: 5.5em;
     right: 1em;
+    // Fix for opened menu to be clickable
+    z-index: 100;
+
+    .md-fab {
+    width: 56px;
+height: 56px;
+    }
 }
 
 .gridster-preview-holder {
@@ -261,7 +268,3 @@ md-toolbar:not(.md-menu-toolbar) {
 border: 2px dashed #000!important;
 }
 
-// Fix for opened menu to be clickable
-.md-open-menu-container {
-    z-index : 9999;
-}

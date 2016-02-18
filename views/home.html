@@ -20,6 +20,12 @@
 	                                </md-button>
 	                            </md-menu-item>
 	                            <md-menu-item>
+	                                <md-button ng-click="showEdit($event, box)">
+	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
+	                                    Edit
+	                                </md-button>
+	                            </md-menu-item>
+	                            <md-menu-item>
 	                                <md-button disabled="disabled" ng-click="ctrl.checkVoicemail()">
 	                                    Move
 	                                </md-button>
@@ -34,14 +40,16 @@
 	                        </md-menu-content>
 	                        </md-menu>
 
-	                        <div ng-if="!editMode" style="height: 100%;">
-	                            <h2 class="md-headline">{{box.title}}</h2>
-	                            <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
+                            <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
 	                                <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
 	                                <br>
 	                                Fetching data
 	                            </div>
 
+
+	                        <h2 class="md-headline">{{box.title}}</h2>
+	                        <div ng-if="!editMode && !box.loading" style="height: 100%;">
+	                            
 	                            <nvd3 flex ng-if="box.type == 'piechart' || box.type == 'barchart'"
 	                                options="box.options" 
 	                                api="api" 
@@ -63,7 +71,8 @@
 	                            </div>
 
                                 <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
-                                    <div><span class="md-display-1">{{ box.data | number }}</span><br>
+                                    <div flex>
+                                        <span class="md-display-1">{{ box.data | number }}</span><br>
                                     {{ box.config.category }} events</div>
                                 </div>
 	                        </div>
@@ -144,8 +153,8 @@
     
     <div class="edit-menu">
         <md-menu md-position-mode="target-right target">
-            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
-            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
+            <md-button aria-label="Open box interactions menu" class="md-fab md-primary" ng-click="openMenu($mdOpenMenu, $event)">
+            <md-icon md-menu-origin md-svg-src="img/settings.svg"></md-icon>
         </md-button>
         <md-menu-content width="3">
             <md-menu-item>
