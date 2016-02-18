@@ -260,3 +260,8 @@ md-toolbar:not(.md-menu-toolbar) {
     background: $grey-dark!important;
 border: 2px dashed #000!important;
 }
+
+// Fix for opened menu to be clickable
+.md-open-menu-container {
+    z-index : 9999;
+}
