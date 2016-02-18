@@ -8,6 +8,7 @@ $blue: #1ab4f0;
 $white: darken(#ffffff, 1%);
 $grey : #eee;
 $grey-dark : #aaa;
+//$blue : darken(#00bef3, 10%);
 
 @import     "bootstrap/_mixins.scss";
 @import     "bootstrap/_variables.scss";
@@ -15,31 +16,46 @@ $grey-dark : #aaa;
 @import     "login.scss";
 @import     "home.scss";
 
-/* Toggle Styles */
-#menu-toggle svg {
-    color: $white;
+body {
+    word-wrap: break-word;
 }
+
+/* Toggle Styles */
 md-toolbar:not(.md-menu-toolbar) {
     background-color: #00bef3;
 }
 .navbar-header {
-    
-
     .navbar-brand {
         font-size: 14px;
     }
 }
 
+.topbar {
+    h1 {
+        color: $white;
+        margin: 0;
+        padding: 0;
+    }
+
+    svg {
+        fill: $white;
+    }
+
+    #menu-toggle {
+        color: $white;
+
+        md-icon {
+            position: relative;
+            top: -1px;
+        }
+    }
+}
 
 .content {
     height: 100vh;
 }
 
-.md-menu {
-    position: absolute;
-    right: 0;
-    top: 0;
-}
+
 
 /* Sidebar Styles */
 
@@ -187,7 +203,7 @@ md-toolbar:not(.md-menu-toolbar) {
     .inner-box {
         //height: 100%;
     }
-    h2 {
+    h2, h3 {
         margin:0;
     }
     &.gridster-item-moving {
@@ -198,6 +214,12 @@ md-toolbar:not(.md-menu-toolbar) {
     .gridster-item-resizable-handler {
         border-color: transparent transparent #ccc!important;
         display: block!important;
+    }
+
+    .md-menu {
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 
     &.add-item {
@@ -252,19 +274,61 @@ md-toolbar:not(.md-menu-toolbar) {
 
 .edit-menu {
     position: fixed;
-    bottom: 5.5em;
+    bottom: 1em;
     right: 1em;
     // Fix for opened menu to be clickable
-    z-index: 100;
+    z-index: 59;
 
     .md-fab {
-    width: 56px;
-height: 56px;
+        width: 56px;
+        height: 56px;
+        background-color: $grey!important;
+    }
+
+
+    md-menu {
+        height: auto!important;
+
+       
     }
 }
 
 .gridster-preview-holder {
     background: $grey-dark!important;
-border: 2px dashed #000!important;
+    border: 2px dashed #000!important;
 }
 
+
+.md-success-toast-theme {
+    .md-toast-content {
+        span {
+            position: relative;
+            top: -4px;
+            
+            &:before {
+                font-family: 'Material Icons';
+                content: 'done';
+                font-size: 20px;
+                position: relative;
+                bottom: -4px;
+            }
+        }
+    }
+}
+
+.md-error-toast-theme {
+    .md-toast-content {
+        span {
+            position: relative;
+            top: -4px;
+            
+            &:before {
+                font-family: 'Material Icons';
+                content: 'error_outline';
+                font-size: 20px;
+                position: relative;
+                bottom: -4px;
+            }
+        }
+    }
+}
