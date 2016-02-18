@@ -76,11 +76,17 @@ app.constant('AREA', {
                 left: 50
             },
             x: function(d) { return d.x },
-            y: function(d) { return d.Count },
+            y: function(d) { 
+                if (d.selector)
+                    return Number(d.FlowCount);
+                else
+                    return Number(d.Count);
+            },
             useVoronoi: false,
             clipEdge: true,
             duration: 100,
-            useInteractiveGuideline: true,
+            useInteractiveGuideline: false,
+            tooltipContent : function(key, x, y, e, graph) {return("Ha");},
             xAxis: {
                 showMaxMin: false,
                 tickFormat: function(d) {
@@ -89,39 +95,22 @@ app.constant('AREA', {
                 rotateLabels : -45,
             },
             yAxis: {
+                showMaxMin: false,
                 tickFormat: function(d){
-                    return d3.format(',.0f')(d);
-                }
-            },
-            zoom: {
-                enabled: true,
-                //scaleExtent: [1, 10],
-                useFixedDomain: false,
-                useNiceScale: false,
-                horizontalOff: false,
-                verticalOff: true,
-                unzoomEventType: 'dblclick.zoom'
-            }, 
-            dispatch: {
-                stateChange: function(e){ console.log("stateChange"); },
-                changeState: function(e){ console.log("changeState"); },
-                tooltipShow: function(e){ console.log("tooltipShow"); },
-                tooltipHide: function(e){ console.log("tooltipHide"); }
-            },
+                    return d3.format('s')(d);
+                },
+            },  
             multibar: {
                 dispatch : {
                     elementClick: function(e) {
                         var date = new Date(e.data.x);
-                        console.log(date)
+                        console.log(e)
                         var hours = date.getHours();
                         var minutes = date.getMinutes();
                         date.setHours(0);
                         date.setMinutes(0);
                         window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key;
-                        //console.log(e.data.key);
-                        //console.log(e.data.x);
                     },
-
                 }
             }
         }

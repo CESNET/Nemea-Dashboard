@@ -8,66 +8,61 @@
   </div>
 </md-toolbar>
 
-<md-dialog-content>
+<md-dialog-content layout="column" layout-padding>
+    <div flex layout="row">
+        <md-input-container flex>
+            <label>Title</label>
+            <input ng-model="box.title">
+        </md-input-container>    
+    </div>
 
-Hello
+    <div layout="row">
+        <md-input-container flex>
+            <label>Type of view</label>
+            <md-select ng-model="box.type" >
+                <!--md-optgroup label="Types"-->
+                    <md-option ng-value="type" ng-repeat="type in types">{{type}}</md-option>
+                <!--/md-optgroup-->
+            </md-select>
+        </md-input-container>
+        
+        <md-input-container ng-if="box.type == 'piechart' || box.type == 'barchart'" flex>
+            <label>Metric</label>
+            <md-select ng-model="box.config.metric">
+                <md-optgroup label="Metric">
+                    <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
+                </md-optgroup>
+            </md-select>
+        </md-input-container>
 
-{{ box }}
+        <md-input-container ng-if="box.type == 'sum'" flex>
+            <label>Category</label>
+            <md-select ng-model="box.config.category">
+                <md-optgroup label="Category">
+                    <md-option ng-value="item" ng-repeat="item in categories track by $index">{{ item }}</md-option>
+                </md-optgroup>
+            </md-select>
+        </md-input-container>
+    </div>
 
+    <div layout="row">
 
-    <md-input-container>
-        <label>Title</label>
-        <input ng-model="box.title">
-    </md-input-container>    
+        <md-input-container ng-if="box.config.metric != ''" flex>
+            <label>Period [hours]</label>
+            <input ng-model="box.config.period">
+        </md-input-container>
+        
+        <md-input-container ng-if="box.type == 'barchart'" flex>
+            <label>Sampling [minutes]</label>
+            <input ng-model="box.config.window">
+        </md-input-container>
+    </div>
+    <div layout="row">
 
-    <md-input-container>
-        <label>Type of view</label>
-        <md-select ng-model="box.type" >
-            <!--md-optgroup label="Types"-->
-                <md-option ng-value="type" ng-repeat="type in types">{{type}}</md-option>
-            <!--/md-optgroup-->
-        </md-select>
-    </md-input-container>
-    
-    <md-input-container ng-if="box.type == 'piechart' || box.type == 'barchart'">
-        <label>Metric</label>
-        <md-select ng-model="box.config.metric">
-            <md-optgroup label="Metric">
-                <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
-            </md-optgroup>
-        </md-select>
-    </md-input-container>
-
-    <md-input-container ng-if="box.type == 'sum'">
-        <label>Category</label>
-        <md-select ng-model="box.config.category">
-            <md-optgroup label="Category">
-                <md-option ng-value="item" ng-repeat="item in categories track by $index">{{ item }}</md-option>
-            </md-optgroup>
-        </md-select>
-    </md-input-container>
-    
-    
-    <md-input-container ng-if="box.type == 'histogram'">
-        <label>Protocol</label>
-        <md-select ng-model="box.config.protocol">
-            <md-optgroup label="Protocols">
-                <md-option ng-value="proto" ng-repeat="proto in protocol track by $index">{{proto}}</md-option>
-            </md-optgroup>
-        </md-select>
-    </md-input-container>
-
-    <md-input-container ng-if="box.config.metric != ''">
-        <label>Period [hours]</label>
-        <input ng-model="box.config.period">
-    </md-input-container>
-    
-    <md-input-container ng-if="box.type == 'barchart'">
-        <label>Sampling [minutes]</label>
-        <input ng-model="box.config.window">
-    </md-input-container>
-
-
+        <md-switch ng-if="box.type == 'barchart'" ng-change="changeSelector(box.selector)" ng-model="box.selector" aria-label="Switch 1" class="md-primary">
+            Y Axis value: <span ng-if="box.selector">Flow Count</span> <span ng-if="!box.selector">Event Count</span>
+        </md-switch>
+    </div>
 
 
 </md-dialog-content>
@@ -77,7 +72,7 @@ Hello
     <md-button ng-click="cancel()">
         Cancel
     </md-button>
-    <md-button ng-click="save()" style="margin-right:20px;" class="md-primary md-raised">
+    <md-button ng-click="saveAndClose()" style="margin-right:20px;" class="md-primary md-raised">
        Save 
     </md-button>
 </md-dialog-actions>
