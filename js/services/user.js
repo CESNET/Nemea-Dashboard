@@ -81,6 +81,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 $location.path("/login");
                 delete $localStorage["token"];
                 delete $localStorage["dashboard"];
+                delete $localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -94,6 +95,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 $location.path("/login");
                 delete $localStorage["token"];
                 delete $localStorage["dashboard"];
+                delete $localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()

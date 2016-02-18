@@ -49,7 +49,7 @@ app.value('boxes_arr', [
   ]);
 
 
-app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user) {
+app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $localStorage, user, $timeout) {
     $scope.activeGrid = false; 
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -65,7 +65,13 @@ app.controller('homeController', function($scope, $log, api, boxes_arr, $http, $
         $scope.$broadcast('enableGrid');
         $scope.activeGrid = !$scope.activeGrid;
     }
-
+    $scope.$on('requestRedraw', function(e) {
+        e.stopPropagation();
+        $timeout(function() {
+            console.log("request accepted");
+            window.dispatchEvent(new Event('resize'));
+        }, 10);
+    });
 
 });
 
@@ -104,7 +110,7 @@ app.controller('row', function($scope, $timeout){
   });
 });
 
-app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, $http, PIECHART, AREA, api, $location, user){
+app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout){
     
     function timeShift() {    
         if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' || $scope.box.type == "sum" )) {
@@ -162,9 +168,7 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         // Disable edit mode
         $scope.editMode = false;
 
-        // Show loading indicator
-        $scope.box.loading = true;
-
+        
         // Shift time for query
         timeShift();
 
@@ -203,7 +207,19 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
             $scope.box.data = data;
         })
     }
+
+    var cache_time = (new Date() - new Date($localStorage['timestamp']))/1000;
+    if (isNaN(cache_time))
+        cache_time = 300 + 10;
+
+    console.log(cache_time)
     
+    // Show loading indicator
+    if (cache_time < 300)
+        $scope.box.loading = false;
+    else
+        $scope.box.loading = true;
+
     if ($scope.box != undefined) {
         if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
             if ($scope.box.type == 'piechart') {
@@ -213,25 +229,20 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
                 $scope.box.options = AREA.options;
            
             $scope.box.config.type = $scope.box.type;
-            
-            api.get('agg', $scope.box.config).success(function(data) {
+            if (cache_time > 300) {
+                api.get('agg', $scope.box.config, false, true).success(function(data) {
+                    $scope.box.loading = false;
+                    $scope.box.data = data;
+                });
+            }
+            $timeout(function() { $scope.$emit('requestRedraw');}, 100);
+        } else if ($scope.box.type == 'top' && cache_time > 300) {
+            api.get('top', $scope.box.config, false, true).success(function(data) {
                 $scope.box.loading = false;
                 $scope.box.data = data;
-                
-                // Sum all events
-                if ($scope.box.type == 'piechart') {
-                    for(var i = 0; i < $scope.box.data.length; i++) {
-                        $scope.total = $scope.total + Number($scope.box.data[i].x);
-                    }
-                }
-            });
-        } else if ($scope.box.type == 'top') {
-            api.get('top', $scope.box.config).success(function(data) {
-                $scope.box.loading = false;
-                $scope.box.data = data;        
             })
-        } else if ($scope.box.type == 'sum') {
-            api.get('count', $scope.box.config).success(function(data) {
+        } else if ($scope.box.type == 'sum' && cache_time > 300) {
+            api.get('count', $scope.box.config, false, true).success(function(data) {
                 $scope.box.loading = false;
                 $scope.box.data = data;
             })
@@ -271,15 +282,48 @@ app.controller('box', function($scope, $log, boxes_arr, $timeout, $element, $mdD
         }, 100);
     })
 
+
+    $scope.showEdit = function(ev, box) {
+        $scope.backupModel = angular.copy($scope.box);
+
+        //var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+        
+        $mdDialog.show({
+            controller: 'editBoxController',
+            templateUrl: 'partials/edit.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose:true,
+            fullscreen: true,
+            locals: {
+                box: $scope.box
+            },
+        })
+        .then(function(answer) {
+            console.log('You said the information was "' + answer + '".');
+            $scope.save();
+        }, function() { // cancel
+            $scope.box = angular.copy($scope.backupModel);
+            $scope.backupModel = {};
+            console.log('You cancelled the dialog.');
+        });
+        
+        /*$scope.$watch(function() {
+            return $mdMedia('xs') || $mdMedia('sm');
+        }, function(wantsFullScreen) {
+            $scope.customFullscreen = (wantsFullScreen === true);
+        });*/
+  };
+
   
 });
 
 app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, user) {
 $scope.opt = {
     outerMargin: false,
-    columns: 6,
+    columns: 8,
     pushing: true,
-    rowHeight: 250 + 10,
+    rowHeight: 180,
     colWidth : 'auto',
     floating: true,
     swapping: true,
@@ -301,14 +345,6 @@ $scope.opt = {
         }
     }
 }
-/*var w = angular.element($window);
-w.bind('resize', function() {
-    //$scope.opt.mobileModeEnable = $mdMedia('gt-md');
-    $scope.opt.isMobile = !$mdMedia('gt-md');
-});*/
-
-console.log(user.config())
-
 
 $scope.$on('enableGrid', function() {
     if ($scope.opt.resizable.enabled == true) {
@@ -412,4 +448,30 @@ app.directive('gridsterDynamicHeight', function ($timeout) {
         });
 
     }
+});
+
+app.controller('editBoxController', function($scope, $mdDialog, box, PROTOCOLS, TYPES, CATEGORIES) {
+    
+    $scope.box = box;
+    
+    $scope.backupModel = angular.copy(box);
+
+    $scope.categories = CATEGORIES;
+    $scope.protocols = PROTOCOLS;
+    $scope.types = TYPES;
+
+    $scope.hide = function() {
+        $mdDialog.hide();
+    };
+    $scope.answer = function(answer) {
+        $mdDialog.hide(answer);
+    };
+
+
+    $scope.cancel = function(box) {
+        console.log("Cancelling");
+        $mdDialog.cancel();
+    }
+
+
 });
