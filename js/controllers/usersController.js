@@ -6,4 +6,8 @@ app.controller('usersController', function($scope, api, user) {
     $scope.deleteUser = function(user_id) {
         console.log(user_id);
     }
+
+    $scope.addUser = function() {
+        $scope.addUserBox = true;
+    }
 })
