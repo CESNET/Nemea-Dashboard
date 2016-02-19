@@ -164,11 +164,11 @@ app.constant("MENU", [
 		"items" : [
             {
 				"title" : "My profile",
-				"link"	: "#/profile"
+				"link"	: "#/settings/profile"
 			},
 			{
 				"title" : "Users",
-				"link" 	: "/settings"
+				"link" 	: "#/settings/users"
 			},
 		]
 	}

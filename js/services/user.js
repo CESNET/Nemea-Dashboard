@@ -106,4 +106,31 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
             });
     }
 
+    this.get = function(allusers) {
+        var user = $localStorage["token"];
+        
+        if (allusers) {
+            return $http({
+                url : addr,
+                method : "GET",
+                headers : {
+                    'Authorization' : user
+                }
+            })
+            .success(function(data) {
+                return data;
+            })
+            .error(function(error, msg) {
+                $mdToast.show(
+                    $mdToast
+                        .simplet()
+                        .textContent("Cannot fetch users from database")
+                        .position("top right")
+                        .hideDelay(3000)
+                        .theme("error-toast")
+                )
+            });
+        }
+    }
+
 });

@@ -1,0 +1,38 @@
+<section layout="row" class="wrapper">
+<sidebar-menu></sidebar-menu>
+
+<md-content flex layout="column" >
+    <topbar-menu></topbar-menu>
+    <section class="content" layout-padding>
+    
+        <div class="table">
+            <div class="row" ng-repeat="user in users" layout="row" layout-align="none center">
+                <div flex="10">{{ user.username }}</div>
+                <div flex="10">{{ user.name }}</div>
+                <div flex="10">{{ user.surname }}</div>
+                <div flex="10">{{ user.lastlogin }}</div>
+                <!--div ng-bind-html="user.settings | json2html" flex></div>
+                <div ng-bind-html="user | json2html" flex></div-->
+                <div>
+                    <md-button ng-click="editUser(user._id.$oid)" class="md-primary md-raised" style="padding: 0 1em" ng-disabled="true">
+                        <md-icon md-svg-src="img/edit.svg" style="fill: #fff!important"></md-icon> 
+                        Edit user
+                    </md-button>
+                </div>
+                <div>
+                    <md-button ng-click="deleteUser(user._id.$oid)" class="md-warn md-raised" style="padding: 0 1em">
+                        <md-icon md-svg-src="img/close.svg" style="fill: #fff!important"></md-icon> 
+                        Delete user
+                    </md-button>
+                </div>
+            </div>
+            <div class="row">
+                <md-button class="md-primary md-raised" ng-click="addUser()">
+                    <md-icon md-svg-src="img/plus.svg"></md-icon>
+                    Add new user
+                </md-button>
+        </div>
+
+    </section>
+</md-content>
+</section>

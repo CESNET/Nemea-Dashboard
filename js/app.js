@@ -25,9 +25,13 @@ function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorage
             controller: 'eventController',
             templateUrl : 'views/event.html'
         })
-        .when('/profile', {
+        .when('/settings/profile', {
             controller : 'profileController',
             templateUrl : 'views/profile.html'
+        })
+        .when('/settings/users', {
+            controller : 'usersController',
+            templateUrl : 'views/users.html'
         })
 		.otherwise({
 			redirectTo: '/login'
