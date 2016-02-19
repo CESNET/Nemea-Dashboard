@@ -19,8 +19,9 @@ import ssl
 config = Config()
 C = config.data
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-context.load_cert_chain('../localhost.crt', '../localhost.key')
+if C["ssl"]:
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain(C['ssl_crt'], C['ssl_key'])
 
 def roundTime(dt=None, roundTo=60):
     """Round a datetime object to any time laps in seconds
@@ -517,6 +518,9 @@ def whois(ip):
 
 if __name__ == '__main__':
     # Start API as local server on given port
-    app.run(host="0.0.0.0", port=int(C['api']['port']), ssl_context=context)
+    if C['ssl']:
+        app.run(host="0.0.0.0", port=int(C['api']['port']), ssl_context=context)
+    else:
+        app.run(host="0.0.0.0", port=int(C['api']['port']))
 
 

@@ -16,5 +16,8 @@
         "port" : 5555,
         "host" : "http://benefizio.liberouter.org"
 	},
+	"ssl" : true,
+	"ssl_key" : "../localhost.key",
+	"ssl_crt" : "../localhost.crt",
 	"debug": true
 }
