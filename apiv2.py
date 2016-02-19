@@ -482,19 +482,54 @@ def get_by_id(id):
 def get_users():
     if request.method == 'GET':
         res = list(db.users.find())
+        
+        # Remove password hash from the resulting query
+        for user in res:
+            user.pop("password", None)
 
     if request.method == 'PUT':
-        #print('updating a user')
         user = request.get_json()
         token = auth.jwt_decode(request.headers.get('Authorization', None))
         user_info = auth.get_session(token['_id'])
-        #print("user_info")
-        #print(user_info)
         
-        res_raw = db.users.find_one_and_update({'_id' : ObjectId(user_info['user_id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
-        res = {
-            "settings" : res_raw["settings"]
+        # Create basic query for user updating
+        query = {
+            "$set" : { 
+                'settings' : user['settings']
+            }
         }
+
+        # If the user updates their profile check for all fields to be updated
+        if "name" in user:
+            query["$set"].append({"name" : user["name"]})
+
+        if "surname" in user:
+            query["$set"].append({"surname" : user["surname"]})
+        
+        if "email" in user:
+            query["$set"].append({"email" : user["email"]})
+
+        # In case of password change, verify that it is really him (revalidate their password)
+        if "password" in user:
+            verify = auth.login(user["username"], user["password"])
+        
+            # This is really stupid, I have to change it
+            # TODO: better password verification returning values
+            if verify != 0 or verify != 1:
+                hash = auth.create_hash(user["password_new"])
+                query["$set"].append({"password" : hash})
+            else:
+                return auth.errors[str(verify)], 401
+
+        # The query is built up, lets update the user and return updated document
+        res_raw = db.users.find_one_and_update(
+            {'_id' : ObjectId(user_info['user_id'])}, 
+            query,
+            return_document=pymongo.ReturnDocument.AFTER)
+
+        # Remove password hash from the response
+        res = res_raw.pop("password", None)
+
     return(json_util.dumps(res))
 
 @app.route(C['users'] + 'logout', methods=['DELETE'])
