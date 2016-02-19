@@ -1,5 +1,5 @@
 app.constant('CONFIG', {
-    "host" : "https://localhost",
+    "host" : "http://localhost",
     "port" : "5555",
     "version" : "v2"
 });
