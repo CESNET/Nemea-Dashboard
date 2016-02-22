@@ -75,7 +75,7 @@
                 </div>
             </div>
         </div>
-        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex >
+        <div layout="column" ng-repeat="item in data | filter: events" ng-init="enableSub = true" class="row"  flex ng-class="{'last' : $last }">
             <div layout="row" layout-align="start center" class="row-wrapper">
                 <div flex=15 layout-padding>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
                 <div flex=15 layout-padding>{{ item.Category[0] }}</div>
@@ -111,11 +111,14 @@
                 <!--div class="event" ng-bind-html="item | json2html"></div-->
 
             </div>                                <!--td><json-tree json='item' edit-level='low'></json-tree></td-->
-            <div layout="row" flex ng-if="$last">
-                Load next 100 items {{ item.DetectTime }}
+            <div layout="row" flex ng-if="$last" style="background-color: #fff!important" class="load-more">
+
+                <md-button class="md-raised md-primary" ng-click="loadNext(item.DetectTime.$date)">
+                    {{ nextButton }}
+                </md-button>
             </div>
         </div>
-        
+
     </div>
         
 

@@ -130,6 +130,21 @@ md-toolbar:not(.md-menu-toolbar) {
             }
         }
     }
+
+    .last {
+        margin-bottom: 0;
+        padding-bottom: 0;
+
+        .load-more {
+            padding: 2em 0;
+            button {
+                margin: 0 auto;
+                text-align: center;
+                padding: 0.5em;
+                font-size: 1.1em;
+            }
+        }
+    }
 }
 
 .item_info {
