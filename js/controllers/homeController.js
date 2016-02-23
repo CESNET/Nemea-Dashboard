@@ -1,4 +1,4 @@
-app.controller('homeController', function($scope, api, user, $timeout) {
+app.controller('homeController', function($scope, user, $timeout, $log, $localStorage, $route) {
     $scope.activeGrid = false; 
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -17,15 +17,20 @@ app.controller('homeController', function($scope, api, user, $timeout) {
     $scope.$on('requestRedraw', function(e) {
         e.stopPropagation();
         $timeout(function() {
-            //console.log("request accepted");
+            console.log("request accepted");
             window.dispatchEvent(new Event('resize'));
-        }, 10);
+        }, 100);
     });
+
+    $scope.clearCache = function() {
+        $log.debug("deleting timestamp")
+        delete $localStorage['timestamp'];
+        $route.reload();
+    }
 
 });
 
 app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout){
-    
     function timeShift() {    
         if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' || $scope.box.type == "sum" )) {
             $scope.box.config.begintime = (function() {
@@ -138,6 +143,10 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     if (isNaN(cache_time))
         cache_time = 300 + 10;
 
+    $scope.$on('gridster-item-initialized', function(item) {
+        $timeout(function() { $scope.$emit('requestRedraw');}, 100);
+    })
+
     
     // Show loading indicator
     if (cache_time < 300)
@@ -157,9 +166,9 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
             api.get('agg', $scope.box.config, false, true).success(function(data) {
                 $scope.box.loading = false;
                 $scope.box.data = data;
+                $scope.$emit('requestRedraw');
             });
         }
-        $timeout(function() { $scope.$emit('requestRedraw');}, 100);
     } else if ($scope.box.type == 'top' && cache_time > 300) {
         api.get('top', $scope.box.config, false, true).success(function(data) {
             $scope.box.loading = false;
@@ -169,9 +178,10 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         api.get('count', $scope.box.config, false, true).success(function(data) {
             $scope.box.loading = false;
             $scope.box.data = data;
+            console.log($scope.box);
         })
     }
-
+ 
     $scope.user = function() {
         var settings = angular.copy($scope.items);
         for (var i = 0; i < settings.length; i++) {
@@ -186,7 +196,6 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         $log.info(query)
         user.put(query)
             .success(function(data) {
-                console.log("Data");
                 console.log(data);
             })
             .error(function(data){
@@ -328,3 +337,4 @@ app.controller('editBoxController', function($scope, $mdDialog, box, PROTOCOLS, 
 
 
 });
+

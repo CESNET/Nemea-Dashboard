@@ -13,21 +13,16 @@
 	                            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
 	                        </md-button>
 	                        <md-menu-content width="3">
-	                            <md-menu-item>
+	                            <!--md-menu-item>
 	                                <md-button ng-click="edit(box)">
 	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
 	                                    Edit
 	                                </md-button>
-	                            </md-menu-item>
+	                            </md-menu-item-->
 	                            <md-menu-item>
 	                                <md-button ng-click="showEdit($event, box)">
 	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
 	                                    Edit
-	                                </md-button>
-	                            </md-menu-item>
-	                            <md-menu-item>
-	                                <md-button disabled="disabled" ng-click="ctrl.checkVoicemail()">
-	                                    Move
 	                                </md-button>
 	                            </md-menu-item>
 	                            <md-menu-divider></md-menu-divider>
@@ -66,14 +61,16 @@
 	                                    <span flex="20">{{ event.DetectTime['$date'] | date : 'H:mm:ss'}}</span>
 	                                    <span flex="40">{{ event._id }}</span>
 	                                    <span flex="20">{{ event.FlowCount | number}}</span>
-	                                    <span flex="20"><md-button ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
+	                                    <span flex="20"><md-button class="md-raised" ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
 	                                </div>
 	                            </div>
 
                                 <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
                                     <div flex>
                                         <h3 class="md-headline">{{ box.data | number }}</h3>
-                                        <p class="md-body-1">{{ box.config.category }} events</p>
+                                        <!--p class="md-body-1">{{ box.config.category }} events</p-->
+                                        <!--md-button class="md-raised" ng-href="#/events?filter&date={{box.config.begintime">Detail</md-button-->
+
                                     </div>
                                 </div>
 	                        </div>
@@ -164,6 +161,12 @@
                     Add item
                 </md-button>
             </md-menu-item>
+            <md-menu-item>
+                <md-button ng-click="clearCache()">
+                    <i style="margin: auto 3px auto 0; position: relative; bottom: -5px;" class="material-icons">autorenew</i> Clear cache
+                </md-button>
+            </md-menu-item>
+
             <md-menu-divider></md-menu-divider>
             <md-menu-item>
                 <md-button ng-click="enableGrid()">
@@ -173,7 +176,7 @@
                             md-svg-src="img/grid_off.svg" 
                             style="margin: auto 3px auto 0;">
                         </md-icon>
-                        Disable grid
+                        Disable and save grid
                     </span>
                     
                     <span ng-if="!activeGrid">
