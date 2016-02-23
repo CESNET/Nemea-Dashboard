@@ -133,4 +133,60 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
         }
     }
 
+
+    this.post = function(userData) {
+        var user = $localStorage["token"];
+        
+        return $http({
+            url : addr,
+            method : "POST",
+            data : angular.toJson(userData),
+            headers : {
+                'Authorization' : user
+            }
+        })
+        .success(function(data) {
+            return data;
+        })
+        .error(function(error, msg) {
+            $mdToast.show(
+                $mdToast
+                    .simplet()
+                    .textContent("Cannot create user")
+                    .position("top right")
+                    .hideDelay(3000)
+                    .theme("error-toast")
+            )
+        });
+    }
+
+     this.delete = function(userId) {
+        var user = $localStorage["token"];
+        console.log(userId)
+        
+        return $http({
+            url : addr,
+            method : "DELETE",
+            params : {"userId" : userId},
+            headers : {
+                'Authorization' : user
+            }
+        })
+        .success(function(data) {
+            return data;
+        })
+        .error(function(error, msg) {
+            $mdToast.show(
+                $mdToast
+                    .simplet()
+                    .textContent("Cannot delete user")
+                    .position("top right")
+                    .hideDelay(3000)
+                    .theme("error-toast")
+            )
+        });
+    }
+
+
+
 });
