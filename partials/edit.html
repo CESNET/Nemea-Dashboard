@@ -48,12 +48,12 @@
     <div layout="row">
 
         <md-input-container ng-if="box.config.metric != ''" flex>
-            <label>Period [hours]</label>
+            <label>Time window [hours]</label>
             <input ng-model="box.config.period">
         </md-input-container>
         
         <md-input-container ng-if="box.type == 'barchart'" flex>
-            <label>Sampling [minutes]</label>
+            <label>Aggregation period [minutes]</label>
             <input ng-model="box.config.window">
         </md-input-container>
     </div>
