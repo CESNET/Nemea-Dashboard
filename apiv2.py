@@ -579,6 +579,6 @@ if __name__ == '__main__':
     if C['ssl']:
         app.run(host="0.0.0.0", port=int(C['api']['port']), ssl_context=context)
     else:
-        app.run(host="0.0.0.0", port=int(C['api']['port']))
+        app.run(host="0.0.0.0", port=int(C['api']['port']), threaded=True)
 
 
