@@ -293,10 +293,12 @@ def query():
     req = req.to_dict()
 
     query = {
-        "$and" : [
-            {"DetectTime" : {"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
-        ]
+        "$and" : []
     }
+    
+    if 'from' in req:
+        part = {"DetectTime" : {"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
+        query["$and"].append(part)
 
     if 'to' in req:
         part = {"DetectTime" : {"$lt" : datetime.strptime(req["to"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
@@ -316,7 +318,12 @@ def query():
     if int(req['limit']) > 1000:
         req['limit'] = 1000
 
-    res = list(db.events.find(query).sort([("DetectTime", 1)]).limit(int(req['limit'])))
+    if 'direction' in req:
+        dir = int(req['direction'])
+    else:
+        dir = 1 # Sort from the start of query results
+
+    res = list(db.events.find(query).sort([("DetectTime", dir)]).limit(int(req['limit'])))
 
     return(json_util.dumps(res))
 
@@ -367,7 +374,7 @@ def aggregate():
                     "res" : {
                         "$subtract": [ 
                             "$DetectTime",
-                            { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 - (int(req['window'])*1000) ]}
+                            { "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
                         ]
                     },
                      "Time" : "$DetectTime",
@@ -477,7 +484,7 @@ def get_by_id(id):
         res = db.collection.find_one(query)
     return(json_util.dumps(res))
 
-@app.route(C['users'], methods=['GET', 'PUT'])
+@app.route(C['users'], methods=['GET', 'PUT', 'POST', 'DELETE'])
 @auth.required
 def get_users():
     if request.method == 'GET':
@@ -486,6 +493,22 @@ def get_users():
         # Remove password hash from the resulting query
         for user in res:
             user.pop("password", None)
+
+    # Create user
+    if request.method == 'POST':
+        user_data = request.get_json()
+        hash = auth.create_hash(user_data["password"])
+        user_data["password"] = hash
+
+        res = db.users.insert(user_data)
+        return(json_util.dumps(res))
+
+    if request.method == 'DELETE':
+        req = request.args
+        req = req.to_dict()
+        print(req["userId"])
+        res = db.users.delete_one({"_id" : ObjectId(req["userId"])})
+        return(json_util.dumps(res.deleted_count))
 
     if request.method == 'PUT':
         user = request.get_json()
