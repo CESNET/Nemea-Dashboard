@@ -1,5 +1,11 @@
-app.controller('homeController', function($scope, user, $timeout, $log, $localStorage, $route) {
-    $scope.activeGrid = false; 
+app.controller('homeController', function($scope, user, $timeout, $interval, $log, $localStorage, $route) {
+    $scope.activeGrid = false;
+    $scope.refresh_interval = 60;
+    
+    // To store interval ID
+    var refresh = undefined;
+    $scope.refresh_enabled = angular.isDefined(refresh);
+    
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
         $mdOpenMenu(ev);
@@ -26,6 +32,25 @@ app.controller('homeController', function($scope, user, $timeout, $log, $localSt
         $log.debug("deleting timestamp")
         delete $localStorage['timestamp'];
         $route.reload();
+    }
+
+    $scope.setInterval = function() {
+        console.log
+
+        if (angular.isDefined(refresh)) {
+            $interval.cancel(refresh);
+            refresh = undefined;
+            console.log('broadcast failed')
+        } else {
+            refresh = $interval(function() {
+                //$scope.clearCache();
+                console.log('broadcast')
+                $scope.$broadcast('refreshData');
+            }, $scope.refresh_interval*1000);
+        }
+
+        $scope.refresh_enabled = angular.isDefined(refresh)
+
     }
 
 });
@@ -154,6 +179,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     else
         $scope.box.loading = true;
 
+    function getData() {
     if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
         if ($scope.box.type == 'piechart') {
             $scope.box.options = PIECHART.options;
@@ -178,9 +204,18 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         api.get('count', $scope.box.config, false, true).success(function(data) {
             $scope.box.loading = false;
             $scope.box.data = data;
-            console.log($scope.box);
         })
     }
+    };
+
+    getData();
+
+
+    $scope.$on('refreshData', function() { 
+        //console.log('refreshing'); 
+        cache_time = 300+10; 
+        getData();
+    })
  
     $scope.user = function() {
         var settings = angular.copy($scope.items);

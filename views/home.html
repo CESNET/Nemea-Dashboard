@@ -166,8 +166,22 @@
                     <i style="margin: auto 3px auto 0; position: relative; bottom: -5px;" class="material-icons">autorenew</i> Clear cache
                 </md-button>
             </md-menu-item>
-
+            
+            <md-menu-item>
+                <md-button ng-click="setInterval()">
+                    <span ng-if="!refresh_enabled">
+                        <i style="margin: auto 3px auto 0; position: relative; bottom: -5px;" class="material-icons">timer</i>
+                        Enable autorefresh ({{ refresh_interval }} s)
+                    </span>
+                    <span ng-if="refresh_enabled">
+                        <i style="margin: auto 3px auto 0; position: relative; bottom: -5px;" class="material-icons">timer_off</i>
+                        Disable autorefresh
+                    </span>
+                </md-button>
+            </md-menu-item>
+            
             <md-menu-divider></md-menu-divider>
+            
             <md-menu-item>
                 <md-button ng-click="enableGrid()">
                     <span ng-if="activeGrid"> 
