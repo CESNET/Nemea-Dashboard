@@ -56,14 +56,12 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 });
 
 app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout){
-    function timeShift() {    
-        if ($scope.box != undefined && ($scope.box.type == "piechart" || $scope.box.type == "barchart" || $scope.box.type == 'top' || $scope.box.type == "sum" )) {
-            $scope.box.config.begintime = (function() {
-                var now = new Date();
-                now.setHours(now.getHours() - $scope.box.config.period);
-                return now;
-            })();
-        }
+    function timeShift() { 
+        $scope.box.config.begintime = (function() {
+            var now = new Date();
+            now.setHours(now.getHours() - $scope.box.config.period);
+            return now;
+        })();
     }
 
     timeShift();
