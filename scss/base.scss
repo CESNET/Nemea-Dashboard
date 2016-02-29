@@ -106,11 +106,33 @@ md-toolbar:not(.md-menu-toolbar) {
         }
     }
 }
+
+.query {
+    md-datepicker {
+        height: 50px !important;
+        margin-top: 13px;
+    }
+
+    md-input-container {
+        margin-bottom: 0!important;
+        padding-bottom: 0!important;
+    }
+
+    .spacer {
+        width: 25px;
+    }
+}
+
 .table {
     .row {
-        border-top: 1px solid $grey;
+        border-top: 1px solid $grey!important;
         padding: 0.5em 0;
         word-wrap: break-word;
+
+        &:focus, &:active {
+            outline: none;
+            border: 0px;
+        }
         
         small {
             color: $grey-dark;
@@ -118,22 +140,31 @@ md-toolbar:not(.md-menu-toolbar) {
         }
         &:hover {
             background: $grey;
+            cursor: pointer;
+
+            .toggled-detail {
+                border-color: darken($grey, 5%);
+            }
         }
         .row-wrapper {
-            &:focus, &:active {
-                outline: none;
-                border: 0px;
-            }
+            
             .flow-count {
                 text-align: right;
                 padding-right: 2em;
             }
         }
-    }
 
-    .last {
-        margin-bottom: 0;
-        padding-bottom: 0;
+        .toggled-detail {
+            border-top: 1px solid $grey;
+            span {
+                padding-bottom: 1em;
+                min-height: 25px;
+            }
+
+            margin: 0 auto;
+        }
+        
+    }
 
         .load-more {
             padding: 2em 0;
@@ -144,16 +175,6 @@ md-toolbar:not(.md-menu-toolbar) {
                 font-size: 1.1em;
             }
         }
-    }
-}
-
-.item_info {
-    display: block;
-    margin: 0 0 2em 0;
-
-    &.toggled-item {
-        padding: 0.5em 0;
-    }
 }
 
 .actionBtn {
