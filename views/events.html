@@ -49,10 +49,29 @@
                     <input type="text" ng-model="query.orderby">
                 </md-input-container>
 
-                <md-switch ng-model="query.dir" aria-label="Direction" class="md-primary" md-no-ink flex>
+                <md-autocomplete 
+                    md-selected-item="query.orderby" 
+                    md-search-text="query.orderby" 
+                    md-items="item in orderBy" 
+                    md-item-text="item"
+                    md-floating-label="Order by"
+                    ng-model="query.orderby">
+                    
+                    <span md-highlight-text="query.orderby">{{item}}</span>
+                </md-autocomplete>
+                
+                {{ query.orderby }}
+
+                <md-switch 
+                    ng-model="query.dir" 
+                    aria-label="Direction" 
+                    class="md-primary" 
+                    ng-change="switchDir(query.dir)"
+                    md-no-ink flex>
                     Direction: 
-                    <span ng-hide="query.dir">ascending</span>
-                    <span ng-hide="!query.dir">descending</span>
+                    <!--span ng-hide="query.dir">ascending</span>
+                    <span ng-hide="!query.dir">descending</span-->
+                    {{ dirVal }}
                 </md-switch>
 
                 <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid">{{ loadbtn }}</md-button>
@@ -118,7 +137,7 @@
                 </div-->
             </div>
             <div ng-if="!enableSub" class="item_info" ng-class="{'toggled-detail' : !enableSub}" flex layout-padding layout="column">
-                <div flex layout="row">
+                <div flex layout="row" style="width: 100%">
                     <div flex layout="column" >
                         <span flex>Detect Time: {{ item.DetectTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
                         <span flex>Event Time: {{ item.EventTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
