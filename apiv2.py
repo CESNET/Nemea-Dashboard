@@ -262,6 +262,7 @@ def indexes():
             print('indexes are here')
             return(json.dumps(indexes))
     db.collection.create_index([( "DetectTime", 1)])
+    db.sessions.create_index([("expire", pymongo.ASCENDING), ("expireAfterSeconds", 60*60*24*30)])
     indexes = db.collection.index_information()
     return(json.dumps(indexes))
 
