@@ -24,7 +24,9 @@ app.constant('PIECHART', {
             cornerRadius : 1,
             transitionDuration: 500,
             labelThreshold: 0,
-            //color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
+            //color: ['blue', 'green', 'yellow'],
+            //color: ["#4ac4f3", "#96d6bd", "#0a599d", "#8ba2c0", "#f7fcfd","#e5f5f9","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"],
+            //color: ["#2196F3", "#009688",  "#673AB7",  "#FF9800"], 
             legend: {
                 margin: {
                     top: 5,
