@@ -17,7 +17,7 @@
         "host" : "http://benefizio.liberouter.org"
 	},
 	"ssl" : true,
-	"ssl_key" : "../localhost.key",
-	"ssl_crt" : "../localhost.crt",
+	"ssl_key" : "../privkey1.pem",
+	"ssl_crt" : "../cert1.pem",
 	"debug": true
 }
