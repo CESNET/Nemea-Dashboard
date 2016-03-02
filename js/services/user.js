@@ -14,6 +14,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
     }
 
     this.auth = function(user) {
+        console.log(addr);
         return $http.post(addr + "auth", angular.toJson(user))
         .success(function(data) {
             $localStorage["token"] = data["jwt"];
