@@ -56,9 +56,14 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 });
 
 app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout){
-    function timeShift() { 
+    function timeShift(offset) { 
         $scope.box.config.begintime = (function() {
+            console.log($scope.box)
             var now = new Date();
+
+            if (angular.isDefined(offset))
+                now.setHours(now.getHours() - Number(offset));
+
             now.setHours(now.getHours() - $scope.box.config.period);
             return now;
         })();
@@ -226,10 +231,10 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
             "settings" : settings
         }
 
-        $log.info(query)
+        //$log.info(query)
         user.put(query)
             .success(function(data) {
-                console.log(data);
+                //console.log(data);
             })
             .error(function(data){
                 $log.error(data)
@@ -311,19 +316,21 @@ $scope.$on('enableGrid', function() {
     $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
 })
 
-$scope.remove = function(box) {
+    $scope.remove = function(box) {
+        var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
+    };
 
-    var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
-
-  };
-
-$scope.items = user.config();
+    $scope.items = user.config();
+    
     $scope.$on('addItem', function() {
         var item = {
             "title" : "New box",
             "loading" : false,
             sizeX: 1,
             sizeY: 1,
+            config : {
+                period : 0
+            }
             //row : row,
             //col : col
         }
