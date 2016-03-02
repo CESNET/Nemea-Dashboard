@@ -14,14 +14,43 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         "date" : new Date(),
         "description" : "",
         "category" : "",
+        "orderby" : "DetectTime",
+        "dir" : false,
         "limit" : 100
     }
+
+    $scope.orderBy = ["DetectTime", "Category", "Description", "FlowCount"];
+    $scope.searchText = "";
+
+    $scope.querySearch = function (query) {
+      var results = query ? $scope.orderBy.filter( createFilterFor(query) ) : [];
+      return results;
+    }
+
+    function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+      return function filterFn(state) {
+        return ($scope.orderBy.indexOf(lowercaseQuery) === 0);
+      };
+    }
+
+   
 
     $scope.data = [];
     $scope.loadbtn = "Load";
     $scope.nextButton = "Load next 100 items";
     console.log($scope.query.date);
     $scope.activeFilter = $location.search().filter;
+
+    $scope.switchDir = function(val) {
+        if (val) {
+            $scope.dirVal = "Descending";
+        } else {
+            $scope.dirVal = "Ascending";
+        }
+    }
+
+    $scope.switchDir($location.search().dir);
 
     $scope.loadNext = function(time) {
         $scope.nextButton = "Loading...";
@@ -86,6 +115,8 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         $location.search('from', query.from);
         $location.search('date', query.date);
         $location.search('limit', query.limit);
+        $location.search('orderby', query.orderby);
+        $location.search('dir', query.dir);
 
         
 
@@ -116,7 +147,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             "to" : to_date,
             "category" : query.category,
             "description" : query.description,
-            "limit" : query.limit
+            "limit" : query.limit,
+            "orderby" : query.orderby,
+            "dir" : query.dir
         }
         api.get('query', send, true).success(function(data) {
 			$scope.data = data;
@@ -127,12 +160,14 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     }
     
     if ($location.search().filter) {
+        // Query filter is set, apply it
         $scope.query = $location.search();
-        console.log($scope.query.date)
+        $scope.query.dir = true;
+        $scope.query.orderby = "DetectTime";
         $scope.query.date = new Date($scope.query.date);
         $scope.loadItems($scope.query);
     } else {
-
+        // Fetch 100 recent events
         api.get("100").success(function(data) {
             $scope.data = data;
         });
