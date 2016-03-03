@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from config import Config
 
 from flask import Flask, session, escape, request, Response, abort
