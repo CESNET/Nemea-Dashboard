@@ -7,18 +7,12 @@
         <div ng-controller="grid">
             <div gridster="opt">
                 <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" class="box" >
-                	<div layout-padding gridster-dynamic-height item="box" class="inner-box">
+                	<div gridster-dynamic-height item="box" class="inner-box" id="nvd3">
 	                    <md-menu md-position-mode="target-right target">
 	                            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
 	                            <md-icon md-menu-origin md-svg-src="img/icon-menu.svg"></md-icon>
 	                        </md-button>
 	                        <md-menu-content width="3">
-	                            <!--md-menu-item>
-	                                <md-button ng-click="edit(box)">
-	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
-	                                    Edit
-	                                </md-button>
-	                            </md-menu-item-->
 	                            <md-menu-item>
 	                                <md-button ng-click="showEdit($event, box)">
 	                                    <md-icon md-menu-align-target md-svg-src="img/edit.svg" style="margin: auto 3px auto 0;"></md-icon> 
@@ -35,6 +29,7 @@
 	                        </md-menu-content>
 	                        </md-menu>
 
+
                             <div ng-if="box.loading == true" class="loading" layout-align="center center" layout="row">
 	                                <div><md-progress-circular flex md-mode="indeterminate" md-diameter="72" flex></md-progress-circular></div>
 	                                <br>
@@ -42,10 +37,11 @@
 	                            </div>
 
 
-	                        <h2 class="md-headline">{{box.title}}</h2>
-	                        <div ng-if="!editMode && !box.loading" style="height: 100%;">
+                            <div ng-if="!editMode && !box.loading" ng-class="{'aligner' : box.type == 'sum' }">
+	                                
+	                            <h2 class="md-headline" ng-if="box.title">{{box.title}}</h2>
 	                            
-	                            <nvd3 flex ng-if="box.type == 'piechart' || box.type == 'barchart'"
+	                            <nvd3 ng-if="box.type == 'piechart' || box.type == 'barchart'"
 	                                options="box.options" 
 	                                api="api" 
 	                                tooltips="true"
@@ -53,10 +49,11 @@
 	                                data="box.data"
 	                                autorefresh="true"
 	                                objectEquality="true" 
-	                                config="{refreshDataOnly: true, deepWatchData : true}" >
+	                                config="{refreshDataOnly: true, deepWatchData : true}" 
+                                    style="height: 100%!important; width: 100%!important;">
 	                            </nvd3> 
 
-	                            <div ng-if="box.type == 'top'" layout="column">
+	                            <div ng-if="box.type == 'top'" layout="column" layout-padding>
 	                                <div ng-repeat="event in box.data" flex layout="row" layout-align="start center">
 	                                    <span flex="20">{{ event.DetectTime['$date'] | date : 'H:mm:ss'}}</span>
 	                                    <span flex="40">{{ event._id }}</span>
@@ -64,77 +61,17 @@
 	                                    <span flex="20"><md-button class="md-raised" ng-href="#/events/{{event.id['$oid']}}">Detail</md-button></span>
 	                                </div>
 	                            </div>
-
-                                <div ng-if="box.type == 'sum'" layout="column" layout-align="center center" flex style="height: 100%;">
-                                    <div flex>
+                                
+                                <div flex class="sum" ng-if="box.type == 'sum'" >
                                         <h3 class="md-headline">{{ box.data | number }}</h3>
                                         <!--p class="md-body-1">{{ box.config.category }} events</p-->
                                         <!--md-button class="md-raised" ng-href="#/events?filter&date={{box.config.begintime">Detail</md-button-->
-
-                                    </div>
+                                        <p class="md-caption"> {{ box.content }} </p>
                                 </div>
+
+                                <p class="md-caption" ng-if="box.type != 'sum'"> {{ box.content }} </p>
 	                        </div>
 
-	                        <div ng-if="editMode" class="edit-mode-box"> 
-	                            <md-input-container>
-	                                <label>Title</label>
-	                                <input ng-model="box.title">
-	                            </md-input-container>    
-
-	                            <md-input-container>
-	                                <label>Type of view</label>
-	                                <md-select ng-model="box.type" >
-	                                    <!--md-optgroup label="Types"-->
-	                                        <md-option ng-value="type" ng-repeat="type in types">{{type}}</md-option>
-	                                    <!--/md-optgroup-->
-	                                </md-select>
-	                            </md-input-container>
-	                            
-	                            <md-input-container ng-if="box.type == 'piechart' || box.type == 'barchart'">
-	                                <label>Metric</label>
-	                                <md-select ng-model="box.config.metric">
-	                                    <md-optgroup label="Metric">
-	                                        <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
-	                                    </md-optgroup>
-	                                </md-select>
-	                            </md-input-container>
-
-                                <md-input-container ng-if="box.type == 'sum'">
-	                                <label>Category</label>
-	                                <md-select ng-model="box.config.category">
-	                                    <md-optgroup label="Category">
-	                                        <md-option ng-value="item" ng-repeat="item in categories track by $index">{{ item }}</md-option>
-	                                    </md-optgroup>
-	                                </md-select>
-	                            </md-input-container>
-	                            
-	                            
-	                            <md-input-container ng-if="box.type == 'histogram'">
-	                                <label>Protocol</label>
-	                                <md-select ng-model="box.config.protocol">
-	                                    <md-optgroup label="Protocols">
-	                                        <md-option ng-value="proto" ng-repeat="proto in protocol track by $index">{{proto}}</md-option>
-	                                    </md-optgroup>
-	                                </md-select>
-	                            </md-input-container>
-
-	                            <md-input-container ng-if="box.config.metric != ''">
-	                                <label>Period [hours]</label>
-	                                <input ng-model="box.config.period">
-	                            </md-input-container>
-	                            
-	                            <md-input-container ng-if="box.type == 'barchart'">
-	                                <label>Sampling [minutes]</label>
-	                                <input ng-model="box.config.window">
-	                            </md-input-container>
-                                
-                                <div class="actionBtn" ng-if="editMode">
-	                                <md-button aria-label="Cancel changes" ng-click="box = backupModel; cancel(box)" class="cancel" >Cancel</md-button>
-	                                <md-button aria-label="Save changes" ng-click="save()" class="md-raised md-primary" >Save</md-button>
-	                            </div>
-                            </div>
-
-	                        
 					</div> <!-- /layout-padding -->            
                 </div> <!-- /gridster-item -->
             </div> <!-- /gridster -->
