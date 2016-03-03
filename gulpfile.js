@@ -9,12 +9,20 @@ var bower = require('main-bower-files');
 var cssnano = require('gulp-cssnano');
 
 gulp.task('js', function () {
-gulp.src(['js/**/*.js', '!js/**/*.min.js'])
+gulp.src(['js/**/*.js', '!js/**/*.min.js','!js/config.js'])
     .pipe(sourcemaps.init())
     .pipe(concat('js/app.min.js'))
     .pipe(ngAnnotate())
     .pipe(uglify())
     .pipe(sourcemaps.write())
+    .pipe(gulp.dest('.'))
+})
+
+gulp.task('js-nosm', function () {
+gulp.src(['js/**/*.js', '!js/**/*.min.js', '!js/config.js'])
+    .pipe(concat('js/app.min.js'))
+    .pipe(ngAnnotate())
+    .pipe(uglify())
     .pipe(gulp.dest('.'))
 })
 
