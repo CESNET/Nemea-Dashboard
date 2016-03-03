@@ -321,12 +321,17 @@ def query():
     if int(req['limit']) > 1000:
         req['limit'] = 1000
 
-    if 'direction' in req:
-        dir = int(req['direction'])
+    if 'dir' in req:
+        dir = int(req['dir'])
     else:
         dir = 1 # Sort from the start of query results
 
-    res = list(db.events.find(query).sort([("DetectTime", dir)]).limit(int(req['limit'])))
+    if 'orderby' in req:
+        orderby = str(req['orderby'])
+    else:
+        orderby = 'DetectTime'
+
+    res = list(db.events.find(query).sort([(orderby, dir)]).limit(int(req['limit'])))
 
     return(json_util.dumps(res))
 
