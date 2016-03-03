@@ -1,0 +1,48 @@
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <h2>Add new user</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+            <md-icon md-svg-src="img/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+  </div>
+</md-toolbar>
+
+<md-dialog-content layout="column" layout-padding>
+    
+    <form ng-model="user">
+    <div flex layout="row">
+        <md-input-container flex>
+            <label>Username</label>
+            <input ng-model="user.username" ng-required="true">
+        </md-input-container>
+    </div>
+    <div flex layout="row">
+        <md-input-container flex>
+            <label>Name</label>
+            <input ng-model="user.name">
+        </md-input-container>
+        <md-input-container flex>
+            <label>Surname</label>
+            <input ng-model="user.surname">
+        </md-input-container>  
+    </div> 
+    <div flex layout="row">
+        <md-input-container flex>
+            <label>Password</label>
+            <input ng-model="user.password" ng-required="true" type="password">
+        </md-input-container>
+    </div>
+    </form>
+
+</md-dialog-content>
+
+<md-dialog-actions layout="row">
+    <span flex></span>
+    <md-button ng-click="cancel()">
+        Cancel
+    </md-button>
+    <md-button ng-click="saveAndClose(user)" style="margin-right:20px;" class="md-primary md-raised">
+       Create user 
+    </md-button>
+</md-dialog-actions>
