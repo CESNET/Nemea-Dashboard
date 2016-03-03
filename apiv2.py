@@ -2,7 +2,7 @@
 
 from config import Config
 
-from flask import Flask, session, escape, request, Response, abort, session
+from flask import Flask, session, escape, request, Response, abort
 from flask.ext.cors import CORS
 import pymongo
 import json
@@ -15,10 +15,15 @@ from time import mktime
 import jwt
 import bcrypt
 from functools import wraps
+import ssl
 
 # Load config.json
 config = Config()
 C = config.data
+
+if C["ssl"]:
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain(C['ssl_crt'], C['ssl_key'])
 
 def roundTime(dt=None, roundTo=60):
     """Round a datetime object to any time laps in seconds
@@ -175,10 +180,10 @@ class Auth(object):
         return _id
         
     def get_session(self, _id):
-        print(_id)
+        #print(_id)
         res = db.sessions.find_one({"_id" : ObjectId(_id)})
         if res:
-            print('We got it in session')
+            #print('We got it in session')
             delta = datetime.utcnow() - res['expire']
             if delta < timedelta(days=31):
                 return res
@@ -206,9 +211,9 @@ class Auth(object):
             if not auth:
                 return abort(401)
             decoded_token = self.jwt_decode(auth)
-            print(decoded_token)
+            #print(decoded_token)
             session_token = self.get_session(decoded_token['_id'])
-            print(session_token)
+            #print(session_token)
             if not session_token:
                 return abort(401)
             else:
@@ -259,6 +264,7 @@ def indexes():
             print('indexes are here')
             return(json.dumps(indexes))
     db.collection.create_index([( "DetectTime", 1)])
+    db.sessions.create_index([("expire", pymongo.ASCENDING), ("expireAfterSeconds", 60*60*24*30)])
     indexes = db.collection.index_information()
     return(json.dumps(indexes))
 
@@ -290,10 +296,12 @@ def query():
     req = req.to_dict()
 
     query = {
-        "$and" : [
-            {"DetectTime" : {"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
-        ]
+        "$and" : []
     }
+    
+    if 'from' in req:
+        part = {"DetectTime" : {"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
+        query["$and"].append(part)
 
     if 'to' in req:
         part = {"DetectTime" : {"$lt" : datetime.strptime(req["to"],"%Y-%m-%dT%H:%M:%S.%fZ")}}
@@ -313,7 +321,12 @@ def query():
     if int(req['limit']) > 1000:
         req['limit'] = 1000
 
-    res = list(db.events.find(query).sort([("DetectTime", 1)]).limit(int(req['limit'])))
+    if 'direction' in req:
+        dir = int(req['direction'])
+    else:
+        dir = 1 # Sort from the start of query results
+
+    res = list(db.events.find(query).sort([("DetectTime", dir)]).limit(int(req['limit'])))
 
     return(json_util.dumps(res))
 
@@ -441,6 +454,27 @@ def top():
     res = list(db.collection.aggregate(query))
     return(json_util.dumps(res))
 
+@app.route(C['events'] + 'count', methods=['GET'])
+@auth.required
+def events_count():
+    req = request.args
+    req = req.to_dict()
+
+    query = {
+        "$and" : [
+            {
+                "DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}
+            }    
+        ]
+    }
+
+    if req["category"] != "any":
+        part = { "Category" : req["category"]}
+        query["$and"].append(part)
+
+    res = db.events.find(query).count()
+    return(json_util.dumps(res))
+
 # Fetch event with given ID
 @app.route(C['events'] + 'id/<string:id>', methods=['GET'])
 @auth.required
@@ -453,32 +487,88 @@ def get_by_id(id):
         res = db.collection.find_one(query)
     return(json_util.dumps(res))
 
-@app.route(C['users'], methods=['GET', 'PUT'])
+@app.route(C['users'], methods=['GET', 'PUT', 'POST', 'DELETE'])
 @auth.required
 def get_users():
     if request.method == 'GET':
         res = list(db.users.find())
+        
+        # Remove password hash from the resulting query
+        for user in res:
+            user.pop("password", None)
+
+    # Create user
+    if request.method == 'POST':
+        user_data = request.get_json()
+        hash = auth.create_hash(user_data["password"])
+        user_data["password"] = hash
+
+        res = db.users.insert(user_data)
+        return(json_util.dumps(res))
+
+    if request.method == 'DELETE':
+        req = request.args
+        req = req.to_dict()
+        print(req["userId"])
+        res = db.users.delete_one({"_id" : ObjectId(req["userId"])})
+        return(json_util.dumps(res.deleted_count))
 
     if request.method == 'PUT':
-        print('updating a user')
         user = request.get_json()
         token = auth.jwt_decode(request.headers.get('Authorization', None))
+        user_info = auth.get_session(token['_id'])
         
-        res = db.users.find_one_and_update({'_id' : ObjectId(token['_id'])}, {"$set" : { 'settings' : user['settings'] }}, return_document=pymongo.ReturnDocument.AFTER)
-        print(user)
+        # Create basic query for user updating
+        query = {
+            "$set" : { 
+                'settings' : user['settings']
+            }
+        }
+
+        # If the user updates their profile check for all fields to be updated
+        if "name" in user:
+            query["$set"].append({"name" : user["name"]})
+
+        if "surname" in user:
+            query["$set"].append({"surname" : user["surname"]})
+        
+        if "email" in user:
+            query["$set"].append({"email" : user["email"]})
+
+        # In case of password change, verify that it is really him (revalidate their password)
+        if "password" in user:
+            verify = auth.login(user["username"], user["password"])
+        
+            # This is really stupid, I have to change it
+            # TODO: better password verification returning values
+            if verify != 0 or verify != 1:
+                hash = auth.create_hash(user["password_new"])
+                query["$set"].append({"password" : hash})
+            else:
+                return auth.errors[str(verify)], 401
+
+        # The query is built up, lets update the user and return updated document
+        res_raw = db.users.find_one_and_update(
+            {'_id' : ObjectId(user_info['user_id'])}, 
+            query,
+            return_document=pymongo.ReturnDocument.AFTER)
+
+        # Remove password hash from the response
+        res = res_raw.pop("password", None)
+
     return(json_util.dumps(res))
 
 @app.route(C['users'] + 'logout', methods=['DELETE'])
-#@auth.required
+@auth.required
 def delete_user_session():
-    print(request.headers)
+    #print(request.headers)
     jwt = request.headers.get('Authorization', None)
     decoded_jwt = auth.jwt_decode(jwt)
     res = auth.delete_session(decoded_jwt['_id'])
     return(str(res))   
 
 @app.route(C['events'] + 'whois/<string:ip>', methods=['GET'])
-@auth.required
+#@auth.required
 def whois(ip):
     p =Popen(['whois', ip], stdout=PIPE)
     tmp = ""
@@ -489,6 +579,9 @@ def whois(ip):
 
 if __name__ == '__main__':
     # Start API as local server on given port
-    app.run(host="0.0.0.0", port=int(C['api']['port']))
+    if C['ssl']:
+        app.run(host="0.0.0.0", port=int(C['api']['port']), ssl_context=context)
+    else:
+        app.run(host="0.0.0.0", port=int(C['api']['port']), threaded=True)
 
 
