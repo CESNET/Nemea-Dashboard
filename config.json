@@ -16,5 +16,8 @@
         "port" : 5555,
         "host" : "http://localhost"
 	},
-	"debug": true
+	"ssl" : false,
+	"ssl_key" : "",
+	"ssl_crt" : "",
+	"debug": false
 }
