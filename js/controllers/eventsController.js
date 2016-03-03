@@ -15,7 +15,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         "description" : "",
         "category" : "",
         "orderby" : "DetectTime",
-        "dir" : false,
+        "dir" : 1,
         "limit" : 100
     }
 
@@ -43,10 +43,12 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     $scope.activeFilter = $location.search().filter;
 
     $scope.switchDir = function(val) {
-        if (val) {
+        if (val == -1 || val) {
             $scope.dirVal = "Descending";
+            $scope.query.dir = -1;
         } else {
             $scope.dirVal = "Ascending";
+            $scope.query.dir = 1;
         }
     }
 
@@ -58,7 +60,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         if ($location.search().filter) {
             var query = angular.copy($scope.query);
             query.from = new Date(time);
-            query.direction = 1;
+            query.dir = 1;
 
             if (query.to) {
                 var to = query.to.split(':');
@@ -88,7 +90,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         else {
             query = {
                 "to" : new Date(time),
-                "direction" : -1
+                "dir" : -1
             }
 
             api.get('query', query, true).success(function(data) {
@@ -162,8 +164,6 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     if ($location.search().filter) {
         // Query filter is set, apply it
         $scope.query = $location.search();
-        $scope.query.dir = true;
-        $scope.query.orderby = "DetectTime";
         $scope.query.date = new Date($scope.query.date);
         $scope.loadItems($scope.query);
     } else {

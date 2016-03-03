@@ -49,7 +49,7 @@
                     <input type="text" ng-model="query.orderby">
                 </md-input-container>
 
-                <md-autocomplete 
+                <!--md-autocomplete 
                     md-selected-item="query.orderby" 
                     md-search-text="query.orderby" 
                     md-items="item in orderBy" 
@@ -61,12 +61,13 @@
                 </md-autocomplete>
                 
                 {{ query.orderby }}
-
+                -->
                 <md-switch 
-                    ng-model="query.dir" 
+                    flex="20"
+                    ng-model="query.dir_raw" 
                     aria-label="Direction" 
                     class="md-primary" 
-                    ng-change="switchDir(query.dir)"
+                    ng-change="switchDir(query.dir_raw)"
                     md-no-ink flex>
                     Direction: 
                     <!--span ng-hide="query.dir">ascending</span>
@@ -74,7 +75,9 @@
                     {{ dirVal }}
                 </md-switch>
 
-                <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid">{{ loadbtn }}</md-button>
+                <div flex></div>
+
+                <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid" flex="10">{{ loadbtn }}</md-button>
             </div>
         </form>
 

@@ -15,7 +15,8 @@ app.constant('PIECHART', {
     options: {
         chart: {
             type: 'pieChart',
-            height: 450,
+            height: 375,
+            //height: function() { console.log(document.getElementById('nvd3').offsetHeight); return Number(425)},
             x: function(d){return d.key[0];},
             y: function(d){return d.x;},
             showLabels: true,
@@ -31,10 +32,11 @@ app.constant('PIECHART', {
                 margin: {
                     top: 5,
                     right: 0,
-                    bottom: 0,
+                    bottom: -15,
                     left: 0
                 }
             },
+            legendPosition : "top",
             tooltipContent : function(key, x, y, e, graph) {
                                 console.log(key);
                                 console.log(y);
@@ -57,7 +59,7 @@ app.constant('PIECHART', {
                     //elementMouseout: function(e) {console.log("element mouse out")}            
                 },
                 labelType : "percent",
-                labelsOutside : true,
+                labelsOutside : false,
                 //startAngle : function(d) { return d.startAngle/2 -Math.PI/2 },
                 //endAngle : function(d) { return d.endAngle/2 -Math.PI/2 }
             }
@@ -111,7 +113,7 @@ app.constant('AREA', {
                         var minutes = date.getMinutes();
                         date.setHours(0);
                         date.setMinutes(0);
-                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key;
+                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key + '&dir=1';
                     },
                 }
             }

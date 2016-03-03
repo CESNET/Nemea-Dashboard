@@ -236,12 +236,26 @@ md-toolbar:not(.md-menu-toolbar) {
 .box {
     background: $white;   
 
-    .inner-box {
-        //height: 100%;
-    }
     h2, h3 {
         margin:0;
     }
+
+    h2 {
+        padding: 8px 8px 8px 12px;
+       
+    }
+
+    p {
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .inner-box {
+        //margin: 8px;
+        height: 100%;
+        width: 100%;
+    }
+
     &.gridster-item-moving {
         //box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
         box-shadow: 0px 4px 5px -2px rgba(0, 0, 0, 0.2), 0px 7px 10px 1px rgba(0, 0, 0, 0.14), 0px 2px 16px 1px rgba(0, 0, 0, 0.12);
@@ -258,30 +272,29 @@ md-toolbar:not(.md-menu-toolbar) {
         top: 0;
     }
 
-    &.add-item {
-        width: 200px;
-        height: 200px;
-        margin: 10px 0 0 0;
-        position: relative;
+    .sum {
+        margin: 0 auto;
+        text-align: center;
 
-        .md-button.md-icon-button {
-            width: auto!important;
-            height: auto!important;
+        
+    }
 
-            md-icon {
-                width: 96px!important;
-                height: 96px!important;
-            }
-        }
+    .aligner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        p {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            top: 0;
-            right: 0;
+        h2 {
+            position: absolute!important;
         }
     }
+
+}
+
+
+.md-dialog-fullscreen {
+    min-width: 400px;
 }
 
 /*.edit-mode-box {

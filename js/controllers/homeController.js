@@ -1,10 +1,12 @@
 app.controller('homeController', function($scope, user, $timeout, $interval, $log, $localStorage, $route) {
     $scope.activeGrid = false;
-    $scope.refresh_interval = 60;
+    $scope.refresh_interval = 10;
     
     // To store interval ID
     var refresh = undefined;
     $scope.refresh_enabled = angular.isDefined(refresh);
+
+    $scope.apis = [];
     
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
@@ -35,8 +37,6 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
     }
 
     $scope.setInterval = function() {
-        console.log
-
         if (angular.isDefined(refresh)) {
             $interval.cancel(refresh);
             refresh = undefined;
@@ -171,44 +171,53 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     if (isNaN(cache_time))
         cache_time = 300 + 10;
 
-    $scope.$on('gridster-item-initialized', function(item) {
-        $timeout(function() { $scope.$emit('requestRedraw');}, 100);
-    })
+    
 
     
     // Show loading indicator
     if (cache_time < 300)
         $scope.box.loading = false;
-    else
+    else {
         $scope.box.loading = true;
+        console.log('Data is cached, redraw')
+        
+    }
+
+    $scope.$on('gridster-item-initialized', function(item) {
+        if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
+            $timeout(function() { $scope.$emit('requestRedraw');}, 500);
+        }
+    })
 
     function getData() {
-    if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
-        if ($scope.box.type == 'piechart') {
-            $scope.box.options = PIECHART.options;
-        }
-        if ($scope.box.type == 'barchart')
-            $scope.box.options = angular.copy(AREA.options);
-       
-        $scope.box.config.type = $scope.box.type;
-        if (cache_time > 300) {
-            api.get('agg', $scope.box.config, false, true).success(function(data) {
+        if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
+            // The box is a chart
+            if ($scope.box.type == 'piechart') {
+                $scope.box.options = PIECHART.options;
+            }
+            if ($scope.box.type == 'barchart')
+                $scope.box.options = angular.copy(AREA.options);
+           
+            $scope.box.config.type = $scope.box.type;
+
+            if (cache_time > 300) {
+                api.get('agg', $scope.box.config, false, true).success(function(data) {
+                    $scope.box.loading = false;
+                    $scope.box.data = data;
+                    $scope.$emit('requestRedraw');
+                });
+            }
+        } else if ($scope.box.type == 'top' && cache_time > 300) {
+            api.get('top', $scope.box.config, false, true).success(function(data) {
                 $scope.box.loading = false;
                 $scope.box.data = data;
-                $scope.$emit('requestRedraw');
-            });
+            })
+        } else if ($scope.box.type == 'sum' && cache_time > 300) {
+            api.get('count', $scope.box.config, false, true).success(function(data) {
+                $scope.box.loading = false;
+                $scope.box.data = data;
+            })
         }
-    } else if ($scope.box.type == 'top' && cache_time > 300) {
-        api.get('top', $scope.box.config, false, true).success(function(data) {
-            $scope.box.loading = false;
-            $scope.box.data = data;
-        })
-    } else if ($scope.box.type == 'sum' && cache_time > 300) {
-        api.get('count', $scope.box.config, false, true).success(function(data) {
-            $scope.box.loading = false;
-            $scope.box.data = data;
-        })
-    }
     };
 
     getData();
@@ -280,44 +289,40 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
 });
 
 app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, user) {
-$scope.opt = {
-    outerMargin: false,
-    columns: 8,
-    pushing: true,
-    rowHeight: 170,
-    colWidth : 'auto',
-    floating: true,
-    swapping: true,
-    mobileBreakPoint: 933,
-    draggable: {
-        enabled: false,
-    },
-    resizable: {
-        enabled: false,
-        handles: ['n', 'e', 's', 'w', 'se', 'sw'],
-        stop: function(event, $element, widget) {
-            console.log("resize end");
-            $scope.$emit('requestRedraw');
-            $timeout(function() {
-              console.log("request accepted");
-              window.dispatchEvent(new Event('resize'));
-            }, 100);
-
+    $scope.opt = {
+        outerMargin: false,
+        columns: 8,
+        pushing: true,
+        rowHeight: 170,
+        colWidth : 'auto',
+        floating: true,
+        swapping: true,
+        mobileBreakPoint: 933,
+        draggable: {
+            enabled: false,
+        },
+        resizable: {
+            enabled: false,
+            handles: ['n', 'e', 's', 'w', 'se', 'sw'],
+            stop: function(event, $element, widget) {
+                console.log("resize end");
+                    $scope.$emit('requestRedraw');
+            }
         }
     }
-}
 
-$scope.$on('enableGrid', function() {
-    if ($scope.opt.resizable.enabled == true) {
-        $scope.$broadcast('saveUser');
-    }
-    
-    $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
-    $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
-})
+    $scope.$on('enableGrid', function() {
+        if ($scope.opt.resizable.enabled == true) {
+            $scope.$broadcast('saveUser');
+        }
+        
+        $scope.opt.resizable.enabled = !$scope.opt.resizable.enabled; 
+        $scope.opt.draggable.enabled = !$scope.opt.draggable.enabled; 
+    })
 
     $scope.remove = function(box) {
         var tmp = $scope.items.splice($scope.items.indexOf(box), 1);
+        $scope.$broadcast('saveUser');
     };
 
     $scope.items = user.config();
@@ -328,6 +333,7 @@ $scope.$on('enableGrid', function() {
             "loading" : false,
             sizeX: 1,
             sizeY: 1,
+            content: "",
             config : {
                 period : 0
             }
