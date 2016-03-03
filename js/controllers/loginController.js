@@ -17,6 +17,20 @@ app.controller('loginController', function($scope, $location, $log, user) {
         })
     }
 
+
+    var pattern = Trianglify({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        x_colors: 'GnBu',
+        y_colors: 'GnBu',
+        cell_size: 50
+
+    });
+
+    console.log(pattern);
+    document.getElementById("login").appendChild(pattern.canvas())
+
+
 		
 		/*loginAuth.fetchUser(user)
 		.success(function(data) {
