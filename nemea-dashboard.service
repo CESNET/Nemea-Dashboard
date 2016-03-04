@@ -16,7 +16,8 @@
 
 [Unit]
 Description=Nemea Dashboard
-After=network.target local-fs.target remote-fs.target
+After=network.target local-fs.target remote-fs.target 
+Requires=mongod.service
 
 [Service]
 Type=simple
