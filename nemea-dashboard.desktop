@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0                                     # version of an app.
+Name[en_US]=Nemea Dashboard                                 # name of an app.
+GenericName=Nemea Dashboard                    # longer name of an app.
+Exec=firefox http://localhost/Nemea-Dashboard          # command used to launch an app.
+Terminal=false                                  # whether an app requires to be run in a terminal.
+Icon[en_US]=/var/www/html/Nemea-Dashboard/img/icon.png   # location of icon file.
+Type=Application                                # type.
+Categories=Application;Network;Security;        # categories in which this app should be listed.
+Comment[en_US]=Launch Nemea Dashboard                 # comment which appears as a tooltip.
