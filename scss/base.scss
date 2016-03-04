@@ -1,7 +1,5 @@
-/*!
- * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
- * Code licensed under the Apache License v2.0.
- * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+/*
+ * Base CSS file for Nemea Dashboard
  */
 
 $blue: #1ab4f0;
@@ -10,9 +8,9 @@ $grey : #eee;
 $grey-dark : #aaa;
 //$blue : darken(#00bef3, 10%);
 
-@import     "bootstrap/_mixins.scss";
-@import     "bootstrap/_variables.scss";
-@import     "mixins/_alignment.scss";
+//@import     "bootstrap/_mixins.scss";
+//@import     "bootstrap/_variables.scss";
+//@import     "mixins/_alignment.scss";
 @import     "login.scss";
 @import     "home.scss";
 @import     "icons.scss";
