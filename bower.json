@@ -7,7 +7,7 @@
     "angular-messages": ">1.4.2",
     "angular-nvd3": ">0.1.1",
     "angular-route": ">1.4.2",
-    "jquery": "~1.9.0",
+    "jquery": "~1.12.1",
     "ngstorage": "~0.3.10",
     "ngmap": "~1.16.7",
     "angular-gridster": "~0.13.5",
