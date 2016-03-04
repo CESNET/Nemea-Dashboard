@@ -55,5 +55,5 @@ css
 
 #node modules
 node_modules/
-app.min.js
-public
+#app.min.js
+#public
