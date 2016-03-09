@@ -226,7 +226,8 @@ db = dbConnector()
 auth = Auth()
 
 app = Flask(__name__)
-app.debug = C['debug']
+app.config['DEBUG'] = C['debug']
+app.config['PROPAGATE_EXCEPTIONS'] = True;
 app.config['SECRET_KEY'] = 'secret-super'
 
 # Enable Cross-Origin
@@ -345,7 +346,10 @@ def aggregate():
             {
                 "$match" : {
                     "DetectTime" : {
-                        "$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                        #"$gte" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "$gte" : datetime.fromtimestamp(int(req["begintime"])),
+                        #"$lte" : datetime.strptime(req["endtime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                        "$lte" : datetime.fromtimestamp(int(req["endtime"]))
                     }
                 }
             },
@@ -369,11 +373,14 @@ def aggregate():
                 "x" : item["count"]
             })
     if req['type'] == "barchart":
-        time = datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        time = datetime.fromtimestamp(int(req['begintime']))
         query = [
             {
                 "$match" : {
-                    "DetectTime" : { "$gte" : time }
+                    "DetectTime" : { 
+                        "$gte" : time,
+                        "$lte" : datetime.fromtimestamp(int(req["endtime"]))
+                    }
                 }
             },
             {
@@ -410,7 +417,11 @@ def aggregate():
             inserted = False
             for serie in data:
                 if serie['key'] == item['_id']['Category'][0]:
-                    serie['values'].append({'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 'FlowCount' : item['FlowCount'], 'Count' : item['Count']})
+                    serie['values'].append({
+                        'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
+                        'FlowCount' : item['FlowCount'], 
+                        'Count' : item['Count']
+                    })
                     inserted = True
                     break
 
@@ -439,7 +450,10 @@ def top():
     query = [
         {
             '$match' : {
-                'DetectTime' : {'$gt' : time}
+                'DetectTime' : {
+                    '$gt' : datetime.fromtimestamp(int(req["begintime"])),
+                    '$lte' : datetime.fromtimestamp(int(req["endtime"]))
+                }
             }
         },
         {
@@ -468,7 +482,10 @@ def events_count():
     query = {
         "$and" : [
             {
-                "DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}
+                "DetectTime" : {
+                    "$gt" : datetime.fromtimestamp(int(req["begintime"])),
+                    "$lte" : datetime.fromtimestamp(int(req["endtime"]))
+                }
             }    
         ]
     }
@@ -520,6 +537,7 @@ def get_users():
 
     if request.method == 'PUT':
         user = request.get_json()
+        print(user)
         token = auth.jwt_decode(request.headers.get('Authorization', None))
         user_info = auth.get_session(token['_id'])
         
