@@ -347,9 +347,9 @@ def aggregate():
                 "$match" : {
                     "DetectTime" : {
                         #"$gte" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ"),
-                        "$gte" : datetime.fromtimestamp(int(req["begintime"])),
+                        "$gte" : datetime.utcfromtimestamp(int(req["begintime"])),
                         #"$lte" : datetime.strptime(req["endtime"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                        "$lte" : datetime.fromtimestamp(int(req["endtime"]))
+                        "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
                     }
                 }
             },
@@ -373,13 +373,13 @@ def aggregate():
                 "x" : item["count"]
             })
     if req['type'] == "barchart":
-        time = datetime.fromtimestamp(int(req['begintime']))
+        time = datetime.utcfromtimestamp(int(req['begintime']))
         query = [
             {
                 "$match" : {
                     "DetectTime" : { 
                         "$gte" : time,
-                        "$lte" : datetime.fromtimestamp(int(req["endtime"]))
+                        "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
                     }
                 }
             },
@@ -451,8 +451,8 @@ def top():
         {
             '$match' : {
                 'DetectTime' : {
-                    '$gt' : datetime.fromtimestamp(int(req["begintime"])),
-                    '$lte' : datetime.fromtimestamp(int(req["endtime"]))
+                    '$gt' : datetime.utcfromtimestamp(int(req["begintime"])),
+                    '$lte' : datetime.utcfromtimestamp(int(req["endtime"]))
                 }
             }
         },
@@ -483,8 +483,8 @@ def events_count():
         "$and" : [
             {
                 "DetectTime" : {
-                    "$gt" : datetime.fromtimestamp(int(req["begintime"])),
-                    "$lte" : datetime.fromtimestamp(int(req["endtime"]))
+                    "$gte" : datetime.utcfromtimestamp(int(req["begintime"])),
+                    "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
                 }
             }    
         ]
