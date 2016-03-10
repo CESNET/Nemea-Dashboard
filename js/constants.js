@@ -124,10 +124,10 @@ app.constant('AREA', {
 
 
 app.constant("MENU", [
-	{
+	/*{
 		"title" : "Dashboard",
         "link" : "#/"
-		/*"items" : [
+		"items" : [
 			{
 				"title" : "Users",
 				"link"	: "user"
@@ -135,8 +135,8 @@ app.constant("MENU", [
 			{
 				"title" : "My profile"
 			}
-		]*/
-	},
+		]
+	},*/
 	{
 		"title" : "Events",
 		"link" 	: "#/events"
