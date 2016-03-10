@@ -1,45 +1,60 @@
-/*!
- * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
- * Code licensed under the Apache License v2.0.
- * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+/*
+ * Base CSS file for Nemea Dashboard
  */
 
 $blue: #1ab4f0;
 $white: darken(#ffffff, 1%);
 $grey : #eee;
 $grey-dark : #aaa;
+//$blue : darken(#00bef3, 10%);
 
-@import     "bootstrap/_mixins.scss";
-@import     "bootstrap/_variables.scss";
-@import     "mixins/_alignment.scss";
+//@import     "bootstrap/_mixins.scss";
+//@import     "bootstrap/_variables.scss";
+//@import     "mixins/_alignment.scss";
 @import     "login.scss";
 @import     "home.scss";
+@import     "icons.scss";
+
+body {
+    word-wrap: break-word;
+}
 
 /* Toggle Styles */
-#menu-toggle svg {
-    color: $white;
-}
 md-toolbar:not(.md-menu-toolbar) {
     background-color: #00bef3;
 }
 .navbar-header {
-    
-
     .navbar-brand {
         font-size: 14px;
     }
 }
 
+.topbar {
+    h1 {
+        color: $white;
+        margin: 0;
+        padding: 0;
+    }
+
+    svg {
+        fill: $white;
+    }
+
+    #menu-toggle {
+        color: $white;
+
+        md-icon {
+            position: relative;
+            top: -1px;
+        }
+    }
+}
 
 .content {
     height: 100vh;
 }
 
-.md-menu {
-    position: absolute;
-    right: 0;
-    top: 0;
-}
+
 
 /* Sidebar Styles */
 
@@ -90,11 +105,33 @@ md-toolbar:not(.md-menu-toolbar) {
         }
     }
 }
+
+.query {
+    md-datepicker {
+        height: 50px !important;
+        margin-top: 13px;
+    }
+
+    md-input-container {
+        margin-bottom: 0!important;
+        padding-bottom: 0!important;
+    }
+
+    .spacer {
+        width: 25px;
+    }
+}
+
 .table {
     .row {
-        border-top: 1px solid $grey;
+        border-top: 1px solid $grey!important;
         padding: 0.5em 0;
         word-wrap: break-word;
+
+        &:focus, &:active {
+            outline: none;
+            border: 0px;
+        }
         
         small {
             color: $grey-dark;
@@ -102,27 +139,41 @@ md-toolbar:not(.md-menu-toolbar) {
         }
         &:hover {
             background: $grey;
+            cursor: pointer;
+
+            .toggled-detail {
+                border-color: darken($grey, 5%);
+            }
         }
         .row-wrapper {
-            &:focus, &:active {
-                outline: none;
-                border: 0px;
-            }
+            
             .flow-count {
                 text-align: right;
                 padding-right: 2em;
             }
         }
-    }
-}
 
-.item_info {
-    display: block;
-    margin: 0 0 2em 0;
+        .toggled-detail {
+            border-top: 1px solid $grey;
+            span {
+                padding-bottom: 1em;
+                min-height: 25px;
+            }
 
-    &.toggled-item {
-        padding: 0.5em 0;
+            margin: 0 auto;
+        }
+        
     }
+
+        .load-more {
+            padding: 2em 0;
+            button {
+                margin: 0 auto;
+                text-align: center;
+                padding: 0.5em;
+                font-size: 1.1em;
+            }
+        }
 }
 
 .actionBtn {
@@ -184,12 +235,26 @@ md-toolbar:not(.md-menu-toolbar) {
 .box {
     background: $white;   
 
-    .inner-box {
-        height: 100%;
-    }
-    h2 {
+    h2, h3 {
         margin:0;
     }
+
+    h2 {
+        padding: 8px 8px 8px 12px;
+       
+    }
+
+    p {
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .inner-box {
+        //margin: 8px;
+        height: 100%;
+        width: 100%;
+    }
+
     &.gridster-item-moving {
         //box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
         box-shadow: 0px 4px 5px -2px rgba(0, 0, 0, 0.2), 0px 7px 10px 1px rgba(0, 0, 0, 0.14), 0px 2px 16px 1px rgba(0, 0, 0, 0.12);
@@ -200,30 +265,35 @@ md-toolbar:not(.md-menu-toolbar) {
         display: block!important;
     }
 
-    &.add-item {
-        width: 200px;
-        height: 200px;
-        margin: 10px 0 0 0;
-        position: relative;
+    .md-menu {
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 
-        .md-button.md-icon-button {
-            width: auto!important;
-            height: auto!important;
+    .sum {
+        margin: 0 auto;
+        text-align: center;
 
-            md-icon {
-                width: 96px!important;
-                height: 96px!important;
-            }
-        }
+        
+    }
 
-        p {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            top: 0;
-            right: 0;
+    .aligner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        h2 {
+            position: absolute!important;
         }
     }
+
+}
+
+
+.md-dialog-fullscreen {
+    min-width: 400px;
 }
 
 /*.edit-mode-box {
@@ -252,11 +322,61 @@ md-toolbar:not(.md-menu-toolbar) {
 
 .edit-menu {
     position: fixed;
-    bottom: 4em;
+    bottom: 1em;
     right: 1em;
+    // Fix for opened menu to be clickable
+    z-index: 59;
+
+    .md-fab {
+        width: 56px;
+        height: 56px;
+        background-color: $grey!important;
+    }
+
+
+    md-menu {
+        height: auto!important;
+
+       
+    }
 }
 
 .gridster-preview-holder {
     background: $grey-dark!important;
-border: 2px dashed #000!important;
+    border: 2px dashed #000!important;
+}
+
+
+.md-success-toast-theme {
+    .md-toast-content {
+        span {
+            position: relative;
+            top: -4px;
+            
+            &:before {
+                font-family: 'Material Icons';
+                content: 'done';
+                font-size: 20px;
+                position: relative;
+                bottom: -4px;
+            }
+        }
+    }
+}
+
+.md-error-toast-theme {
+    .md-toast-content {
+        span {
+            position: relative;
+            top: -4px;
+            
+            &:before {
+                font-family: 'Material Icons';
+                content: 'error_outline';
+                font-size: 20px;
+                position: relative;
+                bottom: -4px;
+            }
+        }
+    }
 }

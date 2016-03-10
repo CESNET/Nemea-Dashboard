@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.3.3 
+Name[en_US]=Nemea Dashboard
+GenericName=Nemea Dashboard
+Exec=firefox http://localhost/Nemea-Dashboard
+Terminal=false
+Icon=/var/www/html/Nemea-Dashboard/img/icon.png
+Type=Application
+Comment=Launch Nemea Dashboard

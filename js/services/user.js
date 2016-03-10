@@ -14,6 +14,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
     }
 
     this.auth = function(user) {
+        console.log(addr);
         return $http.post(addr + "auth", angular.toJson(user))
         .success(function(data) {
             $localStorage["token"] = data["jwt"];
@@ -81,6 +82,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 $location.path("/login");
                 delete $localStorage["token"];
                 delete $localStorage["dashboard"];
+                delete $localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -94,6 +96,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 $location.path("/login");
                 delete $localStorage["token"];
                 delete $localStorage["dashboard"];
+                delete $localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -103,5 +106,88 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 );
             });
     }
+
+    this.get = function(allusers) {
+        var user = $localStorage["token"];
+        
+        if (allusers) {
+            return $http({
+                url : addr,
+                method : "GET",
+                headers : {
+                    'Authorization' : user
+                }
+            })
+            .success(function(data) {
+                return data;
+            })
+            .error(function(error, msg) {
+                $mdToast.show(
+                    $mdToast
+                        .simplet()
+                        .textContent("Cannot fetch users from database")
+                        .position("top right")
+                        .hideDelay(3000)
+                        .theme("error-toast")
+                )
+            });
+        }
+    }
+
+
+    this.post = function(userData) {
+        var user = $localStorage["token"];
+        
+        return $http({
+            url : addr,
+            method : "POST",
+            data : angular.toJson(userData),
+            headers : {
+                'Authorization' : user
+            }
+        })
+        .success(function(data) {
+            return data;
+        })
+        .error(function(error, msg) {
+            $mdToast.show(
+                $mdToast
+                    .simplet()
+                    .textContent("Cannot create user")
+                    .position("top right")
+                    .hideDelay(3000)
+                    .theme("error-toast")
+            )
+        });
+    }
+
+     this.delete = function(userId) {
+        var user = $localStorage["token"];
+        console.log(userId)
+        
+        return $http({
+            url : addr,
+            method : "DELETE",
+            params : {"userId" : userId},
+            headers : {
+                'Authorization' : user
+            }
+        })
+        .success(function(data) {
+            return data;
+        })
+        .error(function(error, msg) {
+            $mdToast.show(
+                $mdToast
+                    .simplet()
+                    .textContent("Cannot delete user")
+                    .position("top right")
+                    .hideDelay(3000)
+                    .theme("error-toast")
+            )
+        });
+    }
+
+
 
 });

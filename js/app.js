@@ -25,15 +25,22 @@ function config($routeProvider, $mdThemingProvider, $httpProvider, $localStorage
             controller: 'eventController',
             templateUrl : 'views/event.html'
         })
-        .when('/profile', {
+        .when('/settings/profile', {
             controller : 'profileController',
             templateUrl : 'views/profile.html'
+        })
+        .when('/settings/users', {
+            controller : 'usersController',
+            templateUrl : 'views/users.html'
         })
 		.otherwise({
 			redirectTo: '/login'
 		});
 
     $mdThemingProvider.theme('default').primaryPalette('light-blue').accentPalette('orange');
+
+    $mdThemingProvider.theme('success-toast');
+    $mdThemingProvider.theme('error-toast');
 
     $httpProvider.interceptors.push('notAllowedInterceptor');
     $localStorageProvider

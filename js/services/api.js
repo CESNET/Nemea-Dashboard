@@ -14,7 +14,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
         });
     }
 
-    this.get = function(url, params, info) {
+    this.get = function(url, params, info, cache) {
 		return $http({
             url : addr + url,
             method : "GET",
@@ -24,7 +24,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
             }
         })
         .success(function(data) {
-            if (info != undefined) {
+            if (info) {
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -35,13 +35,16 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
                 );
             }
 
+            if (cache)
+                $localStorage['timestamp'] = new Date();
+
             return data;
         })
         .error(function() {
             $log.error('Cannot fetch data');
             $mdToast.show(
                 $mdToast.simple()
-                    .textContent('Something went wrong')
+                    .textContent('Cannot load data')
                     .position("top right")
                     .hideDelay(3000)
                     .theme("error-toast")
@@ -69,7 +72,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
             	$log.error('Cannot fetch data');
                 $mdToast.show(
                     $mdToast.simple()
-                        .textContent('Something went wrong')
+                        .textContent('Cannot fetch data')
                         .position("top right")
                         .hideDelay(3000)
                         .theme("error-toast")
@@ -96,7 +99,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
             	$log.error('Cannot fetch data');
                 $mdToast.show(
                     $mdToast.simple()
-                        .textContent('Something went wrong')
+                        .textContent('Cannot fetch data')
                         .position("top right")
                         .hideDelay(3000)
                         .theme("error-toast")

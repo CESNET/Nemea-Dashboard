@@ -14,12 +14,97 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         "date" : new Date(),
         "description" : "",
         "category" : "",
+        "orderby" : "DetectTime",
+        "dir" : 1,
         "limit" : 100
     }
 
+    $scope.orderBy = ["DetectTime", "Category", "Description", "FlowCount"];
+    $scope.searchText = "";
+
+    $scope.querySearch = function (query) {
+      var results = query ? $scope.orderBy.filter( createFilterFor(query) ) : [];
+      return results;
+    }
+
+    function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+      return function filterFn(state) {
+        return ($scope.orderBy.indexOf(lowercaseQuery) === 0);
+      };
+    }
+
+   
+
     $scope.data = [];
     $scope.loadbtn = "Load";
-    console.log($scope.query.date)
+    $scope.nextButton = "Load next 100 items";
+    console.log($scope.query.date);
+    $scope.activeFilter = $location.search().filter;
+
+    $scope.switchDir = function(val) {
+        if (val == -1 || val) {
+            $scope.dirVal = "Descending";
+            $scope.query.dir = -1;
+        } else {
+            $scope.dirVal = "Ascending";
+            $scope.query.dir = 1;
+        }
+    }
+
+    $scope.switchDir($location.search().dir);
+
+    $scope.loadNext = function(time) {
+        $scope.nextButton = "Loading...";
+
+        if ($location.search().filter) {
+            var query = angular.copy($scope.query);
+            query.from = new Date(time);
+            query.dir = 1;
+
+            if (query.to) {
+                var to = query.to.split(':');
+                var to_date = new Date(query.date);
+                to_date.setHours(to_date.getHours() + to[0]);
+                to_date.setMinutes(to[1]);
+
+            } else {
+                var to_date = null;
+            }
+
+            query.to = to_date;
+
+
+            api.get('query', query, true).success(function(data) {
+                for(item in data) {
+                    $scope.data.push(data[item]);
+                }
+
+                $scope.nextButton = "Load next 100 items";
+            }).error(function(err, msg) {
+            
+                $scope.nextButton = "Load next 100 items";
+            })
+           
+        }
+        else {
+            query = {
+                "to" : new Date(time),
+                "dir" : -1
+            }
+
+            api.get('query', query, true).success(function(data) {
+                for(item in data) {
+                    $scope.data.push(data[item]);
+                }
+                $scope.nextButton = "Load next 100 items";
+            })
+            .error(function(err, msg) {
+            
+                $scope.nextButton = "Load next 100 items";
+            })
+        }
+    }
 
     $scope.loadItems = function(query) {
         $scope.loadbtn = "Loading...";
@@ -32,6 +117,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         $location.search('from', query.from);
         $location.search('date', query.date);
         $location.search('limit', query.limit);
+        $location.search('orderby', query.orderby);
+        $location.search('dir', query.dir);
+
         
 
         if (query.to) {
@@ -44,7 +132,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             var to_date = null;
         }
 
-                if (query.description != "") {
+        if (query.description != "") {
             $location.search('description', query.description);
         } else {
             query.description = null;
@@ -61,7 +149,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             "to" : to_date,
             "category" : query.category,
             "description" : query.description,
-            "limit" : query.limit
+            "limit" : query.limit,
+            "orderby" : query.orderby,
+            "dir" : query.dir
         }
         api.get('query', send, true).success(function(data) {
 			$scope.data = data;
@@ -72,12 +162,12 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     }
     
     if ($location.search().filter) {
+        // Query filter is set, apply it
         $scope.query = $location.search();
-        console.log($scope.query.date)
         $scope.query.date = new Date($scope.query.date);
         $scope.loadItems($scope.query);
     } else {
-
+        // Fetch 100 recent events
         api.get("100").success(function(data) {
             $scope.data = data;
         });
@@ -87,7 +177,8 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         var res = [];
         if ($scope.filter.src_ip != ""){
             if ("Source" in item) {
-                if ("IP4" in item.Source[0] && item.Source[0].IP4[0].toLowerCase().indexOf($scope.filter.src_ip.toLowerCase()) > -1) {
+                if ("IP4" in item.Source[0] && 
+                    item.Source[0].IP4[0].toLowerCase().indexOf($scope.filter.src_ip.toLowerCase()) > -1) {
                     res.push(1);
                 }
                 else
@@ -99,7 +190,8 @@ app.controller('eventsController', function($scope, $http, $location, api) {
 
         if ($scope.filter.trt_ip != ""){
             if ("Target" in item) {
-                if ("IP4" in item.Target[0] && item.Target[0].IP4[0].toLowerCase().indexOf($scope.filter.trt_ip.toLowerCase()) > -1) {
+                if ("IP4" in item.Target[0] && 
+                    item.Target[0].IP4[0].toLowerCase().indexOf($scope.filter.trt_ip.toLowerCase()) > -1) {
                     res.push(1);
                 }
                 else
@@ -159,8 +251,6 @@ app.directive('validateHours', function() {
                 } else if (viewValue) {
                     to = viewValue.split(':');
                 }
-            console.log(from)
-            console.log(to) 
             if (to.length == 2 || from.length == 2) {
                 if (to[0] < from[0] || (to[0] <= from[0] && to[1] < from[1]) ||
                     to[0] < 0 || to[0] > 23 || to[1] < 0 || to[1] > 59 || from[0] < 0 || from[0] > 23 || from[1] < 0 || from[1] > 59

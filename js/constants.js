@@ -15,7 +15,8 @@ app.constant('PIECHART', {
     options: {
         chart: {
             type: 'pieChart',
-            height: 450,
+            height: 375,
+            //height: function() { console.log(document.getElementById('nvd3').offsetHeight); return Number(425)},
             x: function(d){return d.key[0];},
             y: function(d){return d.x;},
             showLabels: true,
@@ -24,15 +25,18 @@ app.constant('PIECHART', {
             cornerRadius : 1,
             transitionDuration: 500,
             labelThreshold: 0,
-            //color: ["#0ec4f4", "#631FF6", "#FFDC06", "#FF8406", "#b56969", "#e6cf8b"],
+            //color: ['blue', 'green', 'yellow'],
+            //color: ["#4ac4f3", "#96d6bd", "#0a599d", "#8ba2c0", "#f7fcfd","#e5f5f9","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"],
+            //color: ["#2196F3", "#009688",  "#673AB7",  "#FF9800"], 
             legend: {
                 margin: {
                     top: 5,
                     right: 0,
-                    bottom: 0,
+                    bottom: -15,
                     left: 0
                 }
             },
+            legendPosition : "top",
             tooltipContent : function(key, x, y, e, graph) {
                                 console.log(key);
                                 console.log(y);
@@ -55,7 +59,7 @@ app.constant('PIECHART', {
                     //elementMouseout: function(e) {console.log("element mouse out")}            
                 },
                 labelType : "percent",
-                labelsOutside : true,
+                labelsOutside : false,
                 //startAngle : function(d) { return d.startAngle/2 -Math.PI/2 },
                 //endAngle : function(d) { return d.endAngle/2 -Math.PI/2 }
             }
@@ -76,11 +80,17 @@ app.constant('AREA', {
                 left: 50
             },
             x: function(d) { return d.x },
-            y: function(d) { return d.Count },
+            y: function(d) { 
+                if (d.selector)
+                    return Number(d.FlowCount);
+                else
+                    return Number(d.Count);
+            },
             useVoronoi: false,
             clipEdge: true,
             duration: 100,
-            useInteractiveGuideline: true,
+            useInteractiveGuideline: false,
+            tooltipContent : function(key, x, y, e, graph) {return("Ha");},
             xAxis: {
                 showMaxMin: false,
                 tickFormat: function(d) {
@@ -89,39 +99,22 @@ app.constant('AREA', {
                 rotateLabels : -45,
             },
             yAxis: {
+                showMaxMin: false,
                 tickFormat: function(d){
-                    return d3.format(',.0f')(d);
-                }
-            },
-            zoom: {
-                enabled: true,
-                //scaleExtent: [1, 10],
-                useFixedDomain: false,
-                useNiceScale: false,
-                horizontalOff: false,
-                verticalOff: true,
-                unzoomEventType: 'dblclick.zoom'
-            }, 
-            dispatch: {
-                stateChange: function(e){ console.log("stateChange"); },
-                changeState: function(e){ console.log("changeState"); },
-                tooltipShow: function(e){ console.log("tooltipShow"); },
-                tooltipHide: function(e){ console.log("tooltipHide"); }
-            },
+                    return d3.format('s')(d);
+                },
+            },  
             multibar: {
                 dispatch : {
                     elementClick: function(e) {
                         var date = new Date(e.data.x);
-                        console.log(date)
+                        console.log(e)
                         var hours = date.getHours();
                         var minutes = date.getMinutes();
                         date.setHours(0);
                         date.setMinutes(0);
-                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key;
-                        //console.log(e.data.key);
-                        //console.log(e.data.x);
+                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key + '&dir=1';
                     },
-
                 }
             }
         }
@@ -175,11 +168,11 @@ app.constant("MENU", [
 		"items" : [
             {
 				"title" : "My profile",
-				"link"	: "#/profile"
+				"link"	: "#/settings/profile"
 			},
 			{
 				"title" : "Users",
-				"link" 	: "/settings"
+				"link" 	: "#/settings/users"
 			},
 		]
 	}
