@@ -4,16 +4,15 @@ app.directive("sidebarMenu", function() {
 			section: '='
 		},
 		templateUrl: 'partials/sidebar-menu.html',
-        controller: function($scope, $mdSidenav, $location, MENU, user) {
+        controller: function($scope, $mdSidenav, $location, MENU, user, dashboard) {
             $scope.menu = MENU;
+
+            $scope.dashboards = dashboard.getAll();
+            $scope.selectedDashboard = dashboard.active();
 
             $scope.isActive = function(current) {
                 return('#' + $location.path() == current);
-            }
-
-            $scope.changeMode = function() {
-                $scope.$emit('reqChangeMode');
-            }
+            }   
 
             $scope.enable = true;
 
@@ -28,6 +27,15 @@ app.directive("sidebarMenu", function() {
 
             $scope.logout = function() {
                 user.logout();
+            }
+
+            $scope.addDashboard = function() {
+                $scope.$emit('addDashboard');
+            }
+
+            $scope.switchDashboard = function(index) {
+                $scope.selectedDashboard = dashboard.active(index);
+                $scope.$emit('switchDashboard', index);
             }
     
  

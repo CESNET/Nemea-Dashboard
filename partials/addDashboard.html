@@ -1,0 +1,44 @@
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <h2>Add new dashboard</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+            <md-icon md-svg-src="img/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+  </div>
+</md-toolbar>
+
+<md-dialog-content layout="column" layout-padding>
+    <div flex layout="row">
+        <md-input-container flex>
+            <label>Title</label>
+            <input ng-model="db.title">
+        </md-input-container>    
+    </div>
+
+    <div layout="row">
+        <md-input-container flex>
+            <label>Refresh interval</label>
+            <input ng-model="db.interval">
+        </md-input-container>
+        <md-input-container flex>
+            <label>Time shift</label>
+            <input ng-model="db.timeshift">
+        </md-input-container>
+    </div>
+
+
+</md-dialog-content>
+
+<md-dialog-actions layout="row" class="editDashboard">
+    <md-button ng-click="deleteDashboard()" ng-if="editDashboard" class="md-warn md-hue-2">
+        Delete dashboard
+    </md-button>
+    <span flex></span>
+    <md-button ng-click="cancel()">
+        Cancel
+    </md-button>
+    <md-button ng-click="saveAndClose(db)" style="margin-right:20px;" class="md-primary md-raised">
+       Save 
+    </md-button>
+</md-dialog-actions>

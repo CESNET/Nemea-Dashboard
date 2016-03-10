@@ -1,5 +1,5 @@
 <md-sidenav 
-    class="md-sidenav-left md-whiteframe-z2" 
+    class="md-sidenav-left md-whiteframe-z1" 
     md-component-id="left" 
     md-is-locked-open="$mdMedia('gt-md')" 
     layout="column" 
@@ -14,6 +14,31 @@
 		</md-toolbar>
 
 		<md-content flex>
+            <md-button 
+                class="md-button-toggle menu_item" 
+                ng-href="#/" 
+                ng-click="switchDashboard(0)" 
+                ng-class="{'toggled-item' : isActive('#/')}" >
+                
+                Dashboards 
+            </md-button>
+
+            <md-button 
+                class="md-button-toggle submenu_item" 
+                ng-click="switchDashboard($index)" 
+                ng-repeat="dashboard in dashboards" 
+                ng-href="#/"
+                ng-class="{'toggled-item' : $index == selectedDashboard && isActive('#/')}">
+                {{ dashboard.settings.title }}
+            </md-button>
+
+            <md-button
+                class="md-button-toggle submenu_item"
+                ng-click="addDashboard()">
+                 <i style="margin: auto 3px auto 0; position: relative; bottom: -6px;" class="material-icons">add</i>
+                Add dashboard
+            </md-button>
+
 			<div ng-repeat="menu_item in menu">
 				<md-button 
                     class="md-button-toggle menu_item" 

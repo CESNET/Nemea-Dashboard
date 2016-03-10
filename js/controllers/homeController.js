@@ -1,13 +1,15 @@
-app.controller('homeController', function($scope, user, $timeout, $interval, $log, $localStorage, $route) {
+app.controller('homeController', function($scope, user, $timeout, $interval, $log, $localStorage, $route, $mdDialog, dashboard) {
+    
+    $scope.dashboards = dashboard.getAll();
+    $scope.dashboardSettings = dashboard.settings();
+
     $scope.activeGrid = false;
-    $scope.refresh_interval = 10;
+    $scope.refresh_interval = $scope.dashboardSettings.interval;
     
     // To store interval ID
     var refresh = undefined;
     $scope.refresh_enabled = angular.isDefined(refresh);
 
-    $scope.apis = [];
-    
     $scope.openMenu = function($mdOpenMenu, ev) {
         originatorEv = ev;
         $mdOpenMenu(ev);
@@ -53,23 +55,94 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 
     }
 
+    
+
+    $scope.selectedDashboard = dashboard.selectedDashboard;
+
+    $scope.editDashboard = function(ev, index) {
+        // Make a backup copy of current dashboards
+        $scope.backupDashboards = angular.copy($scope.dashboards);
+
+        $mdDialog.show({
+            controller: "editDashboardController",
+            templateUrl: 'partials/addDashboard.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            fullscreen: true,
+        })
+        .then(function() {
+            dashboard.save();
+            $scope.refresh_interval = $scope.dashboardSettings.interval;
+        }, function() {
+            $scope.dashboards = $scope.backupDashboards;
+            console.log($scope.backupDashboards);
+            $scope.backupDashboards = {};
+            console.log($scope.dashboards)
+            console.log("reverting");
+        });
+    }
+
+
+    $scope.$on('addDashboard', function(ev) {
+        console.log("Adding new dashboard");
+
+        $mdDialog.show({
+            controller: 'addDashboardController',
+            templateUrl: 'partials/addDashboard.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose:true,
+            fullscreen: true,
+        })
+        .then(function(answer) {
+            var newIndex = dashboard.add(answer);
+            console.log(newIndex)
+            dashboard.save();
+            $scope.$broadcast('switchDashboard', newIndex);
+            /*dashboard.switch(newIndex);
+            $scope.selectedDashboard = newIndex;
+            $scope.$broadcast('reloadDashboard'); */
+        }, function() { // cancel
+        });
+        
+    });
+
+    $scope.$on('switchDashboard', function(ev, index) {
+        delete $localStorage['timestamp'];
+        dashboard.switch(index)
+        $scope.selectedDashboard = dashboard.active(index);
+        console.log()
+        $scope.$broadcast('reloadDashboard');
+    });
+    
+
+
 });
 
-app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout){
-    function timeShift(offset) { 
+app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout, dashboard){
+    
+    function timeShift(offset) {
+        //console.log(offset)
+        offset = angular.isDefined(offset) ? offset : 0;
         $scope.box.config.begintime = (function() {
-            console.log($scope.box)
+
+            var now = new Date();
+            
+            var shift_time = (Number(offset) + Number($scope.box.config.period))*60*60*1000;
+            var shifted = now.getTime() - shift_time;
+            return Math.floor(shifted/1000);
+        })();
+
+        $scope.box.config.endtime = (function() {
             var now = new Date();
 
-            if (angular.isDefined(offset))
-                now.setHours(now.getHours() - Number(offset));
-
-            now.setHours(now.getHours() - $scope.box.config.period);
-            return now;
+            now.setTime(now.getTime() - Number(offset)*60*60*1000);
+            return Math.floor(now/1000);
         })();
     }
 
-    timeShift();
+    timeShift($scope.dashboard.settings.timeshift);
 
     $scope.box.loading = true;
         
@@ -78,7 +151,6 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         $mdOpenMenu(ev);
     };
 
-    $scope.editMode = false;
     $scope.backupModel = {};
 
     $scope.protocol = PROTOCOLS;
@@ -93,7 +165,6 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     $scope.edit = function(box) {
         $scope.editMode = true;
         $scope.backupModel = angular.copy(box);
-        $scope.$emit("switch-drag");
     }
 
     // Save changes and disable edit mode
@@ -116,9 +187,8 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
 
         
         // Shift time for query
-        timeShift();
+        timeShift($scope.dashboard.settings.timeshift);
 
-        $scope.$emit("switch-drag");
         // Get required data
         if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
             api.get('agg', $scope.box.config, true).success(function(data) {
@@ -155,12 +225,10 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     $scope.cancel = function(box) {
         $scope.box = angular.copy($scope.backupModel);
         $scope.backupModel = {};
-        $scope.editMode = false;
-        $scope.$emit("switch-drag");
     }
     
     $scope.top = function() {
-        timeShift()
+        timeShift($scope.box.settings.timeshift)
         api.get('top', $scope.box.config, true).success(function(data) {
             console.log(data);
             $scope.box.data = data;
@@ -175,11 +243,13 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
 
     
     // Show loading indicator
-    if (cache_time < 300)
+    if (cache_time < 300) {
         $scope.box.loading = false;
+        //console.log("data is cached")
+    }
     else {
         $scope.box.loading = true;
-        console.log('Data is cached, redraw')
+        //console.log('Data is not cached, redraw')
         
     }
 
@@ -230,24 +300,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     })
  
     $scope.user = function() {
-        var settings = angular.copy($scope.items);
-        for (var i = 0; i < settings.length; i++) {
-                delete settings[i]["data"];
-                delete settings[i]["options"];
-        }
-        
-        var query = {
-            "settings" : settings
-        }
-
-        //$log.info(query)
-        user.put(query)
-            .success(function(data) {
-                //console.log(data);
-            })
-            .error(function(data){
-                $log.error(data)
-            })
+       dashboard.save(); 
     }
 
     $scope.$on('saveUser', function() {
@@ -288,7 +341,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
   
 });
 
-app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, user) {
+app.controller('grid', function($scope, $timeout, $log, $route, user, dashboard) {
     $scope.opt = {
         outerMargin: false,
         columns: 8,
@@ -305,11 +358,15 @@ app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, u
             enabled: false,
             handles: ['n', 'e', 's', 'w', 'se', 'sw'],
             stop: function(event, $element, widget) {
-                console.log("resize end");
-                    $scope.$emit('requestRedraw');
+                //console.log("resize end");
+                $scope.$emit('requestRedraw');
             }
         }
     }
+
+    $scope.dashboard = dashboard.get();
+    $scope.items = $scope.dashboard.items;
+    //console.log($scope.items);
 
     $scope.$on('enableGrid', function() {
         if ($scope.opt.resizable.enabled == true) {
@@ -325,8 +382,6 @@ app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, u
         $scope.$broadcast('saveUser');
     };
 
-    $scope.items = user.config();
-    
     $scope.$on('addItem', function() {
         var item = {
             "title" : "New box",
@@ -343,6 +398,17 @@ app.controller('grid', function($scope, $timeout, $log/*, $mdMedia, $window*/, u
 
         $scope.items.push(item)
     });
+
+    
+
+    $scope.$on('reloadDashboard', function() {
+        $scope.dashboard = dashboard.get();
+        $scope.items = $scope.dashboard.items;
+        console.log($scope.dashboard);
+        $scope.$emit('requestRedraw')
+    })
+
+
 
 
 })
@@ -384,3 +450,49 @@ app.controller('editBoxController', function($scope, $mdDialog, box, PROTOCOLS, 
 
 });
 
+app.controller('addDashboardController', function($scope, $mdDialog) {
+    
+    $scope.editDashboard = false;
+    
+    $scope.saveAndClose = function(answer) {
+        $mdDialog.hide(answer);
+    };
+
+
+    $scope.cancel = function(box) {
+        console.log("Cancelling");
+        $mdDialog.cancel();
+    }
+
+});
+
+
+app.controller('editDashboardController', function($scope, $mdDialog, dashboard) {
+    
+    // Load dashboard settings
+    $scope.db = dashboard.settings();
+
+    // Varible to differentiate between editing and adding a dashboard
+    // We are using the same partial to display within dialog
+    $scope.editDashboard = true;
+
+ 
+    $scope.saveAndClose = function(answer) {
+        dashboard.update(answer);
+        $mdDialog.hide();
+    };
+
+    $scope.deleteDashboard = function() {
+        dashboard.delete();
+        $scope.$broadcast('switchDashboard', 0);
+        dashboard.active(0);
+        $mdDialog.hide();
+    }
+
+
+    $scope.cancel = function(box) {
+        console.log("Cancelling");
+        $mdDialog.cancel();
+    }
+
+});

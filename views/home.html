@@ -1,12 +1,13 @@
 <section layout="row" class="wrapper">
 <sidebar-menu></sidebar-menu>
 
-<md-content flex layout="column" >
+<md-content flex layout="column" class="content-wrapper" >
     <topbar-menu></topbar-menu>
     <section class="content" layout-padding>
-        <div ng-controller="grid">
+        <div ng-controller="grid" >
+            {{ dashboard.settings }}
             <div gridster="opt">
-                <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" class="box" >
+                <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" ng-class="{'resizeable' : activeGrid == true}" >
                 	<div gridster-dynamic-height item="box" class="inner-box" id="nvd3">
 	                    <md-menu md-position-mode="target-right target">
 	                            <md-button aria-label="Open box interactions menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
@@ -75,16 +76,11 @@
 					</div> <!-- /layout-padding -->            
                 </div> <!-- /gridster-item -->
             </div> <!-- /gridster -->
-            
-            <!--div class="box md-whiteframe-z1 add-item" layout="column" layout-align="center center">
-                <md-button class="md-icon-button" aria-label="Add item" ng-click="addItem()">
-                    <md-icon md-svg-icon="img/plus.svg"></md-icon>
-                    <br>
-                    Add item
-                </md-button>
-            </div-->
+             
     	</div> <!-- /ng-controller grid -->
+
 	</section> <!-- /content -->
+
     
     <div class="edit-menu">
         <md-menu md-position-mode="target-right target">
@@ -116,8 +112,15 @@
                     </span>
                 </md-button>
             </md-menu-item>
-            
+
             <md-menu-divider></md-menu-divider>
+
+            <md-menu-item>
+                <md-button ng-click="editDashboard(selectedDashboard)">
+                    <i style="margin: auto 3px auto 0; position: relative; bottom: -5px;" class="material-icons">settings</i>
+                    Dashboard settings
+                </md-button>
+            </md-menu-item>
             
             <md-menu-item>
                 <md-button ng-click="enableGrid()">
