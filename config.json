@@ -1,23 +1,23 @@
 {
 	"db": {
-		"host": "localhost",
-		"port": 27017,
-		"user": null,
-		"password": null,
-		"database": "nemeadb",
-		"collection": {
+		"host": "localhost",        // IP address of MongoDB
+		"port": 27017,              // Port of MongoDB instance
+		"user": null,               // If MongoDB requires credentials
+		"password": null,           // Otherwise leave null
+		"database": "nemeadb",      // MongoDB database for Nemea alerts
+		"collection": {             // MongoDB collections to fetch data from
 			"events": "alerts_new",
 			"users": "users",
             "sessions" : "sessions"
 		}
 	},
 	"api": {
-		"version": "v2",
-        "port" : 5555,
-        "host" : "http://benefizio.liberouter.org"
+		"version": "v2",            // Version of API
+        "port" : 5555,              // Port to bind API to 
+        "host" : "0.0.0.0"          // IP address to bind API to, leave 0.0.0.0 to bind on server's IP
 	},
-	"ssl" : true,
-	"ssl_key" : "../privkey1.pem",
-	"ssl_crt" : "../cert1.pem",
-	"debug": true
+	"ssl" : true,                   // Turn https on
+	"ssl_key" : "../privkey1.pem",  // Path to private key
+	"ssl_crt" : "../cert1.pem",     // Path to certificate
+	"debug": true                   // Turn debugging on
 }
