@@ -1,8 +1,11 @@
 # Nemea Dashboard
+Nemea Dashboard is a graphical user interface to interact with Nemea alerts dabatase. It features multiple dashboards with beautiful graphs showing current state of servers monitored by Nemea system
+
+Nemea Dashboard's main developer is Petr Stehlík (stehlik[you-know-what]cesnet.cz). If you have any questions please contact Petr or create a new issue here on GitHub
 
 ##Installing Nemea-Dashboard
 ###Prequisites
-You'll need `python3`, `pip3`, `bower`, `mongoDB` and any HTTP server (tested and run on `httpd`)
+You'll need `python` (tested on python 3.5), `pip` (in case of python3 pip3), `mongoDB` (~3.2.1) and any HTTP server (tested and run on `httpd`)
 
 ###Installing
 1. Clone this repository
