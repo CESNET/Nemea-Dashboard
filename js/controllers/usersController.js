@@ -51,8 +51,33 @@ app.controller('addUserController', function($scope, $mdDialog) {
         name : '',
         surname : '',
         password : '',
-        settings : []
-    }
+        settings :[
+		{
+			"settings" : {
+				"title" : "Basic",
+				"timeshift" : "0",
+				"interval" : "60"
+			},
+			"items" : [
+				{
+					"loading" : false,
+					"row" : 0,
+					"config" : {
+						"period" : "24",
+						"type" : "piechart",
+						"metric" : "category"
+					},
+					"sizeX" : 4,
+					"sizeY" : 3,
+					"col" : 0,
+					"title" : "24h shares",
+					"type" : "piechart",
+					"content" : "Click the menu icon to select edit"
+				}
+			]
+		}
+	]
+	}
     $scope.saveAndClose = function(user) {
         console.log(user)
         $mdDialog.hide(user);
