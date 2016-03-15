@@ -130,7 +130,8 @@
                 <div flex=15 layout-padding>{{ item.Category[0] }}</div>
                 <div flex=20 layout-padding>{{ item.Source[0].IP4[0] }}<small ng-if="!item.Source[0].IP4">N/A</small></div>
                 <div flex=20 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">N/A</small></div>
-                <div flex=20 layout-padding>{{ item.Description | limitTo : 31 : 0 }}{{item.Description.length > 31 ? ' ...' : ''}}</div>
+                <div flex=20 layout-padding>{{ item.Description }}</div>
+                <!--div flex=20 layout-padding>{{ item.Description | limitTo : 31 : 0 }}{{item.Description.length > 31 ? ' ...' : ''}}</div-->
                 <div flex=10 class="flow-count"layout-padding>{{ item.FlowCount | number }}</div>
                 <!--div flex=5>
                     <md-button class="md-button-toggle md-raised"   aria-label="Enable details">
@@ -180,10 +181,12 @@
 
             
         </div>
-        <div layout="row" flex style="background-color: #fff!important" class="load-more">
+
+        <div layout="row" flex style="background-color: #fff!important" class="load-more" ng-hide="remaining.total <=query.limit">
 
                 <md-button class="md-raised md-primary" ng-click="loadNext(data[data.length-1].DetectTime.$date)">
-                    {{ nextButton }}
+                    {{ nextButton }} <br> 
+                    <small ng-if="remaining.total">({{ remaining.total | number }}<span ng-if="remaining.total >= 10000">+</span> remaining)</small>
                 </md-button>
             </div>
 
