@@ -7,7 +7,7 @@ app.constant('AUTH_EVENTS', {
   notAuthorized: 'auth-not-authorized'
 });
 
-app.constant('CATEGORIES', [ "any", "Recon.Scanning", "Attempt.Login", "Availability.DoS" ]);
+app.constant('CATEGORIES', [ "any", "Recon.Scanning", "Attempt.Login", "Availability.DoS", "Availibility.DDoS"]);
 app.constant('PROTOCOLS', [ "tcp", "dns", "udp" ]);
 app.constant('TYPES', ["barchart", "piechart", "top", "sum"])
 
