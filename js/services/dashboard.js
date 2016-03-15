@@ -2,19 +2,19 @@ app.service('dashboard', function($log, $localStorage, user) {
 
     var selectedDashboard = 0;
     var dashboards = $localStorage['dashboard'];
-    var active = dashboards[selectedDashboard];
+    var active = $localStorage['dashboard'][selectedDashboard];
     var backup;
 
     this.getAll = function() {
-        return dashboards;
+        return $localStorage['dashboard'];
     }
 
     this.get = function() {
-        return dashboards[selectedDashboard];
+        return  $localStorage['dashboard'][selectedDashboard];
     }
 
     this.settings = function() {
-        return dashboards[selectedDashboard].settings;
+        return  $localStorage['dashboard'][selectedDashboard].settings;
     }
 
     this.active = function(index) {
@@ -22,15 +22,22 @@ app.service('dashboard', function($log, $localStorage, user) {
             selectedDashboard = index
         }
 
+        //active = $localStorage['dashboard'][selectedDashboard];
+
         return selectedDashboard;
     }
 
     this.update = function(updatedDashboard) {
-        active.settings = updatedDashboard;
+        if (angular.isUndefined(updatedDashboard))
+            active.settings = 0;
+        else
+            active.settings = updatedDashboard;
+
+        //dashboards = $localStorage['dashboard'];
     }
 
     this.save = function() {
-        var settings = angular.copy(dashboards);
+        var settings = angular.copy($localStorage['dashboard']);
         //console.log(settings)
         
         // Remove data and graph options
@@ -76,15 +83,15 @@ app.service('dashboard', function($log, $localStorage, user) {
             }]
         }
 
-        dashboards.push(tmpDashboard);
-        console.log(dashboards.length - 1);
+         $localStorage['dashboard'].push(tmpDashboard);
+        console.log( $localStorage['dashboard'].length - 1);
 
-        return (dashboards.length - 1);
+        return ( $localStorage['dashboard'].length - 1);
 
     }
 
     this.delete = function() {
-        backup = dashboards.splice(dashboards.indexOf(active), 1);
+        backup =  $localStorage['dashboard'].splice( $localStorage['dashboard'].indexOf(active), 1);
         selectedDashboard = 0;
 
         return backup;
@@ -92,9 +99,14 @@ app.service('dashboard', function($log, $localStorage, user) {
     }
 
     this.switch = function(index) {
-        active = dashboards[index];
+        active = $localStorage['dashboard'][index];
         selectedDashboard = index;
         return active;
+    }
+
+    this.reset = function() {
+        selectedDashboard = 0;
+        active = $localStorage['dashboard'][selectedDashboard]
     }
         
 });
