@@ -26,6 +26,7 @@ app.directive("sidebarMenu", function() {
             };
 
             $scope.logout = function() {
+                dashboard.reset();
                 user.logout();
             }
 
