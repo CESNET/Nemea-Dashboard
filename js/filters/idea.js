@@ -6,6 +6,7 @@ app.filter('idea', function() {
         angular.forEach(input, function(value, key) {
             if (key != '_id') {
                 if (value['$date']) {
+                    console.log(value['$date']);
                     res[key] = new Date(value['$date']).toISOString().slice(0,19) + 'Z';
                 } else {
                     res[key] = value;
