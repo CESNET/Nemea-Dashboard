@@ -164,6 +164,14 @@ def query():
     else:
         orderby = 'DetectTime'
 
+    if 'srcip' in req:
+        part = {"Source.IP4" : req['srcip']}
+        query["$and"].append(part)
+    
+    if 'dstip' in req:
+        part = {"Target.IP4" : req['dstip']}
+        query["$and"].append(part)
+
     res = list(db.events.find(query).sort([(orderby, dir)]).limit(int(req['limit'])))
 
     res.append({'total' : db.events.find(query).limit(10000).count(True)})
