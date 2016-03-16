@@ -74,10 +74,23 @@
                     <span ng-hide="!query.dir">descending</span-->
                     {{ dirVal }}
                 </md-switch>
+                
+                <md-input-container flex="15">
+                    <label>Source IP</label>
+                    <input type="text" ng-model="query.srcip">
+                </md-input-container>
+
+                <md-input-container flex="15">
+                    <label>Destination IP</label>
+                    <input type="text" ng-model="query.dstip">
+                </md-input-container>
+
 
                 <div flex></div>
 
                 <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid" flex="10">{{ loadbtn }}</md-button>
+
+                {{ query }}
             </div>
         </form>
 
@@ -170,6 +183,7 @@
                 </div>
 
                 <div flex   style="margin: 0 auto; text-align: center; height: 0;" >        
+                    <md-button class="md-raised" ng-href="getQuery(item['Source[0].IP4[0]'])">Source IP</md-button>
                     <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}"  aria-label="Show details">
                         Details
                     </md-button>

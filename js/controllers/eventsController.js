@@ -16,7 +16,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         "category" : "",
         "orderby" : "DetectTime",
         "dir" : 1,
-        "limit" : 100
+        "limit" : 100,
+        "srcip" : "",
+        "dstip" : ""
     }
 
     $scope.orderBy = ["DetectTime", "Category", "Description", "FlowCount"];
@@ -40,6 +42,10 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     $scope.loadbtn = "Load";
     $scope.nextButton = "Load next 100 items";
     $scope.activeFilter = $location.search().filter;
+
+    $scope.getQuery = function(ip) {
+        console.log(ip);
+    }
 
     /*$scope.parseDate = function(date) {
         console.log(date);
@@ -134,8 +140,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         $location.search('limit', query.limit);
         $location.search('orderby', query.orderby);
         $location.search('dir', query.dir);
-
-        
+       
 
         if (query.to) {
             var to = query.to.split(':');
@@ -159,6 +164,21 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             query.category = null;
         }
 
+        if (query.srcip != "") {
+            $location.search('srcip', query.srcip);
+        } else {
+            $location.search("srcip", null);
+            query.srcip = null;
+
+        }
+        
+        if (query.dstip != "") {
+            $location.search('dstip', query.dstip);
+        } else {
+            $location.search("dstip", null);
+            query.dstip = null;
+        }
+
         var send = {
             "from" : from_date,
             "to" : to_date,
@@ -166,7 +186,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             "description" : query.description,
             "limit" : query.limit,
             "orderby" : query.orderby,
-            "dir" : query.dir
+            "dir" : query.dir,
+            "srcip" : query.srcip,
+            "dstip" : query.dstip
         }
         api.get('query', send, true).success(function(data) {
 			$scope.remaining = data.pop();//[data.length - 1])
