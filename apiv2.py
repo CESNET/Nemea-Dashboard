@@ -22,6 +22,7 @@ from time import mktime
 # MongoDB data manipulation
 from bson import json_util
 from bson.objectid import ObjectId
+import pymongo
 
 # Load config.json
 config = Config()
@@ -77,10 +78,14 @@ def login():
         return auth.errors[str(auth_user)], 401
     
     _id = auth.store_session(auth_user['username'], auth_user['_id'])
+    print(auth_user)
     
     # Attach JWT for further authentication
     auth_user['jwt'] = auth.jwt_create({
         'username' : auth_user['username'],
+        'name' : auth_user.get('name', ""),
+        'surname' : auth_user.get('surname', ""),
+        'email' : auth_user.get('email', ""),
         '_id' : str(_id),
         'created' : mktime(datetime.utcnow().timetuple())
     })
@@ -360,6 +365,7 @@ def get_users():
         # Remove password hash from the resulting query
         for user in res:
             user.pop("password", None)
+        return(json_util.dumps(res))
 
     # Create user
     if request.method == 'POST':
@@ -373,13 +379,13 @@ def get_users():
     if request.method == 'DELETE':
         req = request.args
         req = req.to_dict()
-        print(req["userId"])
+        #print(req["userId"])
         res = db.users.delete_one({"_id" : ObjectId(req["userId"])})
         return(json_util.dumps(res.deleted_count))
 
     if request.method == 'PUT':
         user = request.get_json()
-        print(user)
+        #print(user)
         token = auth.jwt_decode(request.headers.get('Authorization', None))
         user_info = auth.get_session(token['_id'])
         
@@ -392,25 +398,24 @@ def get_users():
 
         # If the user updates their profile check for all fields to be updated
         if "name" in user:
-            query["$set"].append({"name" : user["name"]})
+            query["$set"]["name"] = user["name"]
 
         if "surname" in user:
-            query["$set"].append({"surname" : user["surname"]})
+            query["$set"]["surname"] = user["surname"]
         
         if "email" in user:
-            query["$set"].append({"email" : user["email"]})
+            query["$set"]["email"] = user["email"]
 
         # In case of password change, verify that it is really him (revalidate their password)
         if "password" in user:
             verify = auth.login(user["username"], user["password"])
-        
             # This is really stupid, I have to change it
             # TODO: better password verification returning values
-            if verify != 0 or verify != 1:
+            if verify != 0 and verify != 1:
                 hash = auth.create_hash(user["password_new"])
-                query["$set"].append({"password" : hash})
+                query["$set"]["password"] = hash
             else:
-                return auth.errors[str(verify)], 401
+                return (json_util.dumps( {'error' : auth.errors[str(verify)]}), 403)
 
         # The query is built up, lets update the user and return updated document
         res_raw = db.users.find_one_and_update(
@@ -421,7 +426,16 @@ def get_users():
         # Remove password hash from the response
         res = res_raw.pop("password", None)
 
-    return(json_util.dumps(res))
+        jwt_res = auth.jwt_create({
+            'username' : res_raw['username'],
+            'name' : res_raw.get('name', ""),
+            'surname' : res_raw.get('surname', ""),
+            'email' : res_raw.get('email', ""),
+            '_id' : str(token['_id']),           # Keep the same session ID!
+            'created' : mktime(datetime.utcnow().timetuple())
+        })
+
+        return(json_util.dumps({"jwt" : jwt_res}))
 
 @app.route(C['users'] + 'logout', methods=['DELETE'])
 @auth.required

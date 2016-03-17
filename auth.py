@@ -1,7 +1,7 @@
 import bcrypt 
 from functools import wraps
 import jwt
-from flask import request
+from flask import request, abort
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
