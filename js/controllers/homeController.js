@@ -6,7 +6,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
     $scope.activeGrid = false;
     $scope.refresh_interval = $scope.dashboardSettings.interval;
     
-    // To store interval ID
+    // Store interval ID
     var refresh = undefined;
     $scope.refresh_enabled = angular.isDefined(refresh);
 
@@ -57,7 +57,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 
     
 
-    $scope.selectedDashboard = dashboard.selectedDashboard;
+    $scope.selectedDashboard = dashboard.active();
 
     $scope.editDashboard = function(ev, index) {
         // Make a backup copy of current dashboards
@@ -97,7 +97,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
         })
         .then(function(answer) {
             var newIndex = dashboard.add(answer);
-            console.log(newIndex)
+            //console.log(newIndex)
             dashboard.save();
             $scope.$broadcast('switchDashboard', newIndex);
             /*dashboard.switch(newIndex);
@@ -111,8 +111,8 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
     $scope.$on('switchDashboard', function(ev, index) {
         delete $localStorage['timestamp'];
         dashboard.switch(index)
-        $scope.selectedDashboard = dashboard.active(index);
-        console.log()
+        $scope.selectedDashboard = dashboard.active();
+        //console.log()
         $scope.$broadcast('reloadDashboard');
     });
     
@@ -169,14 +169,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
 
     // Save changes and disable edit mode
     $scope.save = function() {
-        $scope.user();
-        if ($scope.box.type == 'piechart') {
-            $scope.box.options = PIECHART.options;
-            
-        }
-        if ($scope.box.type == 'barchart')
-            $scope.box.options = AREA.options;
-        
+        dashboard.save(); 
 
         $scope.backupModel = {};
 
@@ -185,41 +178,11 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         // Disable edit mode
         $scope.editMode = false;
 
-        
-        // Shift time for query
-        timeShift($scope.dashboard.settings.timeshift);
+        cache_time = 300 + 10;
 
         // Get required data
-        if ($scope.box.type == 'piechart' || $scope.box.type == 'barchart') {
-            api.get('agg', $scope.box.config, true).success(function(data) {
-                $scope.box.loading = false;    
-                $scope.box.data = data;
-            })
-        } else if ($scope.box.type == 'top') {
-            api.get('top', $scope.box.config, true).success(function(data) {
-                $scope.box.loading = false;    
-                $scope.box.data = data;
-            })
-        } else if ($scope.box.type == 'sum') {
-            api.get('count', $scope.box.config).success(function(data) {
-                $scope.box.loading = false;
-                $scope.box.data = data;
-            })
-        }
+        getData();
     }
-    $scope.changeSelector = function(sel) {
-        angular.forEach($scope.box.data, function(value, key) {
-            angular.forEach(value.values, function(val, k) {
-                val['selector'] = sel;
-            })
-        })
-        $scope.$emit('requestRedraw')
-
-    }
-
-    $scope.changeSelector($scope.box.selector);
-
-    
 
     // Revert to original and disable edit mode
     $scope.cancel = function(box) {
@@ -239,18 +202,13 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     if (isNaN(cache_time))
         cache_time = 300 + 10;
 
-    
-
-    
     // Show loading indicator
     if (cache_time < 300) {
         $scope.box.loading = false;
-        //console.log("data is cached")
     }
     else {
         $scope.box.loading = true;
         //console.log('Data is not cached, redraw')
-        
     }
 
     $scope.$on('gridster-item-initialized', function(item) {
@@ -260,13 +218,22 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
     })
 
     function getData() {
+        timeShift($scope.dashboard.settings.timeshift);
         if ($scope.box.type == "piechart" || $scope.box.type == "barchart") {
             // The box is a chart
             if ($scope.box.type == 'piechart') {
                 $scope.box.options = PIECHART.options;
             }
-            if ($scope.box.type == 'barchart')
+            if ($scope.box.type == 'barchart') {
+                console.log($scope.box.title + ": " + $scope.box.selector)
                 $scope.box.options = angular.copy(AREA.options);
+                if ($scope.box.selector) {
+                    $scope.box.options.chart.yAxis.axisLabel = "Flow Count";
+                    $scope.box.options.chart.y = function(d) { return Number(d.FlowCount)} 
+                } else {
+                    $scope.box.options.chart.yAxis.axisLabel = "Events Count";
+                }
+            }
            
             $scope.box.config.type = $scope.box.type;
 
@@ -299,12 +266,8 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         getData();
     })
  
-    $scope.user = function() {
-       dashboard.save(); 
-    }
-
     $scope.$on('saveUser', function() {
-        $scope.user()
+        dashboard.save(); 
     });
 
     $scope.$on('gridster-item-resized', function(gridster) {
@@ -438,12 +401,12 @@ app.controller('editBoxController', function($scope, $mdDialog, box, PROTOCOLS, 
     }
 
     $scope.changeSelector = function(sel) {
-        angular.forEach($scope.box.data, function(value, key) {
-            angular.forEach(value.values, function(val, k) {
-                val['selector'] = sel;
-            })
-        })
-        $scope.$emit('requestRedraw')
+        //angular.forEach($scope.box.data, function(value, key) {
+        //    angular.forEach(value.values, function(val, k) {
+        //        val['selector'] = sel;
+        //    })
+        //})
+        //$scope.$emit('requestRedraw')
 
     }
 
@@ -467,7 +430,7 @@ app.controller('addDashboardController', function($scope, $mdDialog) {
 });
 
 
-app.controller('editDashboardController', function($scope, $mdDialog, dashboard) {
+app.controller('editDashboardController', function($scope, $rootScope, $mdDialog, dashboard) {
     
     // Load dashboard settings
     $scope.db = dashboard.settings();
@@ -484,8 +447,8 @@ app.controller('editDashboardController', function($scope, $mdDialog, dashboard)
 
     $scope.deleteDashboard = function() {
         dashboard.delete();
-        $scope.$broadcast('switchDashboard', 0);
-        dashboard.active(0);
+        $rootScope.$broadcast('switchDashboard', 0);
+        dashboard.save();
         $mdDialog.hide();
     }
 

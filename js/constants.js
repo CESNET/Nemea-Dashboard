@@ -68,7 +68,7 @@ app.constant('PIECHART', {
 });
 
 
-app.constant('AREA', {
+app.value('AREA', {
     options : {
         chart: {
             type: 'multiBarChart',
@@ -77,15 +77,10 @@ app.constant('AREA', {
                 top: 30,
                 right: 20,
                 bottom: 100,
-                left: 50
+                left: 65
             },
             x: function(d) { return d.x },
-            y: function(d) { 
-                if (d.selector)
-                    return Number(d.FlowCount);
-                else
-                    return Number(d.Count);
-            },
+            y: function(d) { return Number(d.Count) },
             useVoronoi: false,
             clipEdge: true,
             duration: 100,
@@ -103,6 +98,8 @@ app.constant('AREA', {
                 tickFormat: function(d){
                     return d3.format('s')(d);
                 },
+                axisLabel : "Events Count",
+                axisLabelDistance : -20
             },  
             multibar: {
                 dispatch : {
