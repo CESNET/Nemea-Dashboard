@@ -36,8 +36,8 @@ app.service('dashboard', function($log, $localStorage, user) {
         //dashboards = $localStorage['dashboard'];
     }
 
-    this.save = function() {
-        var settings = angular.copy($localStorage['dashboard']);
+    this.clean = function() {
+         var settings = angular.copy($localStorage['dashboard']);
         //console.log(settings)
         
         // Remove data and graph options
@@ -50,8 +50,13 @@ app.service('dashboard', function($log, $localStorage, user) {
             }
         }
 
+        return settings;
+    }
+
+    this.save = function() {
+       
         var query = {
-            "settings" : settings
+            "settings" : this.clean()
         }
 
         //console.log(query)
@@ -83,8 +88,8 @@ app.service('dashboard', function($log, $localStorage, user) {
             }]
         }
 
-         $localStorage['dashboard'].push(tmpDashboard);
-        console.log( $localStorage['dashboard'].length - 1);
+        $localStorage['dashboard'].push(tmpDashboard);
+        //console.log( $localStorage['dashboard'].length - 1);
 
         return ( $localStorage['dashboard'].length - 1);
 
