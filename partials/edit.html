@@ -59,7 +59,7 @@
     </div>
     <div layout="row">
 
-        <md-switch ng-if="box.type == 'barchart'" ng-change="changeSelector(box.selector)" ng-model="box.selector" aria-label="Switch 1" class="md-primary">
+        <md-switch ng-if="box.type == 'barchart'" ng-model="box.selector" aria-label="Switch 1" class="md-primary">
             Y Axis value: <span ng-if="box.selector">Flow Count</span> <span ng-if="!box.selector">Event Count</span>
         </md-switch>
     </div>
