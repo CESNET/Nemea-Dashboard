@@ -38,6 +38,11 @@ app.directive("sidebarMenu", function() {
                 $scope.selectedDashboard = dashboard.active(index);
                 $scope.$emit('switchDashboard', index);
             }
+
+            $scope.$on('switchDashboard', function() {
+                console.log("switching");
+                $scope.selectedDashboard = dashboard.active();
+            })
     
  
         }
