@@ -6,7 +6,7 @@ var ngAnnotate = require('gulp-ng-annotate')
 var sass = require('gulp-sass')
 var filter = require('gulp-filter')
 var bower = require('main-bower-files');
-var cssnano = require('gulp-cssnano');
+var cssnano = require('gulp-clean-css');
 var debug = require('gulp-debug');
 
 var dist = {
@@ -72,7 +72,6 @@ gulp.task('bower', function() {
 
 gulp.task('bower-css', function() {
     var cssFilter = filter('**/*.css')
-
     return gulp.src(bower())
         .pipe(cssFilter)
         .pipe(concat('vendor.css'))
@@ -80,4 +79,6 @@ gulp.task('bower-css', function() {
         .pipe(gulp.dest(dist.css))
 })
 
-gulp.task('production', ['js-nosm', 'scss-nosm', 'bower', 'bower-css'], function() {})
+gulp.task('production', ['js-nosm', 'scss-nosm', 'bower', 'bower-css'], function() {
+    gulp.src('js/config.js').pipe(gulp.dest(dist.js))
+})
