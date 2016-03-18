@@ -90,7 +90,6 @@
 
                 <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid" flex="10">{{ loadbtn }}</md-button>
 
-                {{ query }}
             </div>
         </form>
 
@@ -182,8 +181,9 @@
                     </div>
                 </div>
 
-                <div flex   style="margin: 0 auto; text-align: center; height: 0;" >        
-                    <md-button class="md-raised" ng-href="getQuery(item['Source[0].IP4[0]'])">Source IP</md-button>
+                <div flex style="margin: 0 auto; text-align: center;" >        
+                    <md-button class="md-raised" ng-if="item.Source[0].IP4[0]" ng-click="getQuery(item.Source[0].IP4[0], 'src')">Source IP</md-button>
+                    <md-button class="md-raised" ng-if="item.Target[0].IP4[0]" ng-click="getQuery(item.Target[0].IP4[0], 'trg')">Target IP</md-button>
                     <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}"  aria-label="Show details">
                         Details
                     </md-button>

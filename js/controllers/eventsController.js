@@ -43,17 +43,29 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     $scope.nextButton = "Load next 100 items";
     $scope.activeFilter = $location.search().filter;
 
-    $scope.getQuery = function(ip) {
+    $scope.getQuery = function(ip, path) {
         console.log(ip);
+        var date = new Date();
+        date.setDate(date.getDate() - 7);
+        var minutes = "0" + date.getMinutes();
+        var hours = "0" + date.getHours();
+
+        var query = {
+                from : hours.substr(-2) + ':' + minutes.substr(-2), 
+                date : date,
+                limit : 100,
+                orderby : "DetectTime",
+                dir : 1
+            };
+        if (path == "src") {
+           query["srcip"] = ip; 
+        } else {
+            query["dstip"] = ip;
+        }
+
+        $scope.loadItems(query);
     }
 
-    /*$scope.parseDate = function(date) {
-        console.log(date);
-        
-        var new_date = date.getTime();//new Date(date.valueOf() + date.getTimezoneOffset() * 60000);
-        return new_date;
-    }*/
-    
     $scope.switchDir = function(val) {
         if (val == -1 || val) {
             $scope.dirVal = "Descending";
