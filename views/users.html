@@ -4,23 +4,23 @@
 <md-content flex layout="column" >
     <topbar-menu></topbar-menu>
     <section class="content" layout-padding>
-    
+
         <div class="table">
-            <div class="row" ng-repeat="user in users" layout="row" layout-align="none center">
-                <div flex="10">{{ user.username }}</div>
-                <div flex="10">{{ user.name }}</div>
-                <div flex="10">{{ user.surname }}</div>
-                <div flex="10">{{ user.lastlogin }}</div>
+            <div class="row" ng-repeat="person in people" layout="row" layout-align="none center">
+                <div flex="10">{{ person.username }}</div>
+                <div flex="10">{{ person.name }}</div>
+                <div flex="10">{{ person.surname }}</div>
+                <div flex="10">{{ person.email }}</div>
                 <!--div ng-bind-html="user.settings | json2html" flex></div>
                 <div ng-bind-html="user | json2html" flex></div-->
-                <div ng-if="user.username != 'default' && user.username != 'nemea'">
-                    <md-button ng-click="editUser(user._id.$oid)" class="md-primary md-raised" style="padding: 0 1em" ng-disabled="true">
+                <div ng-if="person.username == myUsername()">
+                    <md-button ng-href="#/settings/profile" class="md-primary md-raised" style="padding: 0 1em" ng-disabled="false">
                         <md-icon md-svg-src="img/edit.svg" style="fill: #fff!important"></md-icon> 
                         Edit user
                     </md-button>
                 </div>
-                <div ng-if="user.username != 'default' && user.username != 'nemea'">
-                    <md-button ng-click="deleteUser(user._id.$oid)" class="md-warn md-raised" style="padding: 0 1em">
+                <div ng-if="person.username != myUsername()">
+                    <md-button ng-click="deleteUser(person._id.$oid)" class="md-warn md-raised" style="padding: 0 1em">
                         <md-icon md-svg-src="img/close.svg" style="fill: #fff!important"></md-icon> 
                         Delete user
                     </md-button>

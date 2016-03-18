@@ -4,32 +4,60 @@
 <md-content flex layout="column" >
     <topbar-menu></topbar-menu>
     <section class="content" layout-padding>
-        <form name="user_form" ng-submit="editUser(user_edit)">
-            <md-input-container>
-	            <label>Current password</label>
-	            <input ng-model="user_edit.password_old" type="password">
-	        </md-input-container>
-
-             <md-input-container>
-	            <label>New password</label>
-	            <input ng-model="user_edit.password" type="password">
-	        </md-input-container>
-
-             <md-input-container>
-	            <label>Repeat new password</label>
-	            <input ng-model="user_edit.password_2" type="password">
-	        </md-input-container>
-
-            <div ng-if="user_edit.password != user_edit.password_2 && user_edit.password_2">
-                <md-icon md-svg-src="img/error.svg" aria-label="Password mismatch"></md-icon>
-Password mismatch
+        <form name="user_form" ng-submit="editUser(user)" ng-model="user">
+            <div layout="row">
+                <md-input-container>
+                    <label>Username</label>
+                    <input disabled value="{{ user.username }}">
+                </md-input-container>
             </div>
-            <div ng-if="user_edit.password == user_edit.password_2 && user_edit.password_2">
-                <md-icon md-svg-src="img/check.svg" aria-label="Password match"></md-icon>
-OK
+            <div layout="row">
+                <md-input-container>
+                    <label>Name</label>
+                    <input ng-model="user.name">
+                </md-input-container>
+                
+                <md-input-container>
+                    <label>Surname</label>
+                    <input ng-model="user.surname">
+                </md-input-container>
+
+                <md-input-container>
+                    <label>E-mail</label>
+                    <input ng-model="user.email">
+                </md-input-container>            
+            </div>
+            <div layout="row">
+                <md-input-container>
+                    <label>Current password</label>
+                    <input ng-model="user.password" type="password" ng-required="true">
+                </md-input-container>
+                {{ err_msg }}
+            </div>
+            <div layout="row">
+
+                 <md-input-container>
+                    <label>New password</label>
+                    <input ng-model="user.password_new" type="password">
+                </md-input-container>
+
+                 <md-input-container>
+                    <label>Repeat new password</label>
+                    <input ng-model="user.password_new_verif" type="password">
+                </md-input-container>
+
+                <div ng-if="user.password_new != user.password_new_verif && user.password_new_verif">
+                    <md-icon md-svg-src="img/error.svg" aria-label="Password mismatch"></md-icon>
+    Password mismatch
+                </div>
+                <div ng-if="user.password_new == user.password_new_verif && user.password_new_verif">
+                    <md-icon md-svg-src="img/check.svg" aria-label="Password match"></md-icon>
+    OK
+                </div>
             </div>
 
-            <md-button aria-label="Save changes"  class="md-raised md-primary" type="submit" >Save</md-button>
+
+            <md-button aria-label="Save changes" class="md-raised md-primary" type="submit" >{{ save_btn }}</md-button>
 
         </form>
             

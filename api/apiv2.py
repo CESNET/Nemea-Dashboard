@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 
+# Own classes and helpers
 from config import Config
+from geo import GeoIP
+from dbConnector import dbConnector
+from auth import Auth
 
-from flask import Flask, session, escape, request, Response, abort
+# Flask libraries
+from flask import Flask, escape, request, Response, abort
 from flask.ext.cors import CORS
-import pymongo
-import json
+import ssl
+
+# System tools
 import sys
 from subprocess import Popen, PIPE, check_output
+
+# Date manipulations
 from datetime import date, datetime, timedelta
+from time import mktime
+
+# MongoDB data manipulation
 from bson import json_util
 from bson.objectid import ObjectId
-from time import mktime
-import jwt
-import bcrypt
-from functools import wraps
-import ssl
+import pymongo
 
 # Load config.json
 config = Config()
@@ -24,19 +31,6 @@ C = config.data
 if C["ssl"]:
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain(C['ssl_crt'], C['ssl_key'])
-
-def roundTime(dt=None, roundTo=60):
-    """Round a datetime object to any time laps in seconds
-    dt : datetime.datetime object, default now.
-    roundTo : Closest number of seconds to round to, default 1 minute.
-    Author: Thierry Husson 2012 - Use it as you want but don't blame me.
-    """
-    if dt == None : dt = datetime.datetime.now()
-    seconds = (dt - dt.min).seconds
-    # // is a floor division, not a comment on following line:
-    rounding = (seconds+roundTo/2) // roundTo * roundTo
-    return dt + timedelta(0,rounding-seconds,-dt.microsecond)
-
 
 class jsonReturn(object):
     base = {
@@ -50,183 +44,23 @@ class jsonReturn(object):
         self.base['error_msg'] = str(message)
         self.base['error'] = True
         self.base['success'] = False
-        return(json.dumps(self.base))
+        return(json_util.dumps(self.base))
 
     def success(self, data):
         self.base['data'] = data
-        return(json.dumps(self.base))
+        return(json_util.dumps(self.base))
 
 ret = jsonReturn()
 
-class dbConnector(object):
-    host = C["db"]["host"]
-    port = C["db"]["port"]
-    dbName = C["db"]["database"]
-    eventsCollection = C["db"]["collection"]["events"]
-    usersCollection = C["db"]["collection"]["users"]
-    sessionsCollection = C["db"]["collection"]["sessions"]
-    collection = None
-    users = None
-    events = None
-    sessions = None
-    db = None
-    socket = None
-
-    def __init__(self, host = None, port = None, db = None, events = None, users = None, sessions = None):
-
-        # Setup host and port for DB 
-        if host != None and port != None:
-            self.host = host
-            self.port = port
-        
-        # Set up database name
-        if db != None:
-            self.dbName = db
-        
-        # Set up events collection
-        if events != None:
-            self.eventsCollection = events
-
-        # Set up users collection
-        if users != None:
-            self.usersCollection = users
-
-        # Connect to database and bind events and users collections 
-        try:
-            self.socket = pymongo.MongoClient(self.host, self.port, serverSelectionTimeoutMS=100)
-            
-            # Try to print out server info
-            # This raises ServerSelectionTimeoutError
-            self.socket.server_info()
-            
-            self.db = self.socket[self.dbName]
-            self.collection = self.events = self.db[self.eventsCollection]
-            self.users = self.db[self.usersCollection]
-            self.sessions = self.db[self.sessionsCollection]
-
-        # Small trick to catch exception for unavailable database
-        except pymongo.errors.ServerSelectionTimeoutError as err:
-            print(err)
-            sys.exit()
-
-    # Get events by type and limit
-    def get_event(self, event_type, limit):
-        res = None
-        if limit == 0:
-            res = ret.error("You cannot dump the whole DB")
-        else:
-            res = self.collection.find( {"type" : event_type.upper() } ).sort( [( "$natural", -1)] ).limit(limit)
-        return(res)
-    def parse_doc(self, docs):
-        tmp = []
-        return(json.dumps(docs, sort_keys=True, indent=4))
-
-    def get_event_time(self, event_type, from_time, to_time):
-        return(self.collection.find( {"type" : event_type.upper(), "time_first" : {"$gt" : from_time},  "time_first" : {"$lt" : to_time} } ).sort( [( "$natural", -1)] )).limit(10000)
-
-#END db
-
-class Auth(object):
-    errors = {
-        '0' : 'Username not found.',
-        '1' : 'Username and password doesn\'t match.',
-        '2' : 'Expired session.',
-        '3' : 'Authorization header is missing.'
-    }
-    
-    def check_password(self, password, hash):
-        return bcrypt.checkpw(password, hash)
-
-    def create_hash(self, password):
-        return bcrypt.hashpw(password, bcrypt.gensalt())
-    
-    def auth_error(self, code):
-        msg = {
-            'code' : code,
-            'description' : self.errors[str(code)]
-        }
-        res = json_util.dumps(msg)
-        return msg
-
-    def login(self, username, password):
-        query = {
-            'username' : username
-        }
-        res = db.users.find_one(query)
-
-        if not res:
-            return(0)
-
-        if not self.check_password(password, res['password']):
-            return(1)
-        
-        return(res)
-
-    def jwt_create(self, payload):
-        encoded = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-        return str(encoded.decode('utf-8'))
-
-    def jwt_decode(self, token):
-        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithm=['HS256'])
-        return decoded
-
-    def store_session(self, username, user_id):
-        _id = db.sessions.insert({
-            "username" : username,
-            "expire" : datetime.utcnow(),
-            "user_id" : ObjectId(user_id)
-        })
-
-        return _id
-        
-    def get_session(self, _id):
-        #print(_id)
-        res = db.sessions.find_one({"_id" : ObjectId(_id)})
-        if res:
-            #print('We got it in session')
-            delta = datetime.utcnow() - res['expire']
-            if delta < timedelta(days=31):
-                return res
-        return False
-
-    # Shift expiry date
-    def update_session(self, _id):
-        db.sessions.update({
-            '_id' : ObjectId(_id)
-        },
-        {
-            "$set" : {
-                "expire" : datetime.utcnow()
-            }
-        })
-    def delete_session(self, _id):
-        res = db.sessions.remove({"_id" : ObjectId(_id)})
-        return res['ok']
-
-    # Decorator for required Authorization JWT token
-    def required(self, f):
-        @wraps(f)
-        def verify_jwt(*args, **kwargs):
-            auth = request.headers.get('Authorization', None)
-            if not auth:
-                return abort(401)
-            decoded_token = self.jwt_decode(auth)
-            #print(decoded_token)
-            session_token = self.get_session(decoded_token['_id'])
-            #print(session_token)
-            if not session_token:
-                return abort(401)
-            else:
-                self.update_session(session_token['_id'])
-            return f(*args, **kwargs)
-        return verify_jwt
-
 
 db = dbConnector()
-auth = Auth()
+
+auth = Auth(db, 'secret-super')
+geo = GeoIP('/data/geoIP/GeoLite2-lib/GeoLite2-City.mmdb')
 
 app = Flask(__name__)
-app.debug = C['debug']
+app.config['DEBUG'] = C['debug']
+app.config['PROPAGATE_EXCEPTIONS'] = True;
 app.config['SECRET_KEY'] = 'secret-super'
 
 # Enable Cross-Origin
@@ -244,10 +78,14 @@ def login():
         return auth.errors[str(auth_user)], 401
     
     _id = auth.store_session(auth_user['username'], auth_user['_id'])
+    print(auth_user)
     
     # Attach JWT for further authentication
     auth_user['jwt'] = auth.jwt_create({
         'username' : auth_user['username'],
+        'name' : auth_user.get('name', ""),
+        'surname' : auth_user.get('surname', ""),
+        'email' : auth_user.get('email', ""),
         '_id' : str(_id),
         'created' : mktime(datetime.utcnow().timetuple())
     })
@@ -262,11 +100,11 @@ def indexes():
     for item in indexes.keys():
         if item == "DetectTime":
             print('indexes are here')
-            return(json.dumps(indexes))
+            return(json_util.dumps(indexes))
     db.collection.create_index([( "DetectTime", 1)])
     db.sessions.create_index([("expire", pymongo.ASCENDING), ("expireAfterSeconds", 60*60*24*30)])
     indexes = db.collection.index_information()
-    return(json.dumps(indexes))
+    return(json_util.dumps(indexes))
 
 @app.route('/config', methods=['GET'])
 @auth.required
@@ -277,7 +115,7 @@ def get_config():
         'host' : C['api']['host'],
         'port' : C['api']['port']
     }
-    return(json.dumps(config))
+    return(json_util.dumps(config))
 
 @app.route(C['events'] + '<int:items>', methods=['GET'])
 @auth.required
@@ -286,7 +124,7 @@ def get_last(items):
         items = 100
     docs = list(db.collection.find().sort( [( "DetectTime", -1)] ).limit(items))
     
-    return (json.dumps(docs, default=json_util.default))
+    return (json_util.dumps(docs, default=json_util.default))
 
 @app.route(C['events'] + 'query', methods=['GET'])
 @auth.required
@@ -331,7 +169,17 @@ def query():
     else:
         orderby = 'DetectTime'
 
+    if 'srcip' in req:
+        part = {"Source.IP4" : req['srcip']}
+        query["$and"].append(part)
+    
+    if 'dstip' in req:
+        part = {"Target.IP4" : req['dstip']}
+        query["$and"].append(part)
+
     res = list(db.events.find(query).sort([(orderby, dir)]).limit(int(req['limit'])))
+
+    res.append({'total' : db.events.find(query).limit(10000).count(True)})
 
     return(json_util.dumps(res))
 
@@ -340,40 +188,56 @@ def query():
 @auth.required
 def aggregate():
     req = request.args
+    
     if req['type'] == 'piechart':
-        query = [
-            {
-                "$match" : {
-                    "DetectTime" : {
-                        "$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                    }
-                }
-            },
-            {
-                "$group" : {
-                    "_id" : {
-                        "Categories" : "$Category"
-                    },
-                    "count" : { "$sum" : 1}
-                }
-            },
-            {
-                "$sort" : { "_id.Categories" : 1 } 
+        match = {
+            "$match" : {
+                "$and" : [
+                    { "DetectTime" : {
+                        #"$gte" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "$gte" : datetime.utcfromtimestamp(int(req["begintime"])),
+                        #"$lte" : datetime.strptime(req["endtime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                        "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
+                    }}
+                ]
             }
-        ]
-        res = list(db.collection.aggregate(query))
+        }
+        
+        # Custom filter is set
+        if req.get("filter", False):
+            match["$match"]["$and"].append({ req["filter_field"] : req["filter_value"]})
+
+        group = {
+            "$group" : {
+                "_id" : {
+                    req["metric"] : "$" + req["metric"]
+                },
+                "count" : { "$sum" : 1}
+            }
+        }
+        sort = {
+            "$sort" : { "_id." + req["metric"] : 1 } 
+        }
+        
+        res = list(db.collection.aggregate([match, group, sort]))
         tmp = list()
+        
         for item in res:
             tmp.append({
-                "key" : item["_id"]["Categories"],
+                "key" : item["_id"][req["metric"]],
                 "x" : item["count"]
             })
-    if req['type'] == "barchart":
-        time = datetime.strptime(req['begintime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+        print(str(tmp))
+    elif req['type'] == "barchart":
+        time = datetime.utcfromtimestamp(int(req['begintime']))
         query = [
             {
                 "$match" : {
-                    "DetectTime" : { "$gte" : time }
+                    "DetectTime" : { 
+                        "$gte" : time,
+                        "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
+                    }
                 }
             },
             {
@@ -410,7 +274,11 @@ def aggregate():
             inserted = False
             for serie in data:
                 if serie['key'] == item['_id']['Category'][0]:
-                    serie['values'].append({'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 'FlowCount' : item['FlowCount'], 'Count' : item['Count']})
+                    serie['values'].append({
+                        'x' : mktime(item['_id']['DetectTime'].timetuple())*1000, 
+                        'FlowCount' : item['FlowCount'], 
+                        'Count' : item['Count']
+                    })
                     inserted = True
                     break
 
@@ -439,7 +307,10 @@ def top():
     query = [
         {
             '$match' : {
-                'DetectTime' : {'$gt' : time}
+                'DetectTime' : {
+                    '$gt' : datetime.utcfromtimestamp(int(req["begintime"])),
+                    '$lte' : datetime.utcfromtimestamp(int(req["endtime"]))
+                }
             }
         },
         {
@@ -468,7 +339,10 @@ def events_count():
     query = {
         "$and" : [
             {
-                "DetectTime" : {"$gt" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ")}
+                "DetectTime" : {
+                    "$gte" : datetime.utcfromtimestamp(int(req["begintime"])),
+                    "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
+                }
             }    
         ]
     }
@@ -501,6 +375,7 @@ def get_users():
         # Remove password hash from the resulting query
         for user in res:
             user.pop("password", None)
+        return(json_util.dumps(res))
 
     # Create user
     if request.method == 'POST':
@@ -514,12 +389,13 @@ def get_users():
     if request.method == 'DELETE':
         req = request.args
         req = req.to_dict()
-        print(req["userId"])
+        #print(req["userId"])
         res = db.users.delete_one({"_id" : ObjectId(req["userId"])})
         return(json_util.dumps(res.deleted_count))
 
     if request.method == 'PUT':
         user = request.get_json()
+        #print(user)
         token = auth.jwt_decode(request.headers.get('Authorization', None))
         user_info = auth.get_session(token['_id'])
         
@@ -532,25 +408,24 @@ def get_users():
 
         # If the user updates their profile check for all fields to be updated
         if "name" in user:
-            query["$set"].append({"name" : user["name"]})
+            query["$set"]["name"] = user["name"]
 
         if "surname" in user:
-            query["$set"].append({"surname" : user["surname"]})
+            query["$set"]["surname"] = user["surname"]
         
         if "email" in user:
-            query["$set"].append({"email" : user["email"]})
+            query["$set"]["email"] = user["email"]
 
         # In case of password change, verify that it is really him (revalidate their password)
         if "password" in user:
             verify = auth.login(user["username"], user["password"])
-        
             # This is really stupid, I have to change it
             # TODO: better password verification returning values
-            if verify != 0 or verify != 1:
+            if verify != 0 and verify != 1:
                 hash = auth.create_hash(user["password_new"])
-                query["$set"].append({"password" : hash})
+                query["$set"]["password"] = hash
             else:
-                return auth.errors[str(verify)], 401
+                return (json_util.dumps( {'error' : auth.errors[str(verify)]}), 403)
 
         # The query is built up, lets update the user and return updated document
         res_raw = db.users.find_one_and_update(
@@ -561,7 +436,16 @@ def get_users():
         # Remove password hash from the response
         res = res_raw.pop("password", None)
 
-    return(json_util.dumps(res))
+        jwt_res = auth.jwt_create({
+            'username' : res_raw['username'],
+            'name' : res_raw.get('name', ""),
+            'surname' : res_raw.get('surname', ""),
+            'email' : res_raw.get('email', ""),
+            '_id' : str(token['_id']),           # Keep the same session ID!
+            'created' : mktime(datetime.utcnow().timetuple())
+        })
+
+        return(json_util.dumps({"jwt" : jwt_res}))
 
 @app.route(C['users'] + 'logout', methods=['DELETE'])
 @auth.required
@@ -579,7 +463,7 @@ def whois(ip):
     tmp = ""
     for line in p.stdout:
         tmp += line.decode('utf-8')
-    return(json.dumps({'output' : tmp }))
+    return(json_util.dumps({'output' : tmp }))
 
 
 if __name__ == '__main__':

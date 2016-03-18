@@ -16,7 +16,7 @@
         </md-input-container>    
     </div>
 
-    <div layout="row">
+    <div layout="row" flex>
         <md-input-container flex>
             <label>Type of view</label>
             <md-select ng-model="box.type" >
@@ -30,9 +30,14 @@
             <label>Metric</label>
             <md-select ng-model="box.config.metric">
                 <md-optgroup label="Metric">
-                    <md-option ng-value="item" ng-repeat="item in ['category'] track by $index">{{ item }}</md-option>
+                    <md-option ng-value="item" ng-repeat="item in ['Category', 'Node.SW', 'custom'] track by $index">{{ item }}</md-option>
                 </md-optgroup>
             </md-select>
+        </md-input-container>
+
+        <md-input-container ng-if="box.config.metric == 'custom'">
+            <label>Custom metric</label>
+            <input ng-model="box.config.custom_metric">
         </md-input-container>
 
         <md-input-container ng-if="box.type == 'sum'" flex>
@@ -45,9 +50,26 @@
         </md-input-container>
     </div>
 
-    <div layout="row">
+    <div layout="row" flex>
+        <md-switch ng-if="box.type == 'piechart'" ng-model="box.config.filter" aria-label="Enable filter" class="md-primary" flex>
+            Enable filter<!--: <span ng-if="box.selector">Flow Count</span> <span ng-if="!box.selector">Event Count</span-->
+        </md-switch>
+    </div>
+    <div layout="row" flex ng-if="box.config.filter">
+        <md-input-container flex>
+            <label>Field</label>
+            <input ng-model="box.config.filter_field">
+        </md-input-container>
 
-        <md-input-container ng-if="box.config.metric != ''" flex>
+        <md-input-container flex>
+            <label>Value</label>
+            <input ng-model="box.config.filter_value">
+        </md-input-container>
+    </div>
+
+    <div layout="row" ng-if="box.config.metric != ''" flex>
+
+        <md-input-container flex>
             <label>Time window [hours]</label>
             <input ng-model="box.config.period">
         </md-input-container>
@@ -57,14 +79,14 @@
             <input ng-model="box.config.window">
         </md-input-container>
     </div>
-    <div layout="row">
+    <div layout="row" ng-if="box.type == 'barchart'"  flex>
 
-        <md-switch ng-if="box.type == 'barchart'" ng-change="changeSelector(box.selector)" ng-model="box.selector" aria-label="Switch 1" class="md-primary">
+        <md-switch ng-model="box.selector" aria-label="Switch 1" class="md-primary">
             Y Axis value: <span ng-if="box.selector">Flow Count</span> <span ng-if="!box.selector">Event Count</span>
         </md-switch>
     </div>
 
-    <div layout="row">
+    <div layout="row" flex>
         <md-input-container flex>
             <label>Content</label>
             <textarea ng-model="box.content" flex></textarea>

@@ -1,4 +1,4 @@
-app.controller('eventsController', function($scope, $http, $location, api) {
+app.controller('eventsController', function($scope, $http, $location, api, $route) {
     $scope.filter = {
         "category" : "",    // Category
         "src_ip" : "",      // Source IP
@@ -9,38 +9,54 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         "items" : 100,      // Limit number of displayed items
     };
     $scope.query = {
-        "from" : "",
+        "from" : "12:00",
         "to" : "",
         "date" : new Date(),
         "description" : "",
         "category" : "",
         "orderby" : "DetectTime",
         "dir" : 1,
-        "limit" : 100
+        "limit" : 100,
+        "srcip" : "",
+        "dstip" : ""
     }
 
     $scope.orderBy = ["DetectTime", "Category", "Description", "FlowCount"];
     $scope.searchText = "";
 
-    $scope.querySearch = function (query) {
-      var results = query ? $scope.orderBy.filter( createFilterFor(query) ) : [];
-      return results;
-    }
-
-    function createFilterFor(query) {
-      var lowercaseQuery = angular.lowercase(query);
-      return function filterFn(state) {
-        return ($scope.orderBy.indexOf(lowercaseQuery) === 0);
-      };
-    }
-
-   
-
     $scope.data = [];
     $scope.loadbtn = "Load";
     $scope.nextButton = "Load next 100 items";
-    console.log($scope.query.date);
     $scope.activeFilter = $location.search().filter;
+
+    // RESET everything including URL parameters and reload
+    $scope.reset = function() {
+        $location.search({});
+        $route.reload();
+    }
+
+    $scope.getQuery = function(ip, path) {
+        console.log(ip);
+        var date = new Date();
+        date.setDate(date.getDate() - 7);
+        var minutes = "0" + date.getMinutes();
+        var hours = "0" + date.getHours();
+
+        var query = {
+                from : hours.substr(-2) + ':' + minutes.substr(-2), 
+                date : date,
+                limit : 100,
+                orderby : "DetectTime",
+                dir : 1
+            };
+        if (path == "src") {
+           query["srcip"] = ip; 
+        } else {
+            query["dstip"] = ip;
+        }
+
+        $scope.loadItems(query);
+    }
 
     $scope.switchDir = function(val) {
         if (val == -1 || val) {
@@ -76,7 +92,9 @@ app.controller('eventsController', function($scope, $http, $location, api) {
 
 
             api.get('query', query, true).success(function(data) {
-                for(item in data) {
+                $scope.remaining = data.pop();
+
+                for(item in data) {    
                     $scope.data.push(data[item]);
                 }
 
@@ -94,6 +112,7 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             }
 
             api.get('query', query, true).success(function(data) {
+                $scope.remaining = data.pop();
                 for(item in data) {
                     $scope.data.push(data[item]);
                 }
@@ -110,22 +129,27 @@ app.controller('eventsController', function($scope, $http, $location, api) {
         $scope.loadbtn = "Loading...";
         var from = query.from.split(':');
         var from_date = new Date(query.date);
-        from_date.setHours(from_date.getHours() + from[0]);
+
+        console.log(query)
+        
+        from_date.setHours(from[0]);
         from_date.setMinutes(from[1]);
+
+        var unix_date = angular.copy(query.date);
+        console.log("copying date");
         
         $location.search('filter', true);
         $location.search('from', query.from);
-        $location.search('date', query.date);
+        $location.search('date', unix_date.getTime());
         $location.search('limit', query.limit);
         $location.search('orderby', query.orderby);
         $location.search('dir', query.dir);
-
-        
+       
 
         if (query.to) {
             var to = query.to.split(':');
             var to_date = new Date(query.date);
-            to_date.setHours(to_date.getHours() + to[0]);
+            to_date.setHours(to[0]);
             to_date.setMinutes(to[1]);
             $location.search('to', query.to);
         } else {
@@ -144,6 +168,21 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             query.category = null;
         }
 
+        if (query.srcip != "") {
+            $location.search('srcip', query.srcip);
+        } else {
+            $location.search("srcip", null);
+            query.srcip = null;
+
+        }
+        
+        if (query.dstip != "") {
+            $location.search('dstip', query.dstip);
+        } else {
+            $location.search("dstip", null);
+            query.dstip = null;
+        }
+
         var send = {
             "from" : from_date,
             "to" : to_date,
@@ -151,9 +190,12 @@ app.controller('eventsController', function($scope, $http, $location, api) {
             "description" : query.description,
             "limit" : query.limit,
             "orderby" : query.orderby,
-            "dir" : query.dir
+            "dir" : query.dir,
+            "srcip" : query.srcip,
+            "dstip" : query.dstip
         }
         api.get('query', send, true).success(function(data) {
+			$scope.remaining = data.pop();//[data.length - 1])
 			$scope.data = data;
             $scope.loadbtn = "Load"
 	    }).error(function() {
@@ -163,8 +205,15 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     
     if ($location.search().filter) {
         // Query filter is set, apply it
-        $scope.query = $location.search();
-        $scope.query.date = new Date($scope.query.date);
+        
+        var tmp_query = angular.copy($location.search());
+        
+        // First convert UNIX Timestamp to Date
+        tmp_query['date'] = new Date(Number(tmp_query['date']));
+        
+        $scope.query = tmp_query;
+        
+        // Fetch items
         $scope.loadItems($scope.query);
     } else {
         // Fetch 100 recent events

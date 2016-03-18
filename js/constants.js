@@ -7,7 +7,7 @@ app.constant('AUTH_EVENTS', {
   notAuthorized: 'auth-not-authorized'
 });
 
-app.constant('CATEGORIES', [ "any", "Recon.Scanning", "Attempt.Login", "Availability.DoS" ]);
+app.constant('CATEGORIES', [ "any", "Recon.Scanning", "Attempt.Login", "Availability.DoS", "Availibility.DDoS"]);
 app.constant('PROTOCOLS', [ "tcp", "dns", "udp" ]);
 app.constant('TYPES', ["barchart", "piechart", "top", "sum"])
 
@@ -53,7 +53,7 @@ app.constant('PIECHART', {
                         date.setTime(date.getTime() - 1000*60*60*24);
                         date.setHours(0);
                         date.setMinutes(0)
-                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + new Date().getHours() + ':' + new Date().getMinutes() + '&category=' + e.data.key[0]},
+                        window.location = '#/events?filter&date=' + date.getTime() + '&from=' + new Date().getHours() + ':' + new Date().getMinutes() + '&category=' + e.data.key[0]},
                     //elementDblClick: function(e) {console.log("element double click")},
                     //elementMouseover: function(e) {console.log("element mouseover")},
                     //elementMouseout: function(e) {console.log("element mouse out")}            
@@ -68,7 +68,7 @@ app.constant('PIECHART', {
 });
 
 
-app.constant('AREA', {
+app.value('AREA', {
     options : {
         chart: {
             type: 'multiBarChart',
@@ -77,15 +77,10 @@ app.constant('AREA', {
                 top: 30,
                 right: 20,
                 bottom: 100,
-                left: 50
+                left: 65
             },
             x: function(d) { return d.x },
-            y: function(d) { 
-                if (d.selector)
-                    return Number(d.FlowCount);
-                else
-                    return Number(d.Count);
-            },
+            y: function(d) { return Number(d.Count) },
             useVoronoi: false,
             clipEdge: true,
             duration: 100,
@@ -103,6 +98,8 @@ app.constant('AREA', {
                 tickFormat: function(d){
                     return d3.format('s')(d);
                 },
+                axisLabel : "Events Count",
+                axisLabelDistance : -20
             },  
             multibar: {
                 dispatch : {
@@ -113,7 +110,7 @@ app.constant('AREA', {
                         var minutes = date.getMinutes();
                         date.setHours(0);
                         date.setMinutes(0);
-                        window.location = '#/events?filter&date=' + date.toISOString() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key + '&dir=1';
+                        window.location = '#/events?filter&date=' + date.getTime() + '&from=' + ("0" + hours).slice(-2) + ':' + ("0" + minutes).slice(-2) + '&category=' + e.data.key + '&dir=1';
                     },
                 }
             }
@@ -124,10 +121,10 @@ app.constant('AREA', {
 
 
 app.constant("MENU", [
-	{
+	/*{
 		"title" : "Dashboard",
         "link" : "#/"
-		/*"items" : [
+		"items" : [
 			{
 				"title" : "Users",
 				"link"	: "user"
@@ -135,8 +132,8 @@ app.constant("MENU", [
 			{
 				"title" : "My profile"
 			}
-		]*/
-	},
+		]
+	},*/
 	{
 		"title" : "Events",
 		"link" 	: "#/events"

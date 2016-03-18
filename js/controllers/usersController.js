@@ -1,7 +1,18 @@
 app.controller('usersController', function($scope, api, user, $mdDialog) {
-    user.get(true).success(function(data) {
+    
+    user.get(true).success(function(d) {$scope.people = d});
+
+    //$scope.users = users;
+    /*.success(function(data) {
+        console.log(data)
         $scope.users = data;
-    });
+    });*/
+
+
+    $scope.myUsername = function() {
+        var tmp = user.get();
+        return tmp['username'];
+    }
 
     $scope.deleteUser = function(user_id) {
         console.log(user_id);
@@ -51,8 +62,33 @@ app.controller('addUserController', function($scope, $mdDialog) {
         name : '',
         surname : '',
         password : '',
-        settings : []
-    }
+        settings :[
+		{
+			"settings" : {
+				"title" : "Basic",
+				"timeshift" : "0",
+				"interval" : "60"
+			},
+			"items" : [
+				{
+					"loading" : false,
+					"row" : 0,
+					"config" : {
+						"period" : "24",
+						"type" : "piechart",
+						"metric" : "category"
+					},
+					"sizeX" : 4,
+					"sizeY" : 3,
+					"col" : 0,
+					"title" : "24h shares",
+					"type" : "piechart",
+					"content" : "Click the menu icon to select edit"
+				}
+			]
+		}
+	]
+	}
     $scope.saveAndClose = function(user) {
         console.log(user)
         $mdDialog.hide(user);

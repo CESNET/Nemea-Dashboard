@@ -21,7 +21,7 @@ Requires=mongod.service
 
 [Service]
 Type=simple
-ExecStart=/var/www/html/Nemea-Dashboard/apiv2.py
+ExecStart=/var/www/html/Nemea-Dashboard/api/apiv2.py
 PIDFile=/var/run/nemea-dashboard.pid
 User=nemead
 Group=nemead

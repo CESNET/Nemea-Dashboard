@@ -8,13 +8,18 @@
         <section class="content event" layout-padding flex>
         
         <h2 layout-align="start center"><md-button class="md-icon-button" ng-click="back()" flex="5"><md-icon flex md-svg-src="img/back.svg"></md-icon></md-button>Event Details</h2>
-            <div layout="row">
+            <div layout-gt-md="row">
                 <div layout="column" flex>
                     <div ng-bind-html="data | json2html" flex></div>
                     
                     <div class="plain" flex>
-                        <h3>Plain data</h3>
-                        <textarea flex>{{ data | idea }}</textarea>
+                        <h3>Plain data
+                            <md-button ng-click="showPlain = !showPlain" class="md-raised">
+                                <span ng-if="showPlain">Show plain data</span> 
+                                <span ng-if="!showPlain">Hide plain data</span>
+                            </md-button>
+                        </h3>
+                        <textarea flex ng-hide="showPlain">{{ data | idea }}</textarea>
                     </div>
                 </div>
 

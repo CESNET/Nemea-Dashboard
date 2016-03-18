@@ -45,8 +45,8 @@ Thumbs.db
 bower_components
 .sass-cache
 
-#virtualenv and python
-api
+#virtualenv
+#api
 __pycache__
 *.pyc
 
@@ -57,3 +57,4 @@ __pycache__
 node_modules/
 #app.min.js
 #public
+js/

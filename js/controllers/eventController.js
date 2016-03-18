@@ -1,6 +1,7 @@
 app.controller('eventController', function($scope, $routeParams, $http, api) {
 
         $scope.id = $routeParams;
+        $scope.showPlain = true;
 
         $scope.geo = [];
 

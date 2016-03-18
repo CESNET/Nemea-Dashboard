@@ -74,10 +74,23 @@
                     <span ng-hide="!query.dir">descending</span-->
                     {{ dirVal }}
                 </md-switch>
+                
+                <md-input-container flex="15">
+                    <label>Source IP</label>
+                    <input type="text" ng-model="query.srcip">
+                </md-input-container>
+
+                <md-input-container flex="15">
+                    <label>Destination IP</label>
+                    <input type="text" ng-model="query.dstip">
+                </md-input-container>
+
 
                 <div flex></div>
 
                 <md-button class="md-raised md-primary" type="submit" ng-disabled="query_form.$invalid" flex="10">{{ loadbtn }}</md-button>
+                <md-button class="md-raised md-warn" type="button" flex="10" ng-click="reset()">RESET</md-button>
+
             </div>
         </form>
 
@@ -130,7 +143,8 @@
                 <div flex=15 layout-padding>{{ item.Category[0] }}</div>
                 <div flex=20 layout-padding>{{ item.Source[0].IP4[0] }}<small ng-if="!item.Source[0].IP4">N/A</small></div>
                 <div flex=20 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">N/A</small></div>
-                <div flex=20 layout-padding>{{ item.Description | limitTo : 31 : 0 }}{{item.Description.length > 31 ? ' ...' : ''}}</div>
+                <div flex=20 layout-padding>{{ item.Description }}</div>
+                <!--div flex=20 layout-padding>{{ item.Description | limitTo : 31 : 0 }}{{item.Description.length > 31 ? ' ...' : ''}}</div-->
                 <div flex=10 class="flow-count"layout-padding>{{ item.FlowCount | number }}</div>
                 <!--div flex=5>
                     <md-button class="md-button-toggle md-raised"   aria-label="Enable details">
@@ -168,7 +182,9 @@
                     </div>
                 </div>
 
-                <div flex   style="margin: 0 auto; text-align: center; height: 0;" >        
+                <div flex style="margin: 0 auto; text-align: center;" >        
+                    <md-button class="md-raised" ng-if="item.Source[0].IP4[0]" ng-click="getQuery(item.Source[0].IP4[0], 'src')">Source IP</md-button>
+                    <md-button class="md-raised" ng-if="item.Target[0].IP4[0]" ng-click="getQuery(item.Target[0].IP4[0], 'trg')">Target IP</md-button>
                     <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}"  aria-label="Show details">
                         Details
                     </md-button>
@@ -180,10 +196,12 @@
 
             
         </div>
-        <div layout="row" flex style="background-color: #fff!important" class="load-more">
+
+        <div layout="row" flex style="background-color: #fff!important" class="load-more" ng-hide="remaining.total <=query.limit">
 
                 <md-button class="md-raised md-primary" ng-click="loadNext(data[data.length-1].DetectTime.$date)">
-                    {{ nextButton }}
+                    {{ nextButton }} <br> 
+                    <small ng-if="remaining.total">({{ remaining.total | number }}<span ng-if="remaining.total >= 10000">+</span> remaining)</small>
                 </md-button>
             </div>
 

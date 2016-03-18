@@ -18,22 +18,13 @@
   },
   "homepage": "https://github.com/CESNET/Nemea-Dashboard#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-bower-files": "^0.2.7",
-    "gulp-clean-css": "^2.0.3",
-    "gulp-concat": "^2.6.0",
-    "gulp-debug": "^2.1.2",
-    "gulp-filter": "^3.0.1",
-    "gulp-ng-annotate": "^1.1.0",
-    "gulp-sass": "^2.1.1",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.5.1",
-    "main-bower-files": "^2.11.1"
+    "gulp-debug": "^2.1.2"
   },
   "dependencies": {
     "gulp": "^3.9.1",
     "gulp-bower-files": "^0.2.7",
     "gulp-concat": "^2.6.0",
+    "gulp-clean-css": "^2.0.3",
     "gulp-filter": "^3.0.1",
     "gulp-ng-annotate": "^1.1.0",
     "gulp-sass": "^2.1.1",

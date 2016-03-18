@@ -1,4 +1,4 @@
-app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
+app.service('user', function($localStorage, $http, $mdToast, $location, $log, CONFIG){
     var cache = null;
 
     var dashboard = [];
@@ -10,7 +10,10 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
     }
 
     this.jwt = function() {
-        return $localStorage["jwt"];
+        var token = $localStorage['token'];
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace('-', '+').replace('_', '/');
+        return JSON.parse(window.atob(base64));
     }
 
     this.auth = function(user) {
@@ -63,6 +66,8 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                         .hideDelay(3000)
                         .theme("error-toast")
                 );
+                console.log(msg);
+                return msg;
             })
     }
     
@@ -118,8 +123,9 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                     'Authorization' : user
                 }
             })
-            .success(function(data) {
-                return data;
+            .success(function(data_raw) {
+                console.log(data_raw)
+                return data_raw;
             })
             .error(function(error, msg) {
                 $mdToast.show(
@@ -132,6 +138,8 @@ app.service('user', function($localStorage, $http, $mdToast, $location, CONFIG){
                 )
             });
         }
+
+        return this.jwt();
     }
 
 
