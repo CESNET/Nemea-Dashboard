@@ -1,4 +1,4 @@
-app.controller('eventsController', function($scope, $http, $location, api) {
+app.controller('eventsController', function($scope, $http, $location, api, $route) {
     $scope.filter = {
         "category" : "",    // Category
         "src_ip" : "",      // Source IP
@@ -24,24 +24,16 @@ app.controller('eventsController', function($scope, $http, $location, api) {
     $scope.orderBy = ["DetectTime", "Category", "Description", "FlowCount"];
     $scope.searchText = "";
 
-    /*$scope.querySearch = function (query) {
-      var results = query ? $scope.orderBy.filter( createFilterFor(query) ) : [];
-      return results;
-    }
-
-    function createFilterFor(query) {
-      var lowercaseQuery = angular.lowercase(query);
-      return function filterFn(state) {
-        return ($scope.orderBy.indexOf(lowercaseQuery) === 0);
-      };
-    }*/
-
-   
-
     $scope.data = [];
     $scope.loadbtn = "Load";
     $scope.nextButton = "Load next 100 items";
     $scope.activeFilter = $location.search().filter;
+
+    // RESET everything including URL parameters and reload
+    $scope.reset = function() {
+        $location.search({});
+        $route.reload();
+    }
 
     $scope.getQuery = function(ip, path) {
         console.log(ip);
