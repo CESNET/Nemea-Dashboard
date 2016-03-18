@@ -188,38 +188,48 @@ def query():
 @auth.required
 def aggregate():
     req = request.args
+    
     if req['type'] == 'piechart':
-        query = [
-            {
-                "$match" : {
-                    "DetectTime" : {
+        match = {
+            "$match" : {
+                "$and" : [
+                    { "DetectTime" : {
                         #"$gte" : datetime.strptime(req["begintime"], "%Y-%m-%dT%H:%M:%S.%fZ"),
                         "$gte" : datetime.utcfromtimestamp(int(req["begintime"])),
                         #"$lte" : datetime.strptime(req["endtime"], "%Y-%m-%dT%H:%M:%S.%fZ")
                         "$lte" : datetime.utcfromtimestamp(int(req["endtime"]))
-                    }
-                }
-            },
-            {
-                "$group" : {
-                    "_id" : {
-                        "Categories" : "$Category"
-                    },
-                    "count" : { "$sum" : 1}
-                }
-            },
-            {
-                "$sort" : { "_id.Categories" : 1 } 
+                    }}
+                ]
             }
-        ]
-        res = list(db.collection.aggregate(query))
+        }
+        
+        # Custom filter is set
+        if req.get("filter", False):
+            match["$match"]["$and"].append({ req["filter_field"] : req["filter_value"]})
+
+        group = {
+            "$group" : {
+                "_id" : {
+                    req["metric"] : "$" + req["metric"]
+                },
+                "count" : { "$sum" : 1}
+            }
+        }
+        sort = {
+            "$sort" : { "_id." + req["metric"] : 1 } 
+        }
+        
+        res = list(db.collection.aggregate([match, group, sort]))
         tmp = list()
+        
         for item in res:
             tmp.append({
-                "key" : item["_id"]["Categories"],
+                "key" : item["_id"][req["metric"]],
                 "x" : item["count"]
             })
-    if req['type'] == "barchart":
+
+        print(str(tmp))
+    elif req['type'] == "barchart":
         time = datetime.utcfromtimestamp(int(req['begintime']))
         query = [
             {
