@@ -238,7 +238,21 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
             $scope.box.config.type = $scope.box.type;
 
             if (cache_time > 300) {
-                api.get('agg', $scope.box.config, false, true).success(function(data) {
+
+                var query = angular.copy($scope.box.config);
+                
+                if ($scope.box.config.metric == "custom") {
+                    query.metric = query.custom_metric;
+                }
+
+                for(item in query) {
+                    console.log(item);
+                    if(query[item] == "")
+                        query[item] = null;
+                }
+                
+                console.log(query)
+                api.get('agg', query, false, true).success(function(data) {
                     $scope.box.loading = false;
                     $scope.box.data = data;
                     $scope.$emit('requestRedraw');
