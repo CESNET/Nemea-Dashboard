@@ -16,8 +16,8 @@
         "port" : 5555,
         "host" : "0.0.0.0"
 	},
-	"ssl" : true,                  
-	"ssl_key" : "../../privkey1.pem", 
-	"ssl_crt" : "../../cert1.pem",    
-	"debug": true                  
+	"ssl" : false,                  
+	"ssl_key" : "", 
+	"ssl_crt" : "",    
+	"debug": false                  
 }

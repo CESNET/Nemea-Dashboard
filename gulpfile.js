@@ -72,7 +72,6 @@ gulp.task('bower', function() {
 
 gulp.task('bower-css', function() {
     var cssFilter = filter('**/*.css')
-
     return gulp.src(bower())
         .pipe(cssFilter)
         .pipe(concat('vendor.css'))
@@ -80,4 +79,6 @@ gulp.task('bower-css', function() {
         .pipe(gulp.dest(dist.css))
 })
 
-gulp.task('production', ['js-nosm', 'scss-nosm', 'bower', 'bower-css'], function() {})
+gulp.task('production', ['js-nosm', 'scss-nosm', 'bower', 'bower-css'], function() {
+    gulp.src('js/config.js').pipe(gulp.dest(dist.js))
+})
