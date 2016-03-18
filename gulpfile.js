@@ -6,7 +6,7 @@ var ngAnnotate = require('gulp-ng-annotate')
 var sass = require('gulp-sass')
 var filter = require('gulp-filter')
 var bower = require('main-bower-files');
-var cssnano = require('gulp-cssnano');
+var cssnano = require('gulp-clean-css');
 var debug = require('gulp-debug');
 
 var dist = {
