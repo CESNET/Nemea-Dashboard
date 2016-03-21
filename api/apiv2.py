@@ -2,7 +2,7 @@
 
 # Own classes and helpers
 from config import Config
-from geo import GeoIP
+#from geo import GeoIP
 from dbConnector import dbConnector
 from auth import Auth
 
