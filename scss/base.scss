@@ -234,6 +234,7 @@ md-content.content-wrapper {
 
 .box {
     background: $white;   
+    overflow: hidden;
 
     h2, h3 {
         margin:0;
