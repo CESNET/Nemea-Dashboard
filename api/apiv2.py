@@ -56,7 +56,7 @@ ret = jsonReturn()
 db = dbConnector()
 
 auth = Auth(db, 'secret-super')
-geo = GeoIP('/data/geoIP/GeoLite2-lib/GeoLite2-City.mmdb')
+#geo = GeoIP('/data/geoIP/GeoLite2-lib/GeoLite2-City.mmdb')
 
 app = Flask(__name__)
 app.config['DEBUG'] = C['debug']
