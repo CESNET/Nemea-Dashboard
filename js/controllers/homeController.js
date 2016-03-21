@@ -27,7 +27,6 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
     $scope.$on('requestRedraw', function(e) {
         e.stopPropagation();
         $timeout(function() {
-            console.log("request accepted");
             window.dispatchEvent(new Event('resize'));
         }, 100);
     });
@@ -45,7 +44,6 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
             console.log('broadcast failed')
         } else {
             refresh = $interval(function() {
-                //$scope.clearCache();
                 console.log('broadcast')
                 $scope.$broadcast('refreshData');
             }, $scope.refresh_interval*1000);
@@ -71,42 +69,16 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
             clickOutsideToClose: true,
             fullscreen: true,
         })
-        .then(function() {
+        .then(function(answer) {
             dashboard.save();
             $scope.refresh_interval = $scope.dashboardSettings.interval;
         }, function() {
             $scope.dashboards = $scope.backupDashboards;
             console.log($scope.backupDashboards);
             $scope.backupDashboards = {};
-            console.log($scope.dashboards)
             console.log("reverting");
         });
     }
-
-
-    $scope.$on('addDashboard', function(ev) {
-        console.log("Adding new dashboard");
-
-        $mdDialog.show({
-            controller: 'addDashboardController',
-            templateUrl: 'partials/addDashboard.html',
-            parent: angular.element(document.body),
-            targetEvent: ev,
-            clickOutsideToClose:true,
-            fullscreen: true,
-        })
-        .then(function(answer) {
-            var newIndex = dashboard.add(answer);
-            //console.log(newIndex)
-            dashboard.save();
-            $scope.$broadcast('switchDashboard', newIndex);
-            /*dashboard.switch(newIndex);
-            $scope.selectedDashboard = newIndex;
-            $scope.$broadcast('reloadDashboard'); */
-        }, function() { // cancel
-        });
-        
-    });
 
     $scope.$on('switchDashboard', function(ev, index) {
         delete $localStorage['timestamp'];
@@ -225,7 +197,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
                 $scope.box.options = PIECHART.options;
             }
             if ($scope.box.type == 'barchart') {
-                console.log($scope.box.title + ": " + $scope.box.selector)
+                //console.log($scope.box.title + ": " + $scope.box.selector)
                 $scope.box.options = angular.copy(AREA.options);
                 if ($scope.box.selector) {
                     $scope.box.options.chart.yAxis.axisLabel = "Flow Count";
@@ -246,12 +218,12 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
                 }
 
                 for(item in query) {
-                    console.log(item);
+                    //console.log(item);
                     if(query[item] == "")
                         query[item] = null;
                 }
                 
-                console.log(query)
+                //console.log(query)
                 api.get('agg', query, false, true).success(function(data) {
                     $scope.box.loading = false;
                     $scope.box.data = data;
@@ -427,11 +399,13 @@ app.controller('editBoxController', function($scope, $mdDialog, box, PROTOCOLS, 
 
 });
 
-app.controller('addDashboardController', function($scope, $mdDialog) {
+app.controller('addDashboardController', function($scope, $mdDialog, dashboard) {
     
     $scope.editDashboard = false;
     
     $scope.saveAndClose = function(answer) {
+        //var newIndex = dashboard.add(answer);
+        //dashboard.save();
         $mdDialog.hide(answer);
     };
 

@@ -4,7 +4,7 @@ app.directive("sidebarMenu", function() {
 			section: '='
 		},
 		templateUrl: 'partials/sidebar-menu.html',
-        controller: function($scope, $mdSidenav, $location, MENU, user, dashboard) {
+        controller: function($scope, $mdSidenav, $mdDialog, $location, MENU, user, dashboard) {
             $scope.menu = MENU;
 
             $scope.dashboards = dashboard.getAll();
@@ -30,9 +30,34 @@ app.directive("sidebarMenu", function() {
                 user.logout();
             }
 
-            $scope.addDashboard = function() {
-                $scope.$emit('addDashboard');
+            $scope.addDashboard = function(ev) {
+                console.log("Adding new dashboard");
+
+                $mdDialog.show({
+                    controller: 'addDashboardController',
+                    templateUrl: 'partials/addDashboard.html',
+                    parent: angular.element(document.body),
+                    targetEvent: ev,
+                    clickOutsideToClose: true,
+                    fullscreen: true,
+                })
+                .then(function(answer) {
+                    var newIndex = dashboard.add(answer);
+                    //console.log(newIndex)
+                    dashboard.save();
+                    $scope.$emit('switchDashboard', newIndex);
+                    $scope.selectedDashboard = dashboard.active(newIndex);
+                    /*dashboard.switch(newIndex);
+                    $scope.selectedDashboard = newIndex;
+                    $scope.$broadcast('reloadDashboard'); */
+                }, function() { // cancel
+                });
+                
             }
+                
+            /*function() {
+                //$scope.$emit('addDashboard');
+            }*/
 
             $scope.switchDashboard = function(index) {
                 $scope.selectedDashboard = dashboard.active(index);
