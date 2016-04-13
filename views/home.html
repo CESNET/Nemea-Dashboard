@@ -3,8 +3,8 @@
 
 <md-content flex layout="column" class="content-wrapper" >
     <topbar-menu></topbar-menu>
-    <section class="content" layout-padding>
-        <div ng-controller="grid" >
+    <section class="content">
+        <div ng-controller="grid" class="bg">
             <div gridster="opt">
                 <div gridster-item="box" ng-repeat="box in items" class="box md-whiteframe-z1" ng-controller="box" ng-class="{'resizeable' : activeGrid == true}" >
                 	<div gridster-dynamic-height item="box" class="inner-box" id="nvd3">
