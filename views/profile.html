@@ -1,10 +1,10 @@
 <section layout="row" class="wrapper">
 <sidebar-menu></sidebar-menu>
 
-<md-content flex layout="column" >
+<md-content flex layout="column profile" >
     <topbar-menu></topbar-menu>
-    <section class="content" layout-padding>
-        <form name="user_form" ng-submit="editUser(user)" ng-model="user">
+    <section class="content" style="width: 100%" layout-padding>
+        <form name="user_form" ng-submit="editUser(user)" ng-model="user" class="box md-whiteframe-z1" layout-padding>
             <div layout="row">
                 <md-input-container>
                     <label>Username</label>

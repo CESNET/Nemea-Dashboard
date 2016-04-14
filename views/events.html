@@ -1,12 +1,12 @@
 <section layout="row" class="wrapper">
     <sidebar-menu></sidebar-menu>
     
-    <md-content flex layout="column" >
+    <md-content flex layout="column" class="events content-wrapper" >
         
         <topbar-menu></topbar-menu>
         <section class="content" layout-padding>
 
-        <form ng-submit="loadItems(query)" name="query_form" flex layout="column" class="query">
+        <form ng-submit="loadItems(query)" name="query_form" flex layout="column" class="query box md-whiteframe-z1" layout-padding>
             <div flex layout="row">
                 <md-datepicker ng-model="query.date" md-placeholder="Date from" ng-change="parseDate(query.date)" ng-required="true"></md-datepicker>
                 <span class="spacer"></span>
@@ -94,7 +94,7 @@
             </div>
         </form>
 
-    <div class="table" layout="column" flex>
+    <div class="table box md-whiteframe-z1" layout="column" flex>
         <div class="head" layout="row" flex layout-align="start center">
             <div flex=15>
                 Event Time
@@ -136,7 +136,8 @@
                 </md-input-container>
                 </div>
             </div>
-        </div>
+        </div> <!-- head -->
+
         <div layout="column" ng-repeat="item in data | filter: events" ng-class="{'md-whiteframe-z2' : !enableSub, 'last' : $last }" ng-init="enableSub = true" class="row"  flex ng-click="enableSub = !enableSub">
             <div layout="row" layout-align="start center" class="row-wrapper"  >
                 <div flex=15 layout-padding>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
@@ -157,47 +158,50 @@
                 <div flex layout="row" style="width: 100%">
                     <div flex layout="column" >
                         <span flex>Detect Time: {{ item.DetectTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
-                        <span flex>Event Time: {{ item.EventTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
-                        <span flex>Cease Time: {{ item.CeaseTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
-                    </div>
-
-                    <div flex layout="column">
-                        <span flex>Category: {{ item.Category[0] }}</span>
-                        <span flex>Description: {{ item.Description }}</span>
-                    </div>
-
-                    <div flex layout="column">
-                        <span flex>
-                            Source: <span ng-if="item.Source[0]">{{ item.Source[0].IP4[0] }} | {{ item.Source[0].Proto[0] }}</span>
-                            <span ng-if="!item.Source[0]">Data not available</span>
-                        </span>
-                        <span flex>
-                            Target: <span ng-if="item.Target[0]">{{ item.Target[0].IP4[0] }} | {{ item.Target[0].Proto[0] }}</span>
-                            <span ng-if="!item.Target[0]">Data not available</span>
-                        </span>
-                   
-                        <span flex >
-                            Flow count: {{ item.FlowCount | number }}
-                        </span>
-                    </div>
+                    <span flex>Event Time: {{ item.EventTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
+                    <span flex>Cease Time: {{ item.CeaseTime['$date'] | date : 'yyyy/MM/dd H:mm:ss' }}</span>
                 </div>
 
-                <div flex style="margin: 0 auto; text-align: center;" >        
-                    <md-button class="md-raised" ng-if="item.Source[0].IP4[0]" ng-click="getQuery(item.Source[0].IP4[0], 'src')">Source IP</md-button>
-                    <md-button class="md-raised" ng-if="item.Target[0].IP4[0]" ng-click="getQuery(item.Target[0].IP4[0], 'trg')">Target IP</md-button>
-                    <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}"  aria-label="Show details">
-                        Details
-                    </md-button>
+                <div flex layout="column">
+                    <span flex>Category: {{ item.Category[0] }}</span>
+                    <span flex>Description: {{ item.Description }}</span>
                 </div>
 
-                                    <!--div class="event" ng-bind-html="item | json2html"></div-->
-                
+                <div flex layout="column">
+                    <span flex>
+                        Source: <span ng-if="item.Source[0]">{{ item.Source[0].IP4[0] }} | {{ item.Source[0].Proto[0] }}</span>
+                        <span ng-if="!item.Source[0]">Data not available</span>
+                    </span>
+                    <span flex>
+                        Target: <span ng-if="item.Target[0]">{{ item.Target[0].IP4[0] }} | {{ item.Target[0].Proto[0] }}</span>
+                        <span ng-if="!item.Target[0]">Data not available</span>
+                    </span>
+               
+                    <span flex >
+                        Flow count: {{ item.FlowCount | number }}
+                    </span>
+                </div>
             </div>
+
+            <div flex style="text-align: center;" layout="row" layout-align="center center">        
+                <md-button class="md-raised" ng-if="item.Source[0].IP4[0]" ng-click="getQuery(item.Source[0].IP4[0], 'src')">Source IP</md-button>
+                <md-button class="md-raised" ng-if="item.Target[0].IP4[0]" ng-click="getQuery(item.Target[0].IP4[0], 'trg')">Target IP</md-button>
+                <md-button class="md-raised" ng-href="#/events/{{item['_id']['$oid']}}" aria-label="Show details">
+                    Details
+                </md-button>
+            </div>
+
+                                <!--div class="event" ng-bind-html="item | json2html"></div-->
+            
+        </div>
 
             
         </div>
 
-        <div layout="row" flex style="background-color: #fff!important" class="load-more" ng-hide="remaining.total <=query.limit">
+    </div>
+        
+
+<div layout="row" flex class="load-more" ng-hide="remaining.total <=query.limit">
 
                 <md-button class="md-raised md-primary" ng-click="loadNext(data[data.length-1].DetectTime.$date)">
                     {{ nextButton }} <br> 
@@ -205,9 +209,7 @@
                 </md-button>
             </div>
 
-    </div>
-        
-
         </section>
+
     </md-content>
 </section>
