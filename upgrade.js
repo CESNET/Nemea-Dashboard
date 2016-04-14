@@ -1,3 +1,7 @@
+// Upgrade script for mongoDB users collection from v0.3.x to v0.4.x
+// To run use "mongo localhost:27017/nemeadb upgrade.js"
+//
+
 var users = db.users_old.find();
 
 print("### Updating USERS collection's scheme")
