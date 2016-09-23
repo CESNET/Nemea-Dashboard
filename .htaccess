@@ -1,5 +1,6 @@
 <Files ~ "\.json$">
     Order allow,deny
-    Deny from all   
-    Satisfy All     
+    Deny from all
+    Satisfy All
 </Files>
+
