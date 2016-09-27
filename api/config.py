@@ -1,4 +1,5 @@
 import configparser
+import sys
 from api import app
 
 class Config(object):
@@ -9,9 +10,9 @@ class Config(object):
 
 	PROPAGATE_EXCEPTIONS = True
 
-	version = 'v1'
+	version = '1.0'
 
-	def __init__(self, args):
+	def __init__(self, args, base_path=None):
 		"""
 		Load configuration
 		"""
@@ -26,6 +27,10 @@ class Config(object):
 		self.THREADED = self.config["api"].getboolean("threaded", True)
 		self.SECRET_KEY = self.config["api"].get("secret_key", "")
 
+		self.version = self.config["api"].get("version", "v1")
+
+		self.module_path = base_path + self.config["api"].get("modules", "/modules")
+
 		self.create_urls()
 
 	def create_urls(self):
@@ -34,13 +39,9 @@ class Config(object):
 		* events Construct a base URI for events
 		*
 		"""
-		self.events = '/' + self.version + '/events/'
-		self.users = '/' + self.version + '/users/'
+		self.config.set("api", "events", '/' + self.version + '/events/')
+		self.config.set("api", "users", '/' + self.version + '/users/')
+		self.config.set("api", "db", '/' + self.version + '/db/')
 
 	def __getitem__(self, key):
-		if key == "users":
-			return self.users
-		elif key == "events":
-			return self.users
-		else:
-			return self.config[key]
+		return self.config[key]
