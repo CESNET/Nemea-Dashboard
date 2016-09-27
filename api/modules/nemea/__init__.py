@@ -1,13 +1,15 @@
-from api import app, config, auth
+from api import app, auth, db, config as conf
+#from api.modules.nemea import nemea, config
 
 # Own classes and helpers
 #from geo import GeoIP
-from api.config import Config
+
+config = conf['api']
 
 # Flask libraries
 from flask import escape, request, Response, abort
-from flask.ext.cors import CORS
-import ssl
+
+from api.module import Module
 
 # System tools
 import sys
@@ -22,35 +24,14 @@ from bson import json_util
 from bson.objectid import ObjectId
 import pymongo
 
-@app.route(config['users'] + 'auth', methods=['POST'])
-def login():
-	user = request.get_json()
-	# Authorize user using their username and password
-	# @return user's document from the DB including config
-	auth_user = auth.login(user['username'], user['password'])
-
-	if auth_user == 0 or auth_user == 1:
-		return auth.errors[str(auth_user)], 401
-
-	_id = auth.store_session(auth_user['username'], auth_user['_id'])
-	print(auth_user)
-
-	# Attach JWT for further authentication
-	auth_user['jwt'] = auth.jwt_create({
-		'username' : auth_user['username'],
-		'name' : auth_user.get('name', ""),
-		'surname' : auth_user.get('surname', ""),
-		'email' : auth_user.get('email', ""),
-		'_id' : str(_id),
-		'created' : mktime(datetime.utcnow().timetuple())
-		})
-	return(json_util.dumps(auth_user))
-
+# Register a blueprint
+nemea = Module('nemea', __name__, url_prefix='/nemea')
 
 # Create indexes
-@app.route(config['events'] + 'indexes', methods=['GET'])
-@auth.required
+@nemea.route('/db/indexes', methods=['GET'])
+#@auth.required
 def indexes():
+	print(config["events"])
 	indexes = db.collection.index_information()
 	for item in indexes.keys():
 		if item == "DetectTime":
@@ -61,7 +42,7 @@ def indexes():
 	indexes = db.collection.index_information()
 	return(json_util.dumps(indexes))
 
-@app.route('/config', methods=['GET'])
+@nemea.route('/config', methods=['GET'])
 @auth.required
 def get_config():
 	config = {
@@ -72,21 +53,21 @@ def get_config():
 			}
 	return(json_util.dumps(config))
 
-@app.route(config['events'] + '<int:items>', methods=['GET'])
+@nemea.route('/events/<int:items>', methods=['GET'])
 @auth.required
 def get_last(items):
-	if items == 0 or items > 10000:
+	if items == 0:
 		items = 100
+	elif items > 10000:
+		items = 10000
 	docs = list(db.collection.find().sort( [( "DetectTime", -1)] ).limit(items))
 
 	return (json_util.dumps(docs, default=json_util.default))
 
-@app.route(config['events'] + 'query', methods=['GET'])
+@nemea.route('/query', methods=['GET'])
 @auth.required
 def query():
-	req = request.args
-
-	req = req.to_dict()
+	req = request.args.to_dict()
 
 	query = {
 			"$and" : []
@@ -139,7 +120,7 @@ def query():
 	return(json_util.dumps(res))
 
 
-@app.route(config['events'] + 'agg', methods=['GET'])
+@nemea.route('/events/aggregate', methods=['GET'])
 @auth.required
 def aggregate():
 	req = request.args
@@ -251,7 +232,7 @@ def aggregate():
 
 	return(json_util.dumps(tmp))
 
-@app.route(config['events'] + 'top', methods=['GET'])
+@nemea.route('/events/top', methods=['GET'])
 @auth.required
 def top():
 	# Get URL params
@@ -285,7 +266,7 @@ def top():
 	res = list(db.collection.aggregate(query))
 	return(json_util.dumps(res))
 
-@app.route(config['events'] + 'count', methods=['GET'])
+@nemea.route('/events/count', methods=['GET'])
 @auth.required
 def events_count():
 	req = request.args
@@ -310,7 +291,7 @@ def events_count():
 	return(json_util.dumps(res))
 
 # Fetch event with given ID
-@app.route(config['events'] + 'id/<string:id>', methods=['GET'])
+@nemea.route('/events/id/<string:id>', methods=['GET'])
 @auth.required
 def get_by_id(id):
 	if request.method == 'GET':
@@ -320,93 +301,3 @@ def get_by_id(id):
 
 		res = db.collection.find_one(query)
 	return(json_util.dumps(res))
-
-@app.route(config['users'], methods=['GET', 'PUT', 'POST', 'DELETE'])
-@auth.required
-def get_users():
-	if request.method == 'GET':
-		res = list(db.users.find())
-
-		# Remove password hash from the resulting query
-		for user in res:
-			user.pop("password", None)
-		return(json_util.dumps(res))
-
-	# Create user
-	if request.method == 'POST':
-		user_data = request.get_json()
-		hash = auth.create_hash(user_data["password"])
-		user_data["password"] = hash
-
-		res = db.users.insert(user_data)
-		return(json_util.dumps(res))
-
-	if request.method == 'DELETE':
-		req = request.args
-		req = req.to_dict()
-		#print(req["userId"])
-		res = db.users.delete_one({"_id" : ObjectId(req["userId"])})
-		return(json_util.dumps(res.deleted_count))
-
-	if request.method == 'PUT':
-		user = request.get_json()
-		#print(user)
-		token = auth.jwt_decode(request.headers.get('Authorization', None))
-		user_info = auth.get_session(token['_id'])
-
-		# Create basic query for user updating
-		query = {
-				"$set" : {
-					'settings' : user['settings']
-					}
-				}
-
-		# If the user updates their profile check for all fields to be updated
-		if "name" in user:
-			query["$set"]["name"] = user["name"]
-
-		if "surname" in user:
-			query["$set"]["surname"] = user["surname"]
-
-		if "email" in user:
-			query["$set"]["email"] = user["email"]
-
-		# In case of password change, verify that it is really him (revalidate their password)
-		if "password" in user:
-			verify = auth.login(user["username"], user["password"])
-			# This is really stupid, I have to change it
-			# TODO: better password verification returning values
-			if verify != 0 and verify != 1:
-				hash = auth.create_hash(user["password_new"])
-				query["$set"]["password"] = hash
-			else:
-				return (json_util.dumps( {'error' : auth.errors[str(verify)]}), 403)
-
-		# The query is built up, lets update the user and return updated document
-		res_raw = db.users.find_one_and_update(
-				{'_id' : ObjectId(user_info['user_id'])},
-				query,
-				return_document=pymongo.ReturnDocument.AFTER)
-
-		# Remove password hash from the response
-		res = res_raw.pop("password", None)
-
-		jwt_res = auth.jwt_create({
-			'username' : res_raw['username'],
-			'name' : res_raw.get('name', ""),
-			'surname' : res_raw.get('surname', ""),
-			'email' : res_raw.get('email', ""),
-			'_id' : str(token['_id']),           # Keep the same session ID!
-			'created' : mktime(datetime.utcnow().timetuple())
-			})
-
-		return(json_util.dumps({"jwt" : jwt_res}))
-
-@app.route(config['users'] + 'logout', methods=['DELETE'])
-@auth.required
-def delete_user_session():
-	#print(request.headers)
-	jwt = request.headers.get('Authorization', None)
-	decoded_jwt = auth.jwt_decode(jwt)
-	res = auth.delete_session(decoded_jwt['_id'])
-	return(str(res))
