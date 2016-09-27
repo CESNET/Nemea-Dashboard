@@ -23,8 +23,8 @@ except:
 	print("Failed to parse arguments")
 	exit(1)
 
-from flask import Flask
-app = Flask(__name__)
+from api.Router import Router
+app = Router(__name__)
 
 # Own classes and helpers
 #from geo import GeoIP
