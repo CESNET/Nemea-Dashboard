@@ -47,12 +47,11 @@ from time import mktime
 # MongoDB data manipulation
 from bson import json_util
 from bson.objectid import ObjectId
-import pymongo
 
 """
 Load user config specified by an argument or in default path.
 """
-config = Config(args)
+config = Config(args, base_path = __path__[0])
 
 if config["ssl"].getboolean("enabled"):
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
@@ -76,8 +75,6 @@ class jsonReturn(object):
         self.base['data'] = data
         return(json_util.dumps(self.base))
 
-ret = jsonReturn()
-
 from api.dbConnector import dbConnector
 db = dbConnector.from_object(config["database"])
 
@@ -89,22 +86,31 @@ app.config.from_object(config)
 # Enable Cross-Origin
 CORS(app)
 
-import api.modules.nemea
-"""
-@app.route(config['events'] + 'whois/<string:ip>', methods=['GET'])
-#@auth.required
-def whois(ip):
-    p =Popen(['whois', ip], stdout=PIPE)
-    tmp = ""
-    for line in p.stdout:
-        tmp += line.decode('utf-8')
-    return(json_util.dumps({'output' : tmp }))
+@app.route('/')
+def routes():
+	routes = []
+	for rule in app.url_map.iter_rules():
+		routes.append({
+			"name": rule.rule,
+			"method": rule.methods,
+			"desc" : rule.endpoint
+		})
 
-if __name__ == '__main__':
-    # Start API as local server on given port
-    if config['ssl']:
-        app.run(host="0.0.0.0", port=int(config['api']['port']), ssl_context=context)
-    else:
-        app.run(host="0.0.0.0", port=int(config['api']['port']), threaded=True)
-"""
+	print(json_util.dumps(routes, indent=4))
+	return (json_util.dumps(routes))
 
+import pkgutil
+from api.module import Module
+
+modules = pkgutil.iter_modules([config.module_path])
+
+for importer, mod_name, _ in modules:
+	if mod_name not in sys.modules:
+		loaded_mod = __import__("api." +
+				config['api']['modules'].split('/')[-1] + "." +  mod_name,
+				fromlist=[mod_name])
+		print("Imported module \"" + mod_name + "\"")
+
+		for obj in vars(loaded_mod).values():
+			if isinstance(obj, Module):
+				app.register_blueprint(obj)
