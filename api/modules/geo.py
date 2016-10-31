@@ -1,6 +1,5 @@
 import geoip2.database
 import geoip2.errors
-import sys
 
 class GeoIP:
     reader = None
@@ -28,7 +27,7 @@ class GeoIP:
         return res
     def __del__(self):
         self.reader.close()
-        
+
 
 # reader = geoip2.database.Reader('/data/geoIP/GeoLite2-lib/GeoLite2-City.mmdb')
 
