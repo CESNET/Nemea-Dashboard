@@ -14,19 +14,21 @@ from time import mktime
 from bson import json_util
 from bson.objectid import ObjectId
 
-@auth.required()
+from api.modules.nemea import nemea
+
+#@auth.required()
 def indexes():
 	"""
 	Check for available indexes in database and recreate them
 	"""
-    indexes = db.collection.index_information()
-    for item in indexes.keys():
-        if item == "DetectTime":
-            print('indexes are here')
-            return(json_util.dumps(indexes))
-    db.collection.create_index([( "DetectTime", 1)])
-    indexes = db.collection.index_information()
-    return(json_util.dumps(indexes))
+	indexes = nemea.index_information()
+	for item in indexes.keys():
+		if item == "DetectTime":
+			print('indexes are here')
+			return(json_util.dumps(indexes))
+	nemea.create_index([( "DetectTime", 1)])
+	indexes = nemea.index_information()
+	return(json_util.dumps(indexes))
 
 @auth.required()
 def get_last_events(items):
@@ -279,7 +281,7 @@ def get_by_id(id):
 	}
 
 	res = db.collection.find_one(query)
-    return(json_util.dumps(res))
+	return(json_util.dumps(res))
 
 #@auth.required
 def whois(ip):
