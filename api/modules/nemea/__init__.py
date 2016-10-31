@@ -1,11 +1,13 @@
 from api import app, db, config
 from api.module import Module
 
-nemea_db = db.db[config['nemea']['database']]
-nemea = nemea_db[config['nemea']['collection']]
+config.load(path = __path__[0] + '/config.ini')
+
+nemea_db = db.socket[config.modules['nemea']['database']]
+nemea = nemea_db[config.modules['nemea']['collection']]
 
 # Register a blueprint
-nemea_bp = Module('module', __name__, url_prefix = '/nemea', no_version=True)
+nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)
 
 from api.modules.nemea.events import *
 
