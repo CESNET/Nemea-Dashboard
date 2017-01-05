@@ -7,10 +7,11 @@ app.controller('loginController', function($scope, $location, $log, user) {
         $scope.loginBtnDisabled = true;
 
         user.auth(cred)
-        .success(function(data) {
-            $location.path('/');    
-        })
-        .error(function(msg) {
+        .then(
+			function successCallback(data) {
+            $location.path('/'); 
+        },
+        function errorCallback(msg) {
             $scope.error_mes = msg;
             $scope.loginBtn = "Login"
             $scope.loginBtnDisabled = false;

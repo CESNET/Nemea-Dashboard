@@ -1,15 +1,15 @@
-app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONFIG) {
+app.service('api', function($http, $log, $mdToast, PIECHART, CONFIG) {
 
 	var addr = CONFIG["host"] + ":" + CONFIG["port"] + "/" + CONFIG["version"] + "/events/";
 
     this.auth = function() {
-        return $localStorage["token"];
+        return window.localStorage["token"];
     }
 
     this.config = function() {
         $http.get('http://benefizio.liberouter.org:5555/config').success(function(data) {
             this.addr = data.host + ':' + data.port + data.events;
-            $localStorage['config'] = data;
+            window.localStorage['config'] = data;
             alert(data);
         });
     }
@@ -36,7 +36,7 @@ app.service('api', function($http, $log, $mdToast, $localStorage, PIECHART, CONF
             }
 
             if (cache)
-                $localStorage['timestamp'] = new Date();
+                window.localStorage['timestamp'] = new Date();
 
             return data;
         })

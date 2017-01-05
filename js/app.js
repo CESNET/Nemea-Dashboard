@@ -66,7 +66,7 @@ app.filter('nospace', function () {
 // Always check for a JWT
 app.run(function(user, $localStorage, $location, $rootScope, $log) {
 	$rootScope.$on("$locationChangeStart", function(event) {
-        if ($localStorage["token"] == undefined) {
+        if (window.localStorage["token"] == undefined) {
             $log.info("no token found, redirecting to /login")
             $location.path("/login");
         }

@@ -1,4 +1,4 @@
-app.controller('profileController', function($scope, $log, $localStorage, user, dashboard) {
+app.controller('profileController', function($scope, $log, user, dashboard) {
     $scope.user = user.get();
 
     $scope.save_btn = "Save";
@@ -9,7 +9,7 @@ app.controller('profileController', function($scope, $log, $localStorage, user, 
         user_data["settings"] = dashboard.clean();
 
         user.put(user_data, true).success(function(data) {
-            $localStorage["token"] = data["jwt"];
+            window.localStorage["token"] = data["jwt"];
             $scope.err_msg = "";
             $scope.user = angular.copy(user.get());
             $scope.save_btn = "Save";

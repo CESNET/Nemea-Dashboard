@@ -1,20 +1,20 @@
-app.service('dashboard', function($log, $localStorage, user) {
+app.service('dashboard', function($log, user) {
 
     var selectedDashboard = 0;
-    var dashboards = $localStorage['dashboard'];
-    var active = $localStorage['dashboard'][selectedDashboard];
+    var dashboards = JSON.parse(window.localStorage['dashboard']);
+    var active = JSON.parse(window.localStorage['dashboard'])[selectedDashboard];
     var backup;
 
     this.getAll = function() {
-        return $localStorage['dashboard'];
+        return JSON.parse(window.localStorage['dashboard']);
     }
 
     this.get = function() {
-        return  $localStorage['dashboard'][selectedDashboard];
+        return JSON.parse(window.localStorage['dashboard'])[selectedDashboard];
     }
 
     this.settings = function() {
-        return  $localStorage['dashboard'][selectedDashboard].settings;
+        return  JSON.parse(window.localStorage['dashboard'])[selectedDashboard].settings;
     }
 
     this.active = function(index) {
@@ -22,7 +22,7 @@ app.service('dashboard', function($log, $localStorage, user) {
             selectedDashboard = index
         }
 
-        //active = $localStorage['dashboard'][selectedDashboard];
+        //active = window.localStorage['dashboard'][selectedDashboard];
 
         return selectedDashboard;
     }
@@ -33,11 +33,11 @@ app.service('dashboard', function($log, $localStorage, user) {
         else
             active.settings = updatedDashboard;
 
-        //dashboards = $localStorage['dashboard'];
+        //dashboards = window.localStorage['dashboard'];
     }
 
     this.clean = function() {
-         var settings = angular.copy($localStorage['dashboard']);
+         var settings = angular.copy(JSON.parse(window.localStorage['dashboard']));
         //console.log(settings)
         
         // Remove data and graph options
@@ -54,7 +54,6 @@ app.service('dashboard', function($log, $localStorage, user) {
     }
 
     this.save = function() {
-       
         var query = {
             "settings" : this.clean()
         }
@@ -88,30 +87,28 @@ app.service('dashboard', function($log, $localStorage, user) {
             }]
         }
 
-        $localStorage['dashboard'].push(tmpDashboard);
-        //console.log( $localStorage['dashboard'].length - 1);
+        tmp = window.localStorage['dashboard'];
+		tmp.push(tmpDashboard);
+		window.localStorage['dashboard'] = tmp;
 
-        return ( $localStorage['dashboard'].length - 1);
-
+        return ( JSON.parse(window.localStorage['dashboard']).length - 1);
     }
 
     this.delete = function() {
-        backup =  $localStorage['dashboard'].splice( $localStorage['dashboard'].indexOf(active), 1);
+        backup =  JSON.parse(window.localStorage['dashboard']).splice( JSON.parse(window.localStorage['dashboard']).indexOf(active), 1);
         selectedDashboard = 0;
 
         return backup;
-    
     }
 
     this.switch = function(index) {
-        active = $localStorage['dashboard'][index];
+        active = JSON.parse(window.localStorage['dashboard'])[index];
         selectedDashboard = index;
         return active;
     }
 
     this.reset = function() {
         selectedDashboard = 0;
-        active = $localStorage['dashboard'][selectedDashboard]
+        active = JSON.parse(window.localStorage['dashboard'])[selectedDashboard]
     }
-        
 });

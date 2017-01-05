@@ -1,5 +1,4 @@
-app.controller('homeController', function($scope, user, $timeout, $interval, $log, $localStorage, $route, $mdDialog, dashboard) {
-    
+app.controller('homeController', function($scope, user, $timeout, $interval, $log, $route, $mdDialog, dashboard) {
     $scope.dashboards = dashboard.getAll();
     $scope.dashboardSettings = dashboard.settings();
 
@@ -33,7 +32,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 
     $scope.clearCache = function() {
         $log.debug("deleting timestamp")
-        delete $localStorage['timestamp'];
+        delete window.localStorage['timestamp'];
         $route.reload();
     }
 
@@ -81,7 +80,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
     }
 
     $scope.$on('switchDashboard', function(ev, index) {
-        delete $localStorage['timestamp'];
+        delete window.localStorage['timestamp'];
         dashboard.switch(index)
         $scope.selectedDashboard = dashboard.active();
         //console.log()
@@ -92,7 +91,7 @@ app.controller('homeController', function($scope, user, $timeout, $interval, $lo
 
 });
 
-app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $localStorage, $timeout, dashboard){
+app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGORIES, PIECHART, AREA, api, user, $mdMedia, $timeout, dashboard){
     
     function timeShift(offset) {
         //console.log(offset)
@@ -170,7 +169,7 @@ app.controller('box', function($scope, $log, $mdDialog, PROTOCOLS, TYPES, CATEGO
         })
     }
 
-    var cache_time = (new Date() - new Date($localStorage['timestamp']))/1000;
+    var cache_time = (new Date() - new Date(window.localStorage['timestamp']))/1000;
     if (isNaN(cache_time))
         cache_time = 300 + 10;
 
