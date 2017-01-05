@@ -51,10 +51,11 @@ __pycache__
 *.pyc
 
 #SASS
-#css
+css
 
 #node modules
 node_modules/
-#app.min.js
-#public
-js/
+
+# Configuration files
+*/config.js
+*/config.json
