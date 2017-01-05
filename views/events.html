@@ -62,6 +62,7 @@
                 
                 {{ query.orderby }}
                 -->
+
                 <md-switch 
                     flex="20"
                     ng-model="query.dir_raw" 
@@ -142,8 +143,17 @@
             <div layout="row" layout-align="start center" class="row-wrapper"  >
                 <div flex=15 layout-padding>{{ item.DetectTime['$date'] | date : 'MM/dd H:mm:ss'}}</div>
                 <div flex=15 layout-padding>{{ item.Category[0] }}</div>
-                <div flex=20 layout-padding>{{ item.Source[0].IP4[0] }}<small ng-if="!item.Source[0].IP4">N/A</small></div>
-                <div flex=20 layout-padding>{{ item.Target[0].IP4[0] }}<small ng-if="!item.Target[0].IP4">N/A</small></div>
+                <div flex=20 layout-padding>
+					<div ng-if="item.Source[0].IP4">{{ item.Source[0].IP4[0] }}</div>
+					<div ng-if="item.Source[0].IP6">{{ item.Source[0].IP6[0] }}</div>
+					<small ng-if="!item.Source[0].IP4 && !item.Source[0].IP6">N/A</small>
+				</div>
+				<div flex=20 layout-padding>
+					<div ng-if="item.Target[0].IP4">{{ item.Target[0].IP4[0] }}</div>
+					<div ng-if="item.Target[0].IP6">{{ item.Target[0].IP6[0] }}</div>
+					<small ng-if="!item.Target[0].IP4 && !item.Target[0].IP6">N/A</small>
+				</div>
+
                 <div flex=20 layout-padding>{{ item.Description }}</div>
                 <!--div flex=20 layout-padding>{{ item.Description | limitTo : 31 : 0 }}{{item.Description.length > 31 ? ' ...' : ''}}</div-->
                 <div flex=10 class="flow-count"layout-padding>{{ item.FlowCount | number }}</div>
@@ -169,11 +179,11 @@
 
                 <div flex layout="column">
                     <span flex>
-                        Source: <span ng-if="item.Source[0]">{{ item.Source[0].IP4[0] }} | {{ item.Source[0].Proto[0] }}</span>
+                        Source: <span ng-if="item.Source[0]">{{ item.Source[0].IP4[0] }}{{ item.Source[0].IP6[0] }} | {{ item.Source[0].Proto[0] }}</span>
                         <span ng-if="!item.Source[0]">Data not available</span>
                     </span>
                     <span flex>
-                        Target: <span ng-if="item.Target[0]">{{ item.Target[0].IP4[0] }} | {{ item.Target[0].Proto[0] }}</span>
+                        Target: <span ng-if="item.Target[0]">{{ item.Target[0].IP4[0] }}{{ item.Target[0].IP6[0] }} | {{ item.Target[0].Proto[0] }}</span>
                         <span ng-if="!item.Target[0]">Data not available</span>
                     </span>
                
