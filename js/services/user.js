@@ -1,4 +1,4 @@
-app.service('user', function($localStorage, $http, $mdToast, $location, $log, CONFIG){
+app.service('user', function($http, $mdToast, $location, $log, CONFIG){
     var cache = null;
 
     var dashboard = [];
@@ -6,11 +6,11 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
 	var addr = CONFIG["host"] + ":" + CONFIG["port"] + "/" + CONFIG["version"] + "/users/";
 
     this.config = function() {
-        return $localStorage["dashboard"];
+        return JSON.parse(window.localStorage["dashboard"]);
     }
 
     this.jwt = function() {
-        var token = $localStorage['token'];
+        var token = window.localStorage['token'];
         var base64Url = token.split('.')[1];
         var base64 = base64Url.replace('-', '+').replace('_', '/');
         return JSON.parse(window.atob(base64));
@@ -19,20 +19,24 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
     this.auth = function(user) {
         console.log(addr);
         return $http.post(addr + "auth", angular.toJson(user))
-        .success(function(data) {
-            $localStorage["token"] = data["jwt"];
-            
-            // TODO: differentiate between config and jwt >> duplicity
-            delete $localStorage["dashboard"];
-            $localStorage["dashboard"] = data["settings"];
-            return;
-        })
-        .error(function(error, status) {
-            console.log(error);
-            console.log(status)
-            // Let it be handled by controller
-            return error;
-        })
+        .then(
+			function successCallback(data) {
+				console.log("SUCCESS");
+				window.localStorage["token"] = data['data']["jwt"];
+				$log.info(data.data)
+
+				// TODO: differentiate between config and jwt >> duplicity
+				delete window.localStorage["dashboard"];
+				window.localStorage["dashboard"] = JSON.stringify(data['data']["settings"]);
+				return data;
+			},
+			function errorCallback(error, status) {
+				console.log(error);
+				console.log(status)
+				// Let it be handled by controller
+				return error;
+			}
+		)
     }
 
     this.put = function(data, info) {
@@ -41,7 +45,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
             method : "PUT",
             data : angular.toJson(data),
             headers : {
-                'Authorization' : $localStorage["token"]
+                'Authorization' : window.localStorage["token"]
             }
             })
             .success(function(data) {
@@ -74,20 +78,20 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
     // Logout user
     // Remove JWT from localStorage and delete session on server
     this.logout = function() {
-        var user = $localStorage["token"];
+        var user = window.localStorage["token"];
 
         return $http({
             url : addr + "logout",
             method : "DELETE",
             headers : {
-                'Authorization' : $localStorage["token"]
+                'Authorization' : window.localStorage["token"]
                 }
             })
             .success(function(data) {
                 $location.path("/login");
-                delete $localStorage["token"];
-                delete $localStorage["dashboard"];
-                delete $localStorage["timestamp"];
+                delete window.localStorage["token"];
+                delete window.localStorage["dashboard"];
+                delete window.localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -99,9 +103,9 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
             })
             .error(function(error, msg) {
                 $location.path("/login");
-                delete $localStorage["token"];
-                delete $localStorage["dashboard"];
-                delete $localStorage["timestamp"];
+                delete window.localStorage["token"];
+                delete window.localStorage["dashboard"];
+                delete window.localStorage["timestamp"];
                 $mdToast.show(
                     $mdToast
                         .simple()
@@ -113,7 +117,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
     }
 
     this.get = function(allusers) {
-        var user = $localStorage["token"];
+        var user = window.localStorage["token"];
         
         if (allusers) {
             return $http({
@@ -144,7 +148,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
 
 
     this.post = function(userData) {
-        var user = $localStorage["token"];
+        var user = window.localStorage["token"];
         
         return $http({
             url : addr,
@@ -170,7 +174,7 @@ app.service('user', function($localStorage, $http, $mdToast, $location, $log, CO
     }
 
      this.delete = function(userId) {
-        var user = $localStorage["token"];
+        var user = windown.localStorage["token"];
         console.log(userId)
         
         return $http({
