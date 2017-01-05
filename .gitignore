@@ -57,3 +57,7 @@ css
 node_modules/
 app.min.js
 public
+
+# Configuration files
+js/config.js
+api/config.json
