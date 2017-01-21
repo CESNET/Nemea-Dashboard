@@ -11,13 +11,13 @@ app.constant('CATEGORIES', [ "any", "Recon.Scanning", "Attempt.Login", "Availabi
 app.constant('PROTOCOLS', [ "tcp", "dns", "udp" ]);
 app.constant('TYPES', ["barchart", "piechart", "top", "sum"])
 
-app.constant('PIECHART', { 
+app.constant('PIECHART', {
     options: {
         chart: {
             type: 'pieChart',
             height: 375,
             //height: function() { console.log(document.getElementById('nvd3').offsetHeight); return Number(425)},
-            x: function(d){return d.key[0];},
+            x: function(d){if (typeof(d.key[0]) == 'string') return d.key; else return d.key[0];},
             y: function(d){return d.x;},
             showLabels: true,
             donut : true,
@@ -42,7 +42,7 @@ app.constant('PIECHART', {
                                 console.log(y);
                                 console.log(e);
                                 console.log(graph);
-                                return 'Olalala!';
+                                return '';
                              },
             pie : {
                 dispatch: {
