@@ -15,6 +15,12 @@ from bson import json_util
 from bson.objectid import ObjectId
 
 from api.modules.nemea import nemea
+from flask import request
+
+from api.error import ApiException
+
+class EventsException(ApiException):
+	status_code = 400
 
 #@auth.required()
 def indexes():
@@ -30,34 +36,44 @@ def indexes():
 	indexes = nemea.index_information()
 	return(json_util.dumps(indexes))
 
-@auth.required()
+"""
+Find N last events
+"""
+#@auth.required()
 def get_last_events(items):
-    if items == 0 or items > 10000:
+    if items <= 0 or items > 10000:
         items = 100
-    docs = list(nemea.find().sort( [( "DetectTime", -1)] ).limit(items))
+    events = list(nemea.find().sort( [( "DetectTime", -1)] ).limit(items))
 
-    return(json_util.dumps(docs))
+    return(json_util.dumps(events))
 
 @auth.required()
 def query():
-
     req = request.args.to_dict()
+
+    if req == {}:
+        raise EventsException("missing required arguments")
+    print(req)
 
     query = {
         "$and" : []
     }
 
+    for key, value in req.items():
+        print(key)
+        print(value)
+
     if 'from' in req:
         query["$and"].append({
         	"DetectTime" : {
-        		"$gte" : datetime.strptime(req["from"],"%Y-%m-%dT%H:%M:%S.%fZ")
+        		"$gte" : datetime.utcfromtimestamp(int(req["from"]))
         	}
         })
 
     if 'to' in req:
         query["$and"].append({
         	"DetectTime" : {
-        		"$lt" : datetime.strptime(req["to"],"%Y-%m-%dT%H:%M:%S.%fZ")
+        		"$lt" : datetime.utcfromtimestamp(int(req["to"]))
         	}
         })
 
