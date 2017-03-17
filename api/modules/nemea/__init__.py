@@ -1,5 +1,5 @@
-from api import app, db, config
-from api.module import Module
+from liberouterapi import app, db, config
+from ..module import Module
 
 config.load(path = __path__[0] + '/config.ini')
 
@@ -9,7 +9,7 @@ nemea = nemea_db[config.modules['nemea']['collection']]
 # Register a blueprint
 nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)
 
-from api.modules.nemea.events import *
+from .events import *
 
 nemea_bp.add_url_rule('/indexes', view_func = indexes, methods=['GET'])
 nemea_bp.add_url_rule('/events/<int:items>', view_func = get_last_events, methods=['GET'])

@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-
-# Own classes and helpers
-from api import db, auth, config
-
 # System tools
 from subprocess import Popen, PIPE, check_output
 
@@ -14,10 +10,12 @@ from time import mktime
 from bson import json_util
 from bson.objectid import ObjectId
 
-from api.modules.nemea import nemea
 from flask import request
 
-from api.error import ApiException
+# Own classes and helpers
+from liberouterapi import db, auth, config
+from ..nemea import nemea
+from ...error import ApiException
 
 class EventsException(ApiException):
 	status_code = 400
