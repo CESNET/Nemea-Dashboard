@@ -11,6 +11,8 @@ nemea = nemea_db[config.modules['nemea']['collection']]
 nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)
 
 from .events import *
+from .Query import query
+from .Stats import aggregate, top, count
 
 # Create index for DetectTime
 nemea_bp.add_url_rule('/indexes', view_func = indexes, methods=['GET'])
