@@ -52,7 +52,7 @@ def get_by_id(id):
 		'_id' : ObjectId(id)
 	}
 
-	res = db.collection.find_one(query)
+	res = nemea.find_one(query)
 	return(json_util.dumps(res))
 
 #@auth.required
