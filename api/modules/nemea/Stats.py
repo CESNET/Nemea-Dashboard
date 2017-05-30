@@ -27,23 +27,19 @@ def aggregate():
 			match["$match"]["$and"].append({ req["filter_field"] : req["filter_value"]})
 
 		group = {
-				"$group" : {
-					"_id" : {
-						req["metric"] : "$" + req["metric"]
-						},
-					"count" : { "$sum" : 1}
-					}
+			"$group" : {
+				"_id" : "$" + req["metric"],
+				"count" : { "$sum" : 1 }
 				}
-		sort = {
-				"$sort" : { "_id." + req["metric"] : 1 }
-				}
+			}
+		sort = { "$sort" : { "_id" : 1 } }
 
 		res = list(nemea.aggregate([match, group, sort]))
 		tmp = list()
 
 		for item in res:
 			tmp.append({
-				"key" : item["_id"][req["metric"]],
+				"key" : item["_id"],
 				"x" : item["count"]
 				})
 
