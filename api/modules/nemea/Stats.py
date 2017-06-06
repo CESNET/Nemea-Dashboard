@@ -44,8 +44,8 @@ def aggregate():
 
 		for item in res:
 			tmp.append({
-				"key" : item["_id"][req["metric"]],
-				"x" : item["count"]
+				"name" : item["_id"][req["metric"]],
+				"value" : item["count"]
 				})
 
 	elif req['type'] == "barchart":
