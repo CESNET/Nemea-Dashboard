@@ -30,9 +30,7 @@ def aggregate():
 
 		group = {
 				"$group" : {
-					"_id" : {
-						req["metric"] : "$" + req["metric"]
-						},
+					"_id" : "$" + req["metric"],
 					"count" : { "$sum" : 1}
 					}
 				}
@@ -40,11 +38,23 @@ def aggregate():
 				"$sort" : { "_id." + req["metric"] : 1 }
 				}
 
-		res = list(nemea.aggregate([match, group, sort]))
+		project = {
+					"$project" : {
+							"metric" : "$_id",
+							"count" : 1,
+							"_id" : 0
+						}
+				}
+
+		print(json_util.dumps([match, group, project, sort]))
+
+		res = list(nemea.aggregate([match, group, project, sort]))
+
+		print(res)
 
 		for item in res:
 			tmp.append({
-				"name" : item["_id"][req["metric"]],
+				"name" : item["metric"],
 				"value" : item["count"]
 				})
 
