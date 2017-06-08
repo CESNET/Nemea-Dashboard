@@ -5,6 +5,7 @@ from bson import json_util
 from bson.objectid import ObjectId
 from flask import request
 from datetime import datetime
+from time import mktime
 
 @auth.required()
 def aggregate():
@@ -46,11 +47,8 @@ def aggregate():
 						}
 				}
 
-		print(json_util.dumps([match, group, project, sort]))
-
 		res = list(nemea.aggregate([match, group, project, sort]))
 
-		print(res)
 
 		for item in res:
 			tmp.append({
@@ -65,7 +63,14 @@ def aggregate():
 					"res" : {
 						"$subtract": [
 							"$DetectTime",
-							{ "$mod": [{ "$subtract" : ["$DetectTime", time] }, int(req['window'])*60*1000 ]}
+							{
+								"$mod": [
+									{
+										"$subtract" : ["$DetectTime", datetime.utcfromtimestamp(int(req['begintime']))]
+									},
+									int(req['window'])*60*1000
+								]
+							}
 							]
 						},
 					"Time" : "$DetectTime",
@@ -92,22 +97,22 @@ def aggregate():
 		for item in res:
 			inserted = False
 			for serie in data:
-				if serie['key'] == item['_id']['Category'][0]:
-					serie['values'].append({
-						'x' : mktime(item['_id']['DetectTime'].timetuple())*1000,
+				if serie['name'] == item['_id']['Category'][0]:
+					serie['series'].append({
+						'name' : mktime(item['_id']['DetectTime'].timetuple()),
 						'FlowCount' : item['FlowCount'],
-						'Count' : item['Count']
+						'value' : item['Count']
 						})
 					inserted = True
 					break
 
 			if not inserted:
 				data.append({
-					'key' : item['_id']['Category'][0],
-					'values' : [{
-						'x' : mktime(item['_id']['DetectTime'].timetuple())*1000,
+					'name' : item['_id']['Category'][0],
+					'series' : [{
+						'name' : mktime(item['_id']['DetectTime'].timetuple()),
 						'FlowCount' : item['FlowCount'],
-						'Count' : item['Count']
+						'value' : item['Count']
 						}] # values
 					}) # data
 				tmp = data
