@@ -100,7 +100,7 @@ def query():
 
 	res = list(nemea.find(query).sort([(orderby, dir)]).limit(int(req['limit'])))
 
-	res.append({'total' : nemea.find(query).limit(int(req['limit'])).count(True)})
+	res.append({'total' : nemea.find(query).limit(int(req['limit']) + 1).count(True)})
 
 	return(json_util.dumps(res))
 
