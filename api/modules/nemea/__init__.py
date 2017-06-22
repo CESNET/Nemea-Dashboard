@@ -13,6 +13,7 @@ nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)
 from .events import *
 from .Query import query
 from .Stats import aggregate, top, count
+from .Reporters import *
 
 # Create index for DetectTime
 nemea_bp.add_url_rule('/indexes', view_func = indexes, methods=['GET'])
@@ -37,3 +38,6 @@ nemea_bp.add_url_rule('/events/id/<string:id>', view_func = get_by_id, methods=[
 
 # Whois lookup (unused)
 nemea_bp.add_url_rule('/whois/<string:ip>', view_func = whois, methods=['GET'])
+
+nemea_bp.add_url_rule('/reporters/config', view_func = get_nr_config, methods=['GET'])
+nemea_bp.add_url_rule('/reporters/config', view_func = edit_nr_config, methods=['PUT'])
