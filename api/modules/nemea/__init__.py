@@ -1,7 +1,9 @@
 from liberouterapi import app, db, config
 from ..module import Module
 
-config.load(path = __path__[0] + '/config.ini')
+# Load NEMEA configuration file if nemea section is not present in current config
+if "nemea" not in config.config.sections():
+    config.load(path = __path__[0] + '/config.ini')
 
 # We need collection for NEMEA Events and Dashboard to be set up
 nemea_db = db.socket[config.modules['nemea']['database']]
