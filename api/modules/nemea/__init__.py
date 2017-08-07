@@ -4,10 +4,13 @@ from ..module import Module
 # Load NEMEA configuration file if nemea section is not present in current config
 if "nemea" not in config.config.sections():
     config.load(path = __path__[0] + '/config.ini')
+    conf_path = config.modules['nemea']
+else:
+    conf_path = config['nemea']
 
 # We need collection for NEMEA Events and Dashboard to be set up
-nemea_db = db.socket[config.modules['nemea']['database']]
-nemea = nemea_db[config.modules['nemea']['collection']]
+nemea_db = db.socket[conf_path['database']]
+nemea = nemea_db[conf_path['collection']]
 
 # Register a blueprint
 nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)

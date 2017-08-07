@@ -12,19 +12,23 @@ from liberouterapi.error import ApiException
 from bson import json_util as json
 import yaml
 from flask import request
+import os
 
 class ReporterError(ApiException):
     status_code = 500
 
 if 'reporters_config' not in config.modules['nemea']:
-    raise ReporterError("missing path to reporters configuration file 'reporters_config'")
-
-import os
+    if 'reporters_config' not in config['nemea']:
+        raise ReporterError("missing path to reporters configuration file 'reporters_config'")
+    else:
+        rc_path = config['nemea']['reporters_config']
+else:
+    rc_path = config.modules['nemea']['reporters_config']
 
 def get_nr_config():
     rconf = None
     try:
-        with open(config.modules['nemea']['reporters_config']) as f:
+        with open(rc_path) as f:
             try:
                 rconf = yaml.load(f)
             except Exception as e:
@@ -39,7 +43,7 @@ def get_nr_config():
 
 def edit_nr_config():
     conf = request.get_json()
-    with open(config.modules['nemea']['reporters_config'], 'w') as yf:
+    with open(rc_path, 'w') as yf:
         yaml.dump(conf, yf, default_flow_style=False, indent = 4)
 
     return json.dumps(conf)
