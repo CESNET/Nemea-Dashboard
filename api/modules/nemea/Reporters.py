@@ -39,7 +39,7 @@ def get_nr_config():
     except Exception as e:
         raise ReporterError(str(e))
 
-    return(json.dumps(yaml.dump(rconf)))
+    return(json.dumps(rconf))
 
 def edit_nr_config():
     conf = request.get_json()
