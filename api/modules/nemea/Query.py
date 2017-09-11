@@ -23,15 +23,10 @@ def query():
 
 	if req == {}:
 		raise EventsException("missing required arguments")
-	print(req)
 
 	query = {
 			"$and" : []
 			}
-
-	for key, value in req.items():
-		print(key)
-		print(value)
 
 	if 'from' in req:
 		query["$and"].append({
