@@ -14,16 +14,19 @@ import yaml
 from flask import request
 import os
 
+# Python 2 fix for FileNotFoundError
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 class ReporterError(ApiException):
     status_code = 500
 
-if 'reporters_config' not in config.modules['nemea']:
-    if 'reporters_config' not in config['nemea']:
-        raise ReporterError("missing path to reporters configuration file 'reporters_config'")
-    else:
-        rc_path = config['nemea']['reporters_config']
+if 'reporters_config' not in config['nemea']:
+    raise ReporterError("missing path to reporters configuration file 'reporters_config'")
 else:
-    rc_path = config.modules['nemea']['reporters_config']
+    rc_path = config['nemea']['reporters_config']
 
 def get_nr_config():
     rconf = None
@@ -34,7 +37,8 @@ def get_nr_config():
             except Exception as e:
                 raise ReporterError("Error while parsing config file")
     except FileNotFoundError as e:
-        raise ReporterError("File %s not found" % config.modules['nemea']['reporters_config'],
+        # report not found file with absolute path
+        raise ReporterError("File %s not found" % os.path.abspath(config['nemea']['reporters_config']),
                 status_code = 404)
     except Exception as e:
         raise ReporterError(str(e))
@@ -42,9 +46,16 @@ def get_nr_config():
     return(json.dumps(rconf))
 
 def edit_nr_config():
+    """
+    Receive JSON formatted reporter config and dump it as YAML in desired location
+    This creates the file if needed
+    """
     conf = request.get_json()
     with open(rc_path, 'w') as yf:
-        yaml.dump(conf, yf, default_flow_style=False, indent = 4)
+        # must use safe_dump and encoding for Python 2
+        # https://stackoverflow.com/questions/20352794/pyyaml-is-producing-undesired-python-unicode-output
+        yaml.safe_dump(conf, yf,
+                default_flow_style=False, indent = 4, encoding='utf-8', allow_unicode=True)
 
     return json.dumps(conf)
 
