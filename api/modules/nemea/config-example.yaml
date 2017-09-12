@@ -1,0 +1,38 @@
+addressgroups:
+-   id: whitelist
+    list:
+    - 1.2.3.4
+    - 4.3.2.1
+-   file: path/to/file
+    id: pathlist
+custom_actions:
+-   id: mark
+    mark:
+        path: Test
+        value: true
+-   id: mongo
+    mongo:
+        collection: alerts
+        db: rc_test
+        port: null
+-   file:
+        dir: false
+        path: testfile.idea
+    id: file
+-   id: nextmark
+    mark:
+        path: _CESNET.Whitelisted
+        value: false
+rules:
+-   actions:
+    - drop
+    condition: Target.IP4 in whitelist
+    elseactions:
+    - mark
+    - file
+    - mongo
+    id: '0'
+-   actions: []
+    condition: ''
+    elseactions: []
+    id: 1
