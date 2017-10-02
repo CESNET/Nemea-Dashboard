@@ -1,0 +1,10 @@
+{
+    "dependencies": {
+    },
+    "module": {
+        "class": "NemeaModule",
+        "file": "nemea.module.ts",
+        "frontend": "frontend",
+        "backend": "api"
+    }
+}
