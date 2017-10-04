@@ -10,7 +10,7 @@
 
 <form novalidate (ngSubmit)="saveConfig()" class="container-fluid" #form="ngForm">
 	<div class="card my-4">
-		<div class="card-block">
+		<div class="card-body">
 			<h4 class="card-title">Address Groups
 				<span class="fa fa-info-circle"
 					aria-hidden="true"
@@ -81,7 +81,7 @@
 	</div>
 
 	<div class="card my-4">
-		<div class="card-block">
+		<div class="card-body">
 			<h4 class="card-title">Custom Actions</h4>
 			<div class="row form-group custom_actions pb-3" *ngFor="let item of config.custom_actions; let i = index">
 				<div class="col-3">
@@ -109,7 +109,7 @@
 					id="addAction">
 					Add Custom Action
 				</div>
-				<div class="dropdown-menu" aria-labelledby="addAction">
+				<div class="dropdown-menu" aria-labelledby="addAction" ngbDropdownMenu>
 					<span class="dropdown-item" (click)="addAction('mark')">Mark</span>
 					<span class="dropdown-item" (click)="addAction('mongo')">Mongo</span>
 					<span class="dropdown-item" (click)="addAction('file')">File</span>
@@ -124,7 +124,7 @@
 
 	<!-- RULES -->
 	<div class="card my-4">
-		<div class="card-block">
+		<div class="card-body">
 			<h4 class="card-title">Rules</h4>
 			<div class="form-group rule pb-3 mb-3" *ngFor="let item of config.rules; let i = index">
 				<div class="row mb-3">
@@ -201,7 +201,7 @@
 				Add Rule
 			</div>
 
-		</div> <!-- /card-block -->
+		</div> <!-- /card-body -->
 	</div> <!-- /RULES -->
 
 	<div class="mb-4">

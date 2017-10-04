@@ -31,11 +31,11 @@ export class DashboardComponent implements OnInit {
       * If no box is there add a clean box (empty dashboard is a sad dashboard)
       */
     ngOnInit() {
-        this.user = JSON.parse(localStorage['currentUser']);
+        this.user = JSON.parse(localStorage['user']);
 
         // Load settings for dashboard (boxes configuration)
         try {
-            this.dashboards = this.user['user']['settings']['nemea']['dashboard'];
+            this.dashboards = this.user['settings']['nemea']['dashboard'];
         } catch (e) {
             console.log(e);
             this.addCleanDashboard();
@@ -74,26 +74,26 @@ export class DashboardComponent implements OnInit {
       */
     save($event = {}, reload = false): void {
 
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const user = JSON.parse(localStorage.getItem('user'));
 
-        if (user['user']['settings'] == null) {
-            user['user']['settings'] = { 'nemea' : { 'dashboard' : this.dashboards } };
+        if (user['settings'] == null) {
+            user['settings'] = { 'nemea' : { 'dashboard' : this.dashboards } };
         } else {
-            if ('nemea' in user['user']['settings']) {
-                if ('dashboard' in user['user']['settings']['nemea']) {
-                    user['user']['settings']['nemea']['dashboard'] = this.dashboards;
+            if ('nemea' in user['settings']) {
+                if ('dashboard' in user['settings']['nemea']) {
+                    user['settings']['nemea']['dashboard'] = this.dashboards;
                 } else {
-                    user['user']['settings']['nemea'] = { 'dashboard' : this.dashboards };
+                    user['settings']['nemea'] = { 'dashboard' : this.dashboards };
                 }
             } else {
-                user['user']['settings'] = { 'nemea' : { 'dashboard' : this.dashboards } };
+                user['settings'] = { 'nemea' : { 'dashboard' : this.dashboards } };
             }
         }
 
-        this.usersService.update(user['user']['_id']['$oid'], user['user']).subscribe(
+        this.usersService.update(user['id'], user).subscribe(
             data => {
                 user['user'] = data;
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('user', JSON.stringify(user));
                 if (reload) {
                     this.ngOnInit();
                 }
@@ -101,7 +101,7 @@ export class DashboardComponent implements OnInit {
             error => {
                 console.log(error);
                 // Save local copy anyway
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('user', JSON.stringify(user));
 
                 if (reload) {
                     this.ngOnInit();
