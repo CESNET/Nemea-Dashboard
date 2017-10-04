@@ -1,5 +1,4 @@
-from liberouterapi import auth
-from ..nemea import nemea
+from liberouterapi import auth, config
 
 from bson import json_util
 from bson.objectid import ObjectId
@@ -7,7 +6,13 @@ from flask import request
 from datetime import datetime
 from time import mktime
 
-@auth.required()
+from liberouterapi.dbConnector import dbConnector
+
+nemea = dbConnector("nemea")
+nemea = nemea.db[config['nemea']['collection']]
+
+
+#@auth.required()
 def aggregate():
 	req = request.args.to_dict()
 
@@ -23,6 +28,8 @@ def aggregate():
 			}
 
 	tmp = list()
+
+	print(nemea)
 
 	if req['type'].lower() == 'piechart':
 		# Custom filter is set

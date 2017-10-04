@@ -14,8 +14,12 @@ from flask import request
 
 # Own classes and helpers
 from liberouterapi import db, auth, config
-from ..nemea import nemea
-from ...error import ApiException
+from liberouterapi.error import ApiException
+
+from liberouterapi.dbConnector import dbConnector
+
+nemea = dbConnector("nemea")
+nemea = nemea.db[config['nemea']['collection']]
 
 class EventsException(ApiException):
 	status_code = 400
@@ -41,6 +45,7 @@ Find N last events
 def get_last_events(items):
     if items <= 0 or items > 10000:
         items = 100
+    print(nemea)
     events = list(nemea.find().sort( [( "DetectTime", -1)] ).limit(items))
 
     return(json_util.dumps(events))

@@ -1,11 +1,15 @@
 from liberouterapi import auth, config
 from .events import EventsException
-from ..nemea import nemea
 
 from bson import json_util
 from bson.objectid import ObjectId
 from flask import request
 from datetime import datetime
+
+from liberouterapi.dbConnector import dbConnector
+
+nemea = dbConnector("nemea")
+nemea = nemea.db[config['nemea']['collection']]
 
 """
 NEMEA Events Query Endpoint

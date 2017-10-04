@@ -1,4 +1,5 @@
-from liberouterapi import app, db, config
+from liberouterapi import app, config
+from liberouterapi.dbConnector import dbConnector
 from ..module import Module
 
 # Load NEMEA configuration file if nemea section is not present in current config
@@ -7,8 +8,12 @@ if "nemea" not in config.config.sections():
     conf_path = config['nemea']
 
 # We need collection for NEMEA Events and Dashboard to be set up
-nemea_db = db.socket[config['nemea']['database']]
-nemea = nemea_db[config['nemea']['collection']]
+nemea_conn = dbConnector("nemea",
+        provider = "mongodb",
+        config = {
+            'database' : config['nemea']['database']
+            })
+nemea = nemea_conn.db[config['nemea']['collection']]
 
 # Register a blueprint
 nemea_bp = Module('nemea', __name__, url_prefix = '/nemea', no_version=True)
