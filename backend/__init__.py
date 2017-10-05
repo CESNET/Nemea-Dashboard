@@ -22,6 +22,7 @@ from .events import *
 from .Query import query
 from .Stats import aggregate, top, count
 from .Reporters import *
+from .Status import *
 
 # Create index for DetectTime
 nemea_bp.add_url_rule('/indexes', view_func = indexes, methods=['GET'])
@@ -49,3 +50,6 @@ nemea_bp.add_url_rule('/whois/<string:ip>', view_func = whois, methods=['GET'])
 
 nemea_bp.add_url_rule('/reporters/config', view_func = get_nr_config, methods=['GET'])
 nemea_bp.add_url_rule('/reporters/config', view_func = edit_nr_config, methods=['PUT'])
+
+nemea_bp.add_url_rule('/status', view_func=nemea_main, methods=['GET'])
+nemea_bp.add_url_rule('/status/stats', view_func=nemea_events, methods=['GET'])
