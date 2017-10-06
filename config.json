@@ -1,5 +1,6 @@
 {
     "dependencies": {
+        "npm" : "frontend/package.json"
     },
     "module": {
         "class": "NemeaModule",
