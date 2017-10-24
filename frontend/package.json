@@ -19,6 +19,5 @@
   "dependencies" : {
     "angular2-grid": "^2.0.2",
     "d3": "^4.9.1"
-  },
-  "devDependencies" : {}
+  }
 }
