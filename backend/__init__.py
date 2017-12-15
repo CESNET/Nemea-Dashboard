@@ -1,6 +1,6 @@
 from liberouterapi import app, config
 from liberouterapi.dbConnector import dbConnector
-from ..module import Module
+from liberouterapi.modules.module import Module
 
 # Load NEMEA configuration file if nemea section is not present in current config
 if "nemea" not in config.config.sections():
