@@ -6,6 +6,7 @@
         "class": "NemeaModule",
         "file": "nemea.module.ts",
         "frontend": "frontend",
-        "backend": "backend"
+        "backend": "backend",
+        "name" : "nemea"
     }
 }
