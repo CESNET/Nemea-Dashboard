@@ -18,6 +18,7 @@
   "homepage": "https://github.com/CESNET/Nemea-Dashboard#readme",
   "dependencies" : {
     "angular2-grid": "^2.0.2",
-    "d3": "^4.9.1"
+    "d3": "^4.9.1",
+    "@swimlane/ngx-charts": "^5.3.1"
   }
 }
