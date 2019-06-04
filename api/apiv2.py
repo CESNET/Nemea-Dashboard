@@ -8,7 +8,7 @@ from auth import Auth
 
 # Flask libraries
 from flask import Flask, escape, request, Response, abort
-from flask.ext.cors import CORS
+from flask_cors import CORS
 import ssl
 
 # System tools
